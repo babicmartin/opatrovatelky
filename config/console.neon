@@ -1,0 +1,14 @@
+parameters:
+    consoleMode: true
+
+console:
+	name: Empty project
+	version: '1.0'
+	catchExceptions: true
+	autoExit: true
+	url: http://opatrovatelky.sk
+
+services:
+    #-
+        #class: App\Command\ImportCommand
+        #tags: [console.command: cron:import]

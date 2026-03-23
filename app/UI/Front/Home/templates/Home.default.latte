@@ -1,0 +1,91 @@
+{block content}
+
+<div class="container">
+	<div class="section-header">
+		<h2 class="section-title">{if $locale === 'en'}Latest exercises{elseif $locale === 'de'}Neueste Übungen{else}Najnovsie cvicenia{/if}</h2>
+	</div>
+
+	{var $first = $articles->fetch()}
+
+	{if $first}
+	<!-- 1. FEATURE CARD -->
+	<article class="feature-card">
+		<a href="{plink Training:default id => $first->id}" class="feature-image-wrapper">
+			{if $first->exercise_photo}
+				<img src="{$basePath}/web/frontend/img/cvicenie/{$first->exercise_photo}" alt="{$first|translate:'title'}">
+			{/if}
+		</a>
+		<div class="feature-content">
+			<a href="{plink Training:default id => $first->id}" class="title-link">
+				<h3 class="title-xl">{$first|translate:'title'}</h3>
+			</a>
+			<p class="text-desc">
+				{$first|translate:'excerpt'}
+			</p>
+			<div class="stats-bar text-sm">
+				<span>{$first->views} {if $locale === 'en'}views{elseif $locale === 'de'}Aufrufe{else}zobrazeni{/if}</span>
+			</div>
+			<a href="{plink Training:default id => $first->id}" class="btn-read">{if $locale === 'en'}Read more{elseif $locale === 'de'}Mehr lesen{else}Citat viac{/if}</a>
+		</div>
+	</article>
+
+	<!-- 2. HIGHLIGHT GRID -->
+	{var $highlights = [$articles->fetch(), $articles->fetch()]}
+	{var $highlights = array_filter($highlights)}
+
+	{if $highlights}
+	<div class="highlight-section">
+		<div class="max-w-[1400px] mx-auto">
+			<div class="highlight-grid">
+				{foreach $highlights as $article}
+				<article class="highlight-card">
+					<a href="{plink Training:default id => $article->id}" class="highlight-img-container">
+						{if $article->exercise_photo}
+							<img src="{$basePath}/web/frontend/img/cvicenie/{$article->exercise_photo}" alt="{$article|translate:'title'}">
+						{/if}
+					</a>
+					<div class="highlight-content">
+						<a href="{plink Training:default id => $article->id}" class="title-link">
+							<h3 class="title-lg">{$article|translate:'title'}</h3>
+						</a>
+						<p class="text-desc">{$article|translate:'excerpt'}</p>
+						<a href="{plink Training:default id => $article->id}" class="btn-read">{if $locale === 'en'}Read more{elseif $locale === 'de'}Mehr lesen{else}Citat viac{/if}</a>
+					</div>
+				</article>
+				{/foreach}
+			</div>
+		</div>
+	</div>
+	{/if}
+
+	<!-- 3. FEED LIST -->
+	<div class="section-header">
+		<h2 class="section-title">{if $locale === 'en'}Exercise archive{elseif $locale === 'de'}Übungsarchiv{else}Archiv cviceni{/if}</h2>
+	</div>
+	<div class="feed-list">
+		{foreach $articles as $article}
+		<article n:class="feed-item, !$iterator->first ? mt-4">
+			<a href="{plink Training:default id => $article->id}" class="feed-img">
+				{if $article->exercise_photo}
+					<img src="{$basePath}/web/frontend/img/cvicenie/{$article->exercise_photo}" alt="{$article|translate:'title'}">
+				{/if}
+			</a>
+			<div class="p-10 flex flex-col justify-center">
+				<a href="{plink Training:default id => $article->id}" class="title-link">
+					<h3 class="title-md">{$article|translate:'title'}</h3>
+				</a>
+				<p class="text-desc" style="margin-bottom: 1rem;">{$article|translate:'excerpt'}</p>
+				<div class="flex items-center justify-between mt-4">
+					<div class="flex gap-6 text-sm uppercase text-[#777]">
+						<span>{$article->views} {if $locale === 'en'}views{elseif $locale === 'de'}Aufrufe{else}zobrazeni{/if}</span>
+					</div>
+					<a href="{plink Training:default id => $article->id}" class="btn-read">{if $locale === 'en'}Read more{elseif $locale === 'de'}Mehr lesen{else}Citat viac{/if}</a>
+				</div>
+			</div>
+		</article>
+		{/foreach}
+	</div>
+	{else}
+		<p>{if $locale === 'en'}No exercises have been added yet.{elseif $locale === 'de'}Es wurden noch keine Übungen hinzugefügt.{else}Ziadne cvicenia zatial neboli pridane.{/if}</p>
+	{/if}
+</div>

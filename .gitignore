@@ -1,0 +1,25 @@
+# Nette Framework
+/log/*
+!/log/.gitignore
+/temp/*
+!/temp/.gitignore
+
+# Composer
+/vendor/
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local configuration
+/config/local.neon
+
+# Uploads
+/www/uploads/

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="{$locale}">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	{control googleMetaData}
+	<link rel="stylesheet" href="{$baseUrl}/assets/css/style.css?v=1">
+	<meta name="robots" content="index, follow" />
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+<div class="top-bar">
+	<div class="top-bar-content">
+		<a href="/" class="logo">FUTBAL<span>TRENING</span>.SK</a>
+		<nav class="main-nav">
+			<a href="#">HERNÝ TRÉNING</a>
+			<a href="#">KONDIČNÝ TRÉNING</a>
+			<a href="#">BRANKÁRI</a>
+			<a href="#">MLÁDEŽ</a>
+			<a href="#">ROZCVIČKY</a>
+		</nav>
+		<div class="lang-links">
+			{foreach $supportedLocales as $loc}
+				<a href="{$presenter->getLocaleLink($loc)}" n:class="$locale === $loc ? active">{$loc|upper}</a>
+			{/foreach}
+		</div>
+	</div>
+</div>
+
+
+<section class="hero-section">
+	<img src="{$baseUrl}/assets/img/bg.webp" alt="Football Training" class="hero-bg">
+	<div class="hero-overlay"></div>
+	<div class="hero-content">
+		<div class="hero-text">
+			<h1>PROFESIONÁLNY<br>TRÉNING</h1>
+			<p>Popis</p>
+		</div>
+	</div>
+</section>
+
+
+
+	{include content}
+
+	<footer>
+		<p>&copy; 2026 FutbalTrening.sk • Všetky práva vyhradené</p>
+	</footer>
+
+
+	{block scripts}
+	{/block}
+
+</body>
+</html>
+
+
+

@@ -1,7 +1,7 @@
 application:
 	errorPresenter:
-		4xx: Error4xx
-		5xx: Error5xx
+		4xx: Admin:Error4xx
+		5xx: Admin:Error
 
 	mapping:
 		*: [App\UI, * ,*\*Presenter]

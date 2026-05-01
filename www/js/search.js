@@ -1,31 +1,37 @@
+$(function() {
+    var request = null;
+    var timeout = null;
 
-$( ".search" ).keyup(function() {
-        var id = $( this ).data("id");
-        var val = $( this ).val();
-        
-        if (val.length > 2) {
-            val = encodeURIComponent(val);
+    $(".search").on("keyup", function() {
+        var input = $(this);
+        var type = input.data("id");
+        var term = input.val();
+        var url = input.data("search-url");
+        var typeParam = input.data("type-param") || "type";
+        var termParam = input.data("term-param") || "term";
+
+        if (term.length <= 2 || !url) {
+            return;
+        }
+
+        clearTimeout(timeout);
+        timeout = setTimeout(function() {
+            if (request) {
+                request.abort();
+            }
+
+            var payload = {};
+            payload[typeParam] = type;
+            payload[termParam] = term;
 
             request = $.ajax({
-                url: "ajax/search.php",
-                data: "id=" + id + "&val=" + val, 
+                url: url,
+                data: payload,
                 type: "post",
-                success: function(html) { 
-                    $(" #searchResults ").show();
-                    $(" #searchResults ").html(html);
+                success: function(response) {
+                    $("#searchResults").show().html(response.html || "");
                 }
-            });        
-        
-        
-        
-        }
-        
-        
-        /*
-
-     * 
-         */
-});    
-
-
-
+            });
+        }, 180);
+    });
+});

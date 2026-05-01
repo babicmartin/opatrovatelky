@@ -1,0 +1,185 @@
+{varType int $type}
+{varType array $rows}
+{varType string $heading}
+{varType string $tableTitle}
+
+{define tableStart, string $title}
+	<div class="tableone">
+		<div class="tableone-header">
+			<h3 class="tableone-title">{$title}</h3>
+		</div>
+		<div class="table-responsive">
+			<table class="table table-striped card-table table-vcenter text-nowrap">
+{/define}
+
+{define tableEnd}
+			</table>
+		</div>
+	</div>
+{/define}
+
+{define statusBadge, string $label, string $color}
+	<span n:if="$label !== ''" class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$label}</span>
+{/define}
+
+{define countryImage, string $image}
+	<span class="header-avatar1">
+		<img n:if="$image !== ''" src="{$basePath}/img/country/{$image}" alt="img" style="height:20px; width:auto;" class="">
+		<img n:if="$image === ''" src="{$basePath}/img/empty.jpg" alt="img" style="width:20px; height:20px" class="">
+	</span>
+{/define}
+
+{define babysitterImage, string $image}
+	<span class="header-avatar1">
+		<img n:if="$image !== ''" src="{$basePath}/img/opatrovatelka/{$image}" alt="img" style="height:26px; width:auto;" class="rounded-circle">
+		<img n:if="$image === ''" src="{$basePath}/img/empty.jpg" alt="img" style="width:26px; height:26px" class="rounded-circle">
+	</span>
+{/define}
+
+{define userBadge, string $label, string $color}
+	<span n:if="$label !== ''" class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$label}</span>
+{/define}
+
+{define websiteUrl, string $url}
+	{if $url !== ''}
+		{var $href = str_starts_with($url, 'http') ? $url : 'http://' . $url}
+		<a href="{$href}" class="filterLink" target="_blank">{$url}</a>
+	{/if}
+{/define}
+
+{if $rows !== []}
+	<h1>{$heading}</h1>
+
+	{if $type === 1}
+		{include tableStart, $tableTitle}
+			<thead>
+				<tr class="thead">
+					<th class="tcenter w90">Číslo</th>
+					<th class="tcenter w50">Fotka</th>
+					<th>Meno</th>
+					<th class="tcenter w50">Vek</th>
+					<th class="tcenter w50">Pohlavie</th>
+					<th class="tcenter w90">Národnosť</th>
+					<th class="tcenter">Agentúra</th>
+					<th class="tcenter">Status</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr n:foreach="$rows as $row">
+					<td class="tcenter">{$row['clientNumber']}</td>
+					<td class="tcenter">{include babysitterImage, $row['image']}</td>
+					<td><a href="{plink :Admin:Babysitter:update, id: $row['id']}" class="titleLink">{$row['surname']} {$row['name']}</a></td>
+					<td class="tcenter">{$row['age']}</td>
+					<td class="tcenter"><a href="{plink :Admin:Babysitter:default, gender: $row['genderId']}" class="filterLink">{$row['genderLabel']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Babysitter:default, country: $row['countryId']}">{include countryImage, $row['countryImage']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Babysitter:default, agency: $row['agencyId']}" class="filterLink">{$row['agencyName']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Babysitter:default, status: $row['statusId']}" class="filterLink">{include statusBadge, $row['statusLabel'], $row['statusColor']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Babysitter:update, id: $row['id']}" class="btn btn-success btn-sm">Upraviť</a></td>
+				</tr>
+			</tbody>
+		{include tableEnd}
+	{elseif $type === 2}
+		{include tableStart, $tableTitle}
+			<thead>
+				<tr class="thead">
+					<th class="tcenter w50">Číslo klienta</th>
+					<th>Priezvisko, meno</th>
+					<th class="tcenter w50">Národnosť</th>
+					<th class="tcenter">Email</th>
+					<th class="tcenter" style="max-width:150px;">Partner</th>
+					<th class="tcenter">Spravuje</th>
+					<th class="tcenter">Status</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr n:foreach="$rows as $row">
+					<td class="tcenter">{$row['clientNumber']}</td>
+					<td><a href="{plink :Admin:Family:update, id: $row['id']}" class="titleLink">{$row['surname']} {$row['name']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:default, country: $row['countryId']}">{include countryImage, $row['countryImage']}</a></td>
+					<td class="tcenter"><a href="mailto:{$row['personEmail']}" class="filterLink">{$row['personEmail']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:default, partner: $row['partnerId']}" class="filterLink">{$row['partnerName']|truncate:20,''}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:default, user: $row['userId']}" class="filterLink">{include userBadge, $row['userAcronym'], $row['userColor']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:default, status: $row['statusId']}" class="filterLink">{include statusBadge, $row['statusLabel'], $row['statusColor']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:update, id: $row['id']}" class="btn btn-success btn-sm">Upraviť</a></td>
+				</tr>
+			</tbody>
+		{include tableEnd}
+	{elseif $type === 5}
+		{include tableStart, $tableTitle}
+			<thead>
+				<tr class="thead">
+					<th class="tcenter w50">Číslo klienta</th>
+					<th>Priezvisko, meno</th>
+					<th class="tcenter w50">Kontaktná osoba</th>
+					<th class="tcenter">Status</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr n:foreach="$rows as $row">
+					<td class="tcenter">{$row['clientNumber']}</td>
+					<td><a href="{plink :Admin:Family:update, id: $row['id']}" class="titleLink">{$row['surname']} {$row['name']}</a></td>
+					<td><a href="{plink :Admin:Family:update, id: $row['id']}" class="titleLink">{$row['personSurname']} {$row['personName']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:default, status: $row['statusId']}" class="filterLink">{include statusBadge, $row['statusLabel'], $row['statusColor']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:update, id: $row['id']}" class="btn btn-success btn-sm">Upraviť</a></td>
+				</tr>
+			</tbody>
+		{include tableEnd}
+	{elseif $type === 3}
+		{include tableStart, $tableTitle}
+			<thead>
+				<tr class="thead">
+					<th class="tcente w50"></th>
+					<th>Názov firmy</th>
+					<th class="tcenter w50">Krajina</th>
+					<th class="tcenter">Web/Telefón/Email</th>
+					<th class="tcenter w50">Status</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr n:foreach="$rows as $row">
+					<td class="tcenter">{$iterator->counter}.</td>
+					<td class="w300 text-wrap"><a href="{plink :Admin:Partner:update, id: $row['id']}" class="titleLink">{$row['name']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Partner:default, country: $row['countryId']}">{include countryImage, $row['countryImage']}</a></td>
+					<td class="tcenter text-wrap">
+						<div>{include websiteUrl, $row['web']}</div>
+						<div>{$row['phone']}</div>
+						<div><a href="mailto:{$row['email']}" class="filterLink">{$row['email']}</a></div>
+					</td>
+					<td class="tcenter"><a href="{plink :Admin:Partner:default, status: $row['statusId']}" class="filterLink">{include statusBadge, $row['statusLabel'], $row['statusColor']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Partner:update, id: $row['id']}" class="btn btn-success btn-sm">Upraviť</a></td>
+				</tr>
+			</tbody>
+		{include tableEnd}
+	{elseif $type === 4}
+		{include tableStart, $tableTitle}
+			<thead>
+				<tr class="thead">
+					<th class="tcenter" style="width:50px;"></th>
+					<th class="w250">Názov firmy</th>
+					<th class="tcenter" style="width:50px;">Národnosť</th>
+					<th class="tcenter">Web/Telefón/Email</th>
+					<th class="tcenter">Status</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr n:foreach="$rows as $row">
+					<td class="tcenter">{$iterator->counter}.</td>
+					<td class="w250 text-wrap"><a href="{plink :Admin:Agency:update, id: $row['id']}" class="titleLink">{$row['name']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Agency:default, country: $row['countryId']}">{include countryImage, $row['countryImage']}</a></td>
+					<td class="tcenter">
+						<div>{$row['web']}</div>
+						<div>{$row['phone']}</div>
+						<div><a href="mailto:{$row['email']}" class="filterLink">{$row['email']}</a></div>
+					</td>
+					<td class="tcenter"><a href="{plink :Admin:Agency:default, status: $row['statusId']}" class="filterLink">{include statusBadge, $row['statusLabel'], $row['statusColor']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Agency:update, id: $row['id']}" class="btn btn-success btn-sm">Upraviť</a></td>
+				</tr>
+			</tbody>
+		{include tableEnd}
+	{/if}
+{/if}

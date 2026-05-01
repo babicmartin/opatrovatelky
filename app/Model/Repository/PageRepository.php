@@ -32,15 +32,18 @@ class PageRepository extends BaseRepository
 	/**
 	 * @return ($wrapToEntity is true ? list<PageEntity> : Selection<ActiveRow>)
 	 */
-	public function findMenuItems(int $userPermission, bool $wrapToEntity = false): Selection|array
+	public function findMenuItems(?int $userPermission = null, bool $wrapToEntity = false): Selection|array
 	{
 		$selection = $this->findAll()
 			->where(PageTableMap::COL_ACTIVE, 1)
 			->where(PageTableMap::COL_PARENT, 0)
-			->where(PageTableMap::COL_PERMISSION . ' <= ?', $userPermission)
 			->where(PageTableMap::COL_POSITION . ' > ?', 0)
 			->where(PageTableMap::COL_IN_MENU, 1)
 			->order(PageTableMap::COL_POSITION . ' ASC');
+
+		if ($userPermission !== null) {
+			$selection->where(PageTableMap::COL_PERMISSION . ' <= ?', $userPermission);
+		}
 
 		if ($wrapToEntity) {
 			/** @var list<PageEntity> */

@@ -2,7 +2,6 @@
 
 namespace App\UI\Admin\Control\Layout\Menu;
 
-use App\Model\Enum\UserRole\UserRole;
 use App\Model\Repository\PageRepository;
 use Nette\Application\UI\Control;
 use Nette\Security\User;
@@ -20,26 +19,29 @@ class MenuControl extends Control
 		$template = $this->getTemplate();
 		$template->setFile(__DIR__ . '/templates/MenuControl.latte');
 
-		$permission = $this->resolveUserPermission();
-		$template->menuItems = $this->pageRepository->findMenuItems($permission);
+		$template->menuItems = $this->pageRepository->findMenuItems();
+		$template->menuDestinations = $this->getMenuDestinations();
+		$template->user = $this->user;
 		$template->render();
 	}
 
-	private function resolveUserPermission(): int
+	/**
+	 * @return array<string, string>
+	 */
+	private function getMenuDestinations(): array
 	{
-		$identity = $this->user->getIdentity();
-		if ($identity === null) {
-			return 0;
-		}
-
-		$roles = $identity->getRoles();
-		$roleName = $roles[0] ?? null;
-		if (!is_string($roleName)) {
-			return 0;
-		}
-
-		$role = UserRole::tryFrom($roleName);
-
-		return $role?->getPermissionId() ?? 0;
+		return [
+			'homepage' => ':Admin:Home:default',
+			'opatrovatelky' => ':Admin:Babysitter:default',
+			'families' => ':Admin:Family:default',
+			'partneri' => ':Admin:Partner:default',
+			'agencies' => ':Admin:Agency:default',
+			'turnus' => ':Admin:Turnus:default',
+			'projekty' => ':Admin:Project:default',
+			'proposal' => ':Admin:Proposal:default',
+			'proposal-records' => ':Admin:Proposal:default',
+			'stats' => ':Admin:Stats:default',
+			'missing-registry' => ':Admin:MissingRegistry:default',
+		];
 	}
 }

@@ -1,0 +1,4 @@
+- [Project Overview](project_overview.md) — Nette CRM structure, modules, DB table sany_users, roles, auth
+- [User Profile](user_martin.md) — Martin, Slovak PHP dev, rebuilding CRM in Nette 3.2 / PHP 8.5
+- [Environments](reference_environments.md) — Dev: opatrovatelky.local, DB localhost:3307; Prod: TBD
+- [Old Web Map](reference_old_web_map.md) — Full map of old CRM pages, controllers, AJAX, tabs, proposed new presenters

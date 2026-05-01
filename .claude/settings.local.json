@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -i \"\\\\.php$\")",
+      "WebFetch(domain:opatrovatelky.local)",
+      "Bash(curl -s -L http://opatrovatelky.local)",
+      "Bash(rm -rf \"C:\\\\wamp64\\\\www\\\\monika\\\\opatrovatelky\\\\local\\\\temp\\\\cache\")",
+      "Bash(curl -s http://opatrovatelky.local -b \"PHPSESSID=test123\")",
+      "Bash(mkdir -p \"C:\\\\wamp64\\\\www\\\\monika\\\\opatrovatelky\\\\local\\\\app\\\\UI\\\\Admin\\\\templates\\\\Home\")",
+      "Bash(mv \"C:\\\\wamp64\\\\www\\\\monika\\\\opatrovatelky\\\\local\\\\app\\\\UI\\\\Admin\\\\Home\\\\default.latte\" \"C:\\\\wamp64\\\\www\\\\monika\\\\opatrovatelky\\\\local\\\\app\\\\UI\\\\Admin\\\\templates\\\\Home\\\\default.latte\")",
+      "Bash(curl -s -L -b \"nette-samesite=1\" http://opatrovatelky.local)",
+      "Bash(mkdir -p \"C:\\\\wamp64\\\\www\\\\monika\\\\opatrovatelky\\\\local\\\\app\\\\UI\\\\Admin\\\\Home\\\\templates\")",
+      "Bash(mv \"C:\\\\wamp64\\\\www\\\\monika\\\\opatrovatelky\\\\local\\\\app\\\\UI\\\\Admin\\\\templates\\\\Home\\\\default.latte\" \"C:\\\\wamp64\\\\www\\\\monika\\\\opatrovatelky\\\\local\\\\app\\\\UI\\\\Admin\\\\Home\\\\templates\\\\default.latte\")",
+      "Bash(vendor/bin/phpstan analyse:*)",
+      "Bash(where php:*)",
+      "Bash(php -v)",
+      "Bash(/c/wamp64/bin/php/php8.5.0/php.exe:*)",
+      "Bash(find C:\\\\wamp64\\\\www\\\\monika\\\\opatrovatelky\\\\local\\\\app\\\\Model\\\\Repository:*)",
+      "Bash(git add:*)",
+      "Bash(xargs grep *)",
+      "Bash(awk -F: '{print $1}')",
+      "Bash(\"C:/wamp64/bin/php/php8.5.0/php.exe\" vendor/bin/phpstan analyse app/Model/Security/Authorizator/AuthorizatorFactory.php app/Model/Repository/PageRepository.php --no-progress)",
+      "Bash(\"C:/wamp64/bin/php/php8.5.0/php.exe\" -r 'echo PHP_VERSION;')",
+      "Bash(\"C:/wamp64/bin/php/php8.5.0/php.exe\" vendor/bin/phpstan analyse app/Model/Security/Authorizator/AuthorizatorFactory.php app/Model/Repository/PageRepository.php app/Model/Entity/PageEntity.php --no-progress)",
+      "Bash(\"C:/wamp64/bin/php/php8.5.0/php.exe\" vendor/bin/phpstan analyse --no-progress)",
+      "Bash(\"C:/wamp64/bin/php/php8.5.0/php.exe\" vendor/bin/phpstan analyse --memory-limit=512M --no-progress)",
+      "Bash(\"C:/wamp64/bin/php/php8.5.0/php.exe\" vendor/bin/phpstan analyse --memory-limit=512M --no-progress app/Model/Security/Authorizator/AuthorizatorFactory.php app/Model/Repository/PageRepository.php app/Model/Entity/PageEntity.php app/Model/Factory/PageFactory.php app/UI/Admin/Control/Layout/Menu/MenuControl.php)",
+      "Bash(C:/wamp64/bin/mysql/mysql8.0.31/bin/mysql.exe *)",
+      "Bash(C:/wamp64/bin/mysql/mysql8.4.7/bin/mysql.exe *)",
+      "Bash(xargs -0 grep -h \"->url\\\\|->permission\\\\|->name\\\\|->email\\\\|->active\\\\|->phone\\\\|->id\")",
+      "Bash(grep -v \"^ *\\\\*\\\\|^ *//\")",
+      "Bash(grep -r \"\\\\$[a-zA-Z_][a-zA-Z0-9_]*->\\(url|permission|name|email|active|phone|getId\\)\\\\b\" app --include=\"*.php\")",
+      "Bash('C:\\\\wamp64\\\\bin\\\\php\\\\php8.5.0\\\\php.exe' vendor/bin/phpstan analyse app --level 8 --memory-limit=512M)",
+      "Bash(C:\\\\wamp64\\\\bin\\\\php\\\\php8.5.0\\\\php.exe *)",
+      "Bash(curl -sS -o /tmp/admin_home.html -w \"HTTP:%{http_code}\\\\n\" \"http://opatrovatelky.local/admin/\")",
+      "Read(//tmp/**)",
+      "Bash(grep -oP 'class=\"[^\"]*tracy-bs[^\"]*\"[^>]*>[^<]{0,200}' /tmp/admin_home.html)",
+      "Bash(grep -oP '<h1[^>]*>[^<]{0,200}' /tmp/admin_home.html)",
+      "Bash(curl *)"
+    ]
+  },
+  "hooks": {}
+}

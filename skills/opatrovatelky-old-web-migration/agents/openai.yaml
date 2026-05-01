@@ -1,0 +1,4 @@
+interface:
+  display_name: "Opatrovatelky Old Web Migration"
+  short_description: "Migrate old Opatrovatelky CRM pages into the Nette application."
+  default_prompt: "Migrate an old CRM page from the legacy Opatrovatelky web into the new Nette project."

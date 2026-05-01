@@ -1,0 +1,7 @@
+{
+  "name": "opatrovatelky-migrate",
+  "description": "Migration tools for converting old CRM pages to Nette 3.2 framework",
+  "author": {
+    "name": "Martin"
+  }
+}

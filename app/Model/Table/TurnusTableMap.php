@@ -40,6 +40,7 @@ class TurnusTableMap extends BaseTableMap
     public const string COL_TRAVEL_COSTS_DEPARTURE = 'travel_costs_departure';
     public const string COL_FEE = 'fee';
     public const string COL_FEE_AG = 'fee_ag';
+    public const string COL_FEE_BK = 'fee_bk';
     public const string COL_NOTICE = 'notice';
     public const string COL_ACTIVE = 'active';
     public const string COL_STATUS_A1 = 'status_a1';

@@ -38,6 +38,7 @@ class TurnusEntity extends BaseEntity
         public ?string $travelCostsDeparture,
         public ?string $fee,
         public ?string $feeAg,
+        public ?string $feeBk,
         public ?string $notice,
         public ?string $active,
         public ?string $statusA1,

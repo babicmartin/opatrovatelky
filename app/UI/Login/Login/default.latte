@@ -1,0 +1,62 @@
+{layout none}
+<!DOCTYPE html>
+<html lang="sk" dir="ltr">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+	<meta content="4MS - administrácia" name="description">
+	<title>4MS - administrácia</title>
+
+	<link rel="icon" href="{$basePath}/assets/images/brand/favicon.ico" type="image/x-icon">
+	<link href="{$basePath}/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="{$basePath}/assets/css/style.css" rel="stylesheet">
+	<link href="{$basePath}/assets/css/plugins.css" rel="stylesheet">
+	<link href="{$basePath}/assets/css/animated.css" rel="stylesheet">
+	<link href="{$basePath}/assets/css/icons.css" rel="stylesheet">
+</head>
+
+<body class="register-2 login-page">
+
+	<div class="page">
+		<div class="page-content">
+			<div class="container">
+				<div class="row">
+					<div class="col mx-auto">
+						<div class="row justify-content-center">
+							<div class="col-md-4">
+								<div class="text-center mb-5">
+									<img src="{$basePath}/img/logo.png" class="header-brand-img" alt="Logo">
+								</div>
+
+								<div n:ifcontent class="text-center mb-5">
+									<div n:foreach="$flashes as $flash" class="alert alert-{$flash->type}">{$flash->message}</div>
+								</div>
+
+								<div class="card">
+									<div class="card-body">
+										<div class="text-center mb-3">
+											<h1 class="mb-2">Prihlásenie</h1>
+										</div>
+										{control login}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="{$basePath}/assets/js/jquery.min.js"></script>
+	<script src="{$basePath}/assets/plugins/bootstrap/popper.min.js"></script>
+	<script src="{$basePath}/assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+	<script src="{$basePath}/assets/js/bootstrap-show-password.min.js"></script>
+	<script src="{$basePath}/assets/plugins/p-scrollbar/p-scrollbar.js"></script>
+	<script src="{$basePath}/assets/js/themeColors.js"></script>
+	<script src="{$basePath}/assets/js/custom.js"></script>
+
+</body>
+
+</html>

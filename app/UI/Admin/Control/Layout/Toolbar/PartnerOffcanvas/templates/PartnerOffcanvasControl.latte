@@ -1,0 +1,43 @@
+{varType list<array{id:int,title:string,count:int,updateUrl:string}> $partnerItems}
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="partnerStatsOffcanvas" aria-labelledby="partnerStatsOffcanvasLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="partnerStatsOffcanvasLabel">Údaje o partneroch</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		{if $partnerItems}
+			<div class="col-xl-12">
+				<div class="tableone">
+					<div class="tableone-header">
+						<h3 class="tableone-title">Aktívne rodiny</h3>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-striped card-table table-vcenter text-nowrap">
+							<thead>
+								<tr class="thead">
+									<th>Partner</th>
+									<th class="tcenter">Počet aktívnych rodín</th>
+								</tr>
+							</thead>
+							<tbody>
+								{foreach $partnerItems as $item}
+									<tr>
+										<td style="max-width:200px;word-break: break-all;">
+											<div style="width:200px;word-break: break-all; display:block; overflow:hidden;">
+												<a href="{$item['updateUrl']}" class="titleLink" style="word-break: break-all;max-width:200px;">{$item['title']}</a>
+											</div>
+										</td>
+										<td class="tcenter">
+											<a href="{$item['updateUrl']}" class="filterLink">{$item['count']}</a>
+										</td>
+									</tr>
+								{/foreach}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		{/if}
+	</div>
+</div>

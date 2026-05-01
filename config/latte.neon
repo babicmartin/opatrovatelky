@@ -1,0 +1,13 @@
+parameters:
+    latteVariable:
+        cssVersion: 1
+        jsVersion: 1
+
+services:
+    customLatteFilters:
+         class: App\Model\Latte\Filters
+
+    -
+        class: App\Model\Latte\LatteDefaultVariables
+        arguments: [%latteVariable.cssVersion%, %latteVariable.jsVersion%]
+

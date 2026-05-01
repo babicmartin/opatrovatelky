@@ -1,0 +1,94 @@
+{varType array $upcomingStarts}
+{varType array $upcomingEnds}
+
+{define statusBadge, string $label, string $color}
+	{if $label !== ''}
+		<span class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$label}</span>
+	{/if}
+{/define}
+
+{define countryFlag, string $image}
+	{if $image !== ''}
+		<span class="header-avatar1">
+			<img src="{$basePath}/img/country/{$image}" alt="" style="height:16px; width:auto;" class="rectangle">
+		</span>
+	{/if}
+{/define}
+
+{if $upcomingStarts !== []}
+	<div class="tableone">
+		<div class="tableone-header">
+			<h3 class="tableone-title">Zoznam najbližších nástupov na turnus - 20 dní</h3>
+		</div>
+		<div class="table-responsive">
+			<table class="table table-striped card-table table-vcenter text-nowrap">
+				<thead>
+					<tr class="thead">
+						<th class="tcenter">Status</th>
+						<th class="tcenter w90">Nástup</th>
+						<th class="tcenter w90">Do</th>
+						<th class="tcenter">Rodina</th>
+						<th class="tcenter">Opatrovateľka</th>
+						<th class="tcenter">Možnosti</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr n:foreach="$upcomingStarts as $turnus" n:attr="data-bs-toggle: $turnus['isInvoiceUnpaid'] ? 'tooltip', data-bs-title: $turnus['isInvoiceUnpaid'] ? 'Neuhradená faktúra', style: $turnus['isInvoiceUnpaid'] ? 'background:#d6f2fa'">
+						<td class="tcenter">{include statusBadge, $turnus['status'], $turnus['statusColor']}</td>
+						<td class="tcenter">{$turnus['dateFrom']}</td>
+						<td class="tcenter">{$turnus['dateTo']}</td>
+						<td>
+							<a href="{plink :Admin:Family:update, id: $turnus['familyId']}" class="filterLink">
+								{include countryFlag, $turnus['countryImage']}
+								{$turnus['familyName']}
+							</a>
+						</td>
+						<td class="tcenter">
+							<a href="{plink :Admin:Babysitter:update, id: $turnus['babysitterId']}" class="filterLink">{$turnus['babysitterName']}</a>
+						</td>
+						<td class="tcenter"><a href="{plink :Admin:Turnus:update, id: $turnus['id']}" class="btn btn-success btn-sm">&gt;</a></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+{/if}
+
+{if $upcomingEnds !== []}
+	<div class="mt-4">
+		<div class="tableone">
+			<div class="tableone-header">
+				<h3 class="tableone-title">Zoznam najbližších ukončení turnusu - 20 dní</h3>
+			</div>
+			<div class="table-responsive">
+				<table class="table table-striped card-table table-vcenter text-nowrap">
+					<thead>
+						<tr class="thead">
+							<th class="tcenter">Status</th>
+							<th class="tcenter w90">Ukončenie</th>
+							<th class="tcenter">Rodina</th>
+							<th class="tcenter">Opatrovateľka</th>
+							<th class="tcenter">Možnosti</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr n:foreach="$upcomingEnds as $turnus" n:attr="data-bs-toggle: $turnus['isInvoiceUnpaid'] ? 'tooltip', data-bs-title: $turnus['isInvoiceUnpaid'] ? 'Neuhradená faktúra', style: $turnus['isInvoiceUnpaid'] ? 'background:#d6f2fa'">
+							<td class="tcenter">{include statusBadge, $turnus['status'], $turnus['statusColor']}</td>
+							<td class="tcenter">{$turnus['dateTo']}</td>
+							<td>
+								<a href="{plink :Admin:Family:update, id: $turnus['familyId']}" class="filterLink">
+									{include countryFlag, $turnus['countryImage']}
+									{$turnus['familyName']}
+								</a>
+							</td>
+							<td class="tcenter">
+								<a href="{plink :Admin:Babysitter:update, id: $turnus['babysitterId']}" class="filterLink">{$turnus['babysitterName']}</a>
+							</td>
+							<td class="tcenter"><a href="{plink :Admin:Turnus:update, id: $turnus['id']}" class="btn btn-success btn-sm">&gt;</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+{/if}

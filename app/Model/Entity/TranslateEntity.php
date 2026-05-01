@@ -7,23 +7,9 @@ namespace App\Model\Entity;
 class TranslateEntity extends BaseEntity
 {
     public function __construct(
-        private readonly int $id,
-        private ?string $slovak {
-            get {
-                return $this->slovak;
-            }
-            set {
-                $this->slovak = $value;
-            }
-        },
-        private ?string $german {
-            get {
-                return $this->german;
-            }
-            set {
-                $this->german = $value;
-            }
-        },
+        public readonly int $id,
+        public ?string $slovak,
+        public ?string $german,
     ) {
     }
 

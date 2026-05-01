@@ -6,9 +6,15 @@ search:
 			- *Factory
 			- *Repository
 			- *TableMap
+		exclude:
+			classes:
+				- *ControlFactory
 
 services:
 	- App\Router\RouterFactory::createRouter
+	- App\Model\DataProvider\Directory\DirectoryProvider(appDir: %appDir%, tempDir: %tempDir%, vendorDir: %vendorDir%, rootDir: %rootDir%, logDir: %rootDir%/log)
+	- App\Model\DataProvider\Directory\StorageDirProvider(userImages: %storageDir.userImages%, userImagesEmpty: %storageDir.userImagesEmpty%)
+	- App\Model\DataProvider\UrlProvider\UrlProvider(appName: %url.appName%)
 
 
 

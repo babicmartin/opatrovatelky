@@ -7,15 +7,8 @@ namespace App\Model\Entity;
 class SelectPaymentPeriodEntity extends BaseEntity
 {
     public function __construct(
-        private readonly int $id,
-        private ?string $status {
-            get {
-                return $this->status;
-            }
-            set {
-                $this->status = $value;
-            }
-        },
+        public readonly int $id,
+        public ?string $status,
     ) {
     }
 

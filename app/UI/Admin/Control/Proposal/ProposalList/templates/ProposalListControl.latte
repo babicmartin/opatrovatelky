@@ -1,0 +1,67 @@
+{varType array $rows}
+{varType App\Model\Utils\Paginator\Paginator $paginator}
+
+{define statusBadge, string $label, string $color}
+	{if $label !== ''}
+		<span class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$label}</span>
+	{/if}
+{/define}
+
+{define userBadge, string $label, string $color}
+	{if $label !== ''}
+		<span class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$label}</span>
+	{/if}
+{/define}
+
+<div class="col-md-12 mt-4">
+	<div class="tableone">
+		<div class="tableone-header">
+			<h3 class="tableone-title">Návrhy opatrovateliek</h3>
+		</div>
+		<div class="table-responsive">
+			<table class="table table-striped card-table table-vcenter text-nowrap">
+				<thead>
+					<tr class="thead">
+						<th class="tcenter">Status</th>
+						<th class="tcenter w90">Odoslaný návrh</th>
+						<th class="tcenter w90">Možný nástup</th>
+						<th class="tcenter">Rodina</th>
+						<th class="tcenter">Opatrovateľka</th>
+						<th class="tcenter">Vytvoril</th>
+						<th class="tcenter">Partner</th>
+						<th class="tcenter">Možnosti</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr n:foreach="$rows as $proposal">
+						<td class="tcenter">{include statusBadge, $proposal['status'], $proposal['statusColor']}</td>
+						<td class="tcenter">{$proposal['dateProposalSended']}</td>
+						<td class="tcenter">{$proposal['dateStartingWork']}</td>
+						<td class="tcenter">
+							<a n:if="$proposal['familyId'] > 0" href="{plink :Admin:Family:update, id: $proposal['familyId']}" class="filterLink">{$proposal['familyName']}</a>
+							<span n:if="$proposal['familyId'] <= 0">{$proposal['familyName']}</span>
+						</td>
+						<td class="tcenter">
+							<a n:if="$proposal['babysitterId'] > 0" href="{plink :Admin:Babysitter:update, id: $proposal['babysitterId']}" class="filterLink">{$proposal['babysitterName']}</a>
+							<span n:if="$proposal['babysitterId'] <= 0">{$proposal['babysitterName']}</span>
+						</td>
+						<td class="tcenter">{include userBadge, $proposal['userAcronym'], $proposal['userColor']}</td>
+						<td class="tcenter">
+							<a n:if="$proposal['partnerId'] > 0" href="{plink :Admin:Partner:update, id: $proposal['partnerId']}" class="filterLink">{$proposal['partnerName']}</a>
+							<span n:if="$proposal['partnerId'] <= 0">{$proposal['partnerName']}</span>
+						</td>
+						<td class="tcenter">
+							<a href="{plink :Admin:Proposal:update, id: $proposal['id']}" class="btn btn-success btn-sm">&gt;</a>
+						</td>
+					</tr>
+					<tr n:if="$rows === []">
+						<td colspan="8" class="tcenter">Žiadne návrhy.</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<div class="space20"></div>
+{include '../../../../templates/components/paginator.latte', paginator: $paginator}

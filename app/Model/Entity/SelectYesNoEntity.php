@@ -7,23 +7,9 @@ namespace App\Model\Entity;
 class SelectYesNoEntity extends BaseEntity
 {
     public function __construct(
-        private readonly int $id,
-        private ?string $status {
-            get {
-                return $this->status;
-            }
-            set {
-                $this->status = $value;
-            }
-        },
-        private ?string $german {
-            get {
-                return $this->german;
-            }
-            set {
-                $this->german = $value;
-            }
-        },
+        public readonly int $id,
+        public ?string $status,
+        public ?string $german,
     ) {
     }
 

@@ -1,0 +1,12 @@
+services:
+    security.passwords:
+        factory: Nette\Security\Passwords(::PASSWORD_ARGON2ID, [cost: 12])
+
+    security.authorizator:
+        factory: @App\Model\Security\Authorizator\AuthorizatorFactory::create()
+
+    - App\Model\Security\Authorizator\AuthorizatorFactory
+
+    -
+        class: App\Model\Security\AdminAuthenticator
+        autowired: self

@@ -1,0 +1,25 @@
+includes:
+    - application.neon
+    - parameter.neon
+    - extension.neon
+    - services.neon
+    - security.neon
+    - latte.neon
+    - console.neon
+
+    - common/logging.neon
+
+    #control
+    - control/login.neon
+    - control/menu.neon
+    - control/userProfileImage.neon
+    - control/search.neon
+    - control/toolbar.neon
+    - control/familyOffcanvas.neon
+    - control/partnerOffcanvas.neon
+    - control/projectOffcanvas.neon
+    - control/homepageTurnusList.neon
+    - control/unpaidInvoicesWidget.neon
+    - control/statsOverview.neon
+    - control/missingRegistryList.neon
+    - control/proposalList.neon

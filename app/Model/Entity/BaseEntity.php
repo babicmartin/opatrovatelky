@@ -9,6 +9,9 @@ use ReflectionProperty;
 
 abstract class BaseEntity
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         $reflection = new ReflectionClass($this);

@@ -1,0 +1,31 @@
+{varType array $unpaidInvoices}
+
+{if $unpaidInvoices !== []}
+	<div class="tableone">
+		<div class="tableone-header">
+			<h3 class="tableone-title">Neuhradené faktúry</h3>
+		</div>
+		<div class="table-responsive">
+			<table class="table table-striped card-table table-vcenter text-nowrap">
+				<thead>
+					<tr class="thead">
+						<th>Meno op.</th>
+						<th>Č. PFA</th>
+						<th class="tcenter">Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr n:foreach="$unpaidInvoices as $invoice">
+						<td><a href="{plink :Admin:Turnus:update, id: $invoice['id']}" class="titleLink">{$invoice['babysitterName']}</a></td>
+						<td><a href="{plink :Admin:Turnus:update, id: $invoice['id']}" class="titleLink">{$invoice['preinvoiceNumber']}</a></td>
+						<td class="tcenter">
+							<a href="{plink :Admin:Turnus:update, id: $invoice['id']}" class="filterLink">
+								<span class="badge" n:attr="style: $invoice['invoiceStatusColor'] !== '' ? 'background-color:' . $invoice['invoiceStatusColor']">{$invoice['invoiceStatus']}</span>
+							</a>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+{/if}

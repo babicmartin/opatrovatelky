@@ -1,0 +1,89 @@
+{varType list<array{id:int,name:string,surname:string,statusLabel:string,statusColor:string,updateUrl:string}> $lastFamilies}
+{varType list<array{id:int,title:string,color:string,count:int,url:string}> $statusItems}
+{varType list<array{id:int,title:string,image:string,count:int,url:string}> $countryItems}
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="familyStatsOffcanvas" aria-labelledby="familyStatsOffcanvasLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="familyStatsOffcanvasLabel">Údaje o rodinách</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		{if $lastFamilies}
+			<div class="col-xl-12">
+				<div class="tableone">
+					<div class="tableone-header">
+						<h3 class="tableone-title">Posledné pridané rodiny</h3>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-striped card-table table-vcenter text-nowrap">
+							<thead>
+								<tr class="thead">
+									<th>Meno</th>
+									<th class="tcenter">Status</th>
+								</tr>
+							</thead>
+							<tbody>
+								{foreach $lastFamilies as $family}
+									<tr>
+										<td>
+											<a href="{$family['updateUrl']}" class="titleLink">{$family['surname']} {$family['name']}</a>
+										</td>
+										<td class="tcenter">
+											{if $family['statusLabel'] !== ''}
+												<span class="badge" style="background-color:{$family['statusColor']|noescape}">{$family['statusLabel']}</span>
+											{/if}
+										</td>
+									</tr>
+								{/foreach}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="space20"></div>
+			</div>
+		{/if}
+
+		<div class="col-xl-12 col-md-6">
+			<div class="divone">
+				<div class="divone-header">
+					<h3 class="divone-title">Rodiny - status</h3>
+				</div>
+				<div>
+					{foreach $statusItems as $item}
+						<div class="overflow space10">
+							<a href="{$item['url']}" class="filterLink">
+								<div style="background:{$item['color']|noescape}; width:10px; float:left; margin-right:10px;">&nbsp;</div>
+								<div style="float:left; margin-right:5px;">{$item['title']}</div>
+								<div style="float:right;">{$item['count']}</div>
+							</a>
+						</div>
+					{/foreach}
+				</div>
+			</div>
+			<div class="space20"></div>
+		</div>
+
+		<div class="col-xl-12 col-md-6">
+			<div class="divone">
+				<div class="divone-header">
+					<h3 class="divone-title">Rodiny - krajiny</h3>
+				</div>
+				<div>
+					{foreach $countryItems as $item}
+						<div class="overflow space10">
+							<a href="{$item['url']}" class="filterLink">
+								<div style="float:left; margin-right:5px; width:45px;">
+									{if $item['image'] !== ''}
+										<img src="{$basePath}/img/country/{$item['image']}" alt="" style="height:20px; width:auto;" class="rectangle">
+									{/if}
+								</div>
+								<div style="float:left; margin-right:5px;">{$item['title']}</div>
+								<div style="float:right;">{$item['count']}</div>
+							</a>
+						</div>
+					{/foreach}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

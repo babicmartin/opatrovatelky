@@ -1,0 +1,66 @@
+{block pageTitle}Mesačný prehľad turnusov{/block}
+
+{block content}
+	{varType int $year}
+	{varType int $month}
+	{varType string $monthName}
+	{varType array $turnuses}
+
+	<div class="mb-3 fw-bold">
+		Dátum: {$monthName} {$year}
+	</div>
+
+	{if $turnuses !== []}
+		<div class="tableone">
+			<div class="tableone-header">
+				<h3 class="tableone-title">Zoznam turnusov</h3>
+			</div>
+			<div class="table-responsive">
+				<table class="table table-striped card-table table-vcenter text-nowrap">
+					<thead>
+						<tr class="thead">
+							<th class="tcenter">Status</th>
+							<th class="tcenter w90">Od</th>
+							<th class="tcenter w90">Do</th>
+							<th class="tcenter">Rodina</th>
+							<th class="tcenter">Opatrovateľka</th>
+							<th class="tcenter">Honorár</th>
+							<th class="tcenter">Príchod</th>
+							<th class="tcenter">Odchod</th>
+							<th class="tcenter">Sviatky</th>
+							<th class="tcenter">Možnosti</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr n:foreach="$turnuses as $turnus">
+							<td class="tcenter">
+								<a href="{link default, status: $turnus['statusId']}">
+									{if $turnus['status'] !== ''}
+										<span class="badge" n:attr="style: $turnus['statusColor'] !== '' ? 'background-color:' . $turnus['statusColor']">{$turnus['status']}</span>
+									{/if}
+								</a>
+							</td>
+							<td class="tcenter">{$turnus['dateFrom']}</td>
+							<td class="tcenter">{$turnus['dateTo']}</td>
+							<td class="tcenter">
+								<a href="{plink :Admin:Family:update, id: $turnus['familyId']}" class="filterLink">{$turnus['familyName']}</a>
+							</td>
+							<td class="tcenter">
+								<a href="{plink :Admin:Babysitter:update, id: $turnus['babysitterId']}" class="filterLink">{$turnus['babysitterName']}</a>
+							</td>
+							<td class="tcenter">{$turnus['fee']} €</td>
+							<td class="tcenter">{$turnus['travelCostsArrival']} €</td>
+							<td class="tcenter">{$turnus['travelCostsDeparture']} €</td>
+							<td class="tcenter">{$turnus['holiday']} €</td>
+							<td class="tcenter">
+								<a href="{plink :Admin:Turnus:update, id: $turnus['id']}" class="btn btn-success btn-sm" style="margin:0 20px 0 10px;">Upraviť</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	{else}
+		<div class="alert alert-info">Pre zvolený mesiac nie sú evidované žiadne turnusy.</div>
+	{/if}
+{/block}

@@ -1,0 +1,89 @@
+{varType list<array{id:int,name:string,surname:string,statusId:int,statusLabel:string,statusColor:string,updateUrl:string,statusUrl:string}> $lastProjects}
+{varType list<array{id:int,title:string,color:string,count:int,url:string}> $statusItems}
+{varType list<array{id:int,title:string,image:string,count:int,url:string}> $countryItems}
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="projectStatsOffcanvas" aria-labelledby="projectStatsOffcanvasLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="projectStatsOffcanvasLabel">Údaje o projektoch</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		{if $lastProjects}
+			<div class="col-xl-12">
+				<div class="tableone">
+					<div class="tableone-header">
+						<h3 class="tableone-title">Posledné pridané projekty</h3>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-striped card-table table-vcenter text-nowrap">
+							<thead>
+								<tr class="thead">
+									<th>Meno</th>
+									<th class="tcenter">Status</th>
+								</tr>
+							</thead>
+							<tbody>
+								{foreach $lastProjects as $project}
+									<tr>
+										<td><a href="{$project['updateUrl']}" class="titleLink">{$project['surname']} {$project['name']}</a></td>
+										<td class="tcenter">
+											{if $project['statusLabel'] !== ''}
+												<a href="{$project['statusUrl']}" class="filterLink">
+													<span class="badge" style="background-color:{$project['statusColor']|noescape}">{$project['statusLabel']}</span>
+												</a>
+											{/if}
+										</td>
+									</tr>
+								{/foreach}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="space20"></div>
+			</div>
+		{/if}
+
+		<div class="col-xl-12 col-md-6 mt-2">
+			<div class="divone">
+				<div class="divone-header">
+					<h3 class="divone-title">Projekty - status</h3>
+				</div>
+				<div>
+					{foreach $statusItems as $item}
+						<div class="overflow space10">
+							<a href="{$item['url']}" class="filterLink">
+								<div style="background:{$item['color']|noescape}; width:10px; float:left; margin-right:10px;">&nbsp;</div>
+								<div style="float:left; margin-right:5px;">{$item['title']}</div>
+								<div style="float:right;">{$item['count']}</div>
+							</a>
+						</div>
+					{/foreach}
+				</div>
+			</div>
+			<div class="space20"></div>
+		</div>
+
+		<div class="col-xl-12 col-md-6">
+			<div class="divone">
+				<div class="divone-header">
+					<h3 class="divone-title">Projekty - krajiny</h3>
+				</div>
+				<div>
+					{foreach $countryItems as $item}
+						<div class="overflow space10">
+							<a href="{$item['url']}" class="filterLink">
+								<div style="float:left; margin-right:5px; width:45px;">
+									{if $item['image'] !== ''}
+										<img src="{$basePath}/img/country/{$item['image']}" alt="" style="height:20px; width:auto;" class="rectangle">
+									{/if}
+								</div>
+								<div style="float:left; margin-right:5px;">{$item['title']}</div>
+								<div style="float:right;">{$item['count']}</div>
+							</a>
+						</div>
+					{/foreach}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

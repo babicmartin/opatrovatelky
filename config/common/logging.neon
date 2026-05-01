@@ -1,0 +1,12 @@
+parameters:
+    logPath: ../log/app.log
+    logLevel: Monolog\Logger::DEBUG
+    logChannel: 'app'
+
+services:
+    monolog.handler:
+        class: Monolog\Handler\StreamHandler(%logPath%, %logLevel%)
+
+    monolog:
+        class: Monolog\Logger
+        arguments: [%logChannel%]

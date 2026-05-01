@@ -1,0 +1,17 @@
+li.nav-item {margin-right:20px;}
+
+.pagination .page-link {
+	color: #8A2062;
+}
+
+.pagination .page-item.active .page-link {
+	background-color: #8A2062;
+	border-color: #8A2062;
+	color: #fff;
+}
+
+.pagination .paginator-ellipsis .page-link {
+	background: transparent;
+	border-color: transparent;
+	color: #6c757d;
+}

@@ -1,1 +1,6 @@
 parameters:
+    storageDir:
+        userImages: img/users
+        userImagesEmpty: img/users/empty.jpg
+    url:
+        appName: 4MS

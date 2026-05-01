@@ -33,6 +33,10 @@ abstract class BaseFactory
                 continue;
             }
 
+            if (!is_string($columnName)) {
+                continue;
+            }
+
             // Convert snake_case column to camelCase property/argument name
             $propertyName = $this->snakeToCamel($columnName);
 
@@ -41,6 +45,19 @@ abstract class BaseFactory
         }
 
         return new $entityClass(...$args);
+    }
+
+    /**
+     * @param iterable<ActiveRow> $rows
+     * @return list<object>
+     */
+    public function createEntitiesFromRows(iterable $rows): array
+    {
+        $entities = [];
+        foreach ($rows as $row) {
+            $entities[] = $this->createFromActiveRow($row);
+        }
+        return $entities;
     }
 
     private function snakeToCamel(string $input): string

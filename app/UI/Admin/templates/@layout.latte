@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="sk" dir="ltr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+	<meta content="4MS - administrácia" name="description">
+
+	<title>{block title}4MS - administrácia{/block}</title>
+
+	<link rel="icon" href="{$basePath}/assets/images/brand/favicon.ico" type="image/x-icon">
+	<link id="style" href="{$basePath}/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="{$basePath}/assets/css/main.css" rel="stylesheet">
+	<link href="{$basePath}/assets/css/custom.css" rel="stylesheet">
+	<link href="{$basePath}/assets/css/pdf.css" rel="stylesheet">
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0/dist/themes/light.css">
+	<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0/dist/shoelace.js"></script>
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/js/all.min.js" integrity="sha512-rpLlll167T5LJHwp0waJCh3ZRf7pO6IT1+LZOhAyP6phAirwchClbTZV3iqL3BMrVxIYRbzGTpli4rfxsCK6Vw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+	<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+	<script>
+		$(function() {
+			$(".datepicker").datepicker({
+				changeMonth: true,
+				changeYear: true,
+				dateFormat: "dd.mm.yy"
+			});
+		});
+	</script>
+
+	{block head}{/block}
+</head>
+
+<body>
+	{* ===== TOP MENU ===== *}
+	<div class="container-fluid topmenu" style="max-width:1500px;">
+		<div class="row">
+			<div class="col-xl-3 col-md-1 col-sm-2 col-3">
+				<a class="logo-horizontal" href="{link :Admin:Home:default}">
+					<img src="{$basePath}/img/logo.png" class="header-brand-img desktop-lgo d-none d-xl-block" alt="4MS">
+					<img src="{$basePath}/img/logo-small.png" class="d-xl-none" alt="4MS">
+				</a>
+			</div>
+			{control search}
+			<div class="col-xl-2 col-md-1 offset-md-0 col-sm-2 offset-sm-0 col-3">
+				<div class="logout fright">
+					<a href="{link :Login:Login:logout}" class="d-none d-xl-block">Odhlásiť sa</a>
+					<a href="{link :Login:Login:logout}" class="d-xl-none"><i class="fas fa-power-off" style="font-size:35px; color:#8A2062; padding-top:8px;"></i></a>
+				</div>
+				<div class="fright d-none d-xl-block">
+					{control userProfileImage}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{* ===== MAIN NAVIGATION ===== *}
+	<div class="fullnavbar">
+		<div class="container-fluid" style="max-width:1500px;">
+			<nav class="navbar navbar-expand-lg navbar-light mainMenu">
+				<div class="container-fluid">
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span> <span style="color:black; font-size:18px;">MENU</span>
+					</button>
+					<div class="collapse navbar-collapse" id="navbarNav">
+						{control menu}
+					</div>
+				</div>
+			</nav>
+		</div>
+	</div>
+
+	{* ===== PAGE CONTENT ===== *}
+	<div class="container-fluid" style="max-width:1500px;">
+		{control toolbar}
+
+		<div id="searchResults"></div>
+
+		<h1>{block pageTitle}{/block}</h1>
+
+		{* Flash messages *}
+		{foreach $flashes as $flash}
+			<div class="alert alert-{$flash->type}">{$flash->message}</div>
+		{/foreach}
+
+		{block content}{/block}
+	</div>
+	{* ===== END PAGE CONTENT ===== *}
+
+	{control familyOffcanvas}
+	{control partnerOffcanvas}
+	{control projectOffcanvas}
+
+	{* ===== FOOTER ===== *}
+	<footer class="footer">
+		<div class="container">
+			<div class="row align-items-center flex-row-reverse">
+				<div class="col-md-12 col-sm-12 text-center">
+					Copyright &copy; 2022, All rights reserved
+				</div>
+			</div>
+		</div>
+	</footer>
+
+	<a href="#top" id="back-to-top"><i class="fe fe-chevron-up"></i></a>
+
+	{* ===== SCRIPTS ===== *}
+	<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+	<script src="{$basePath}/assets/plugins/bootstrap/popper.min.js"></script>
+	<script src="{$basePath}/assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+	<script src="{$basePath}/assets/plugins/sidemenu/sidemenu.js"></script>
+	<script src="{$basePath}/assets/plugins/p-scrollbar/p-scrollbar.js"></script>
+	<script src="{$basePath}/assets/plugins/p-scrollbar/p-scroll1.js"></script>
+	<script src="{$basePath}/assets/plugins/p-scrollbar/p-scroll.js"></script>
+	<script src="{$basePath}/assets/plugins/datatables/DataTables/js/jquery.dataTables.js"></script>
+	<script src="{$basePath}/assets/plugins/datatables/DataTables/js/dataTables.bootstrap5.js"></script>
+	<script src="{$basePath}/assets/plugins/datatables/Responsive/js/dataTables.responsive.min.js"></script>
+	<script src="{$basePath}/assets/plugins/datatables/Responsive/js/responsive.bootstrap5.min.js"></script>
+	<script src="{$basePath}/assets/plugins/select2/select2.full.min.js"></script>
+	<script src="{$basePath}/assets/js/select2.js"></script>
+	<script src="{$basePath}/assets/plugins/simplebar/js/simplebar.min.js"></script>
+	<script src="{$basePath}/assets/js/themeColors.js"></script>
+	<script src="{$basePath}/assets/js/custom.js"></script>
+	<script src="{$basePath}/js/search.js"></script>
+
+	{block scripts}{/block}
+</body>
+</html>

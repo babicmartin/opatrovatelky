@@ -7,15 +7,8 @@ namespace App\Model\Entity;
 class SelectWorkStatusStaffEntity extends BaseEntity
 {
     public function __construct(
-        private readonly int $id,
-        private ?string $contract {
-            get {
-                return $this->contract;
-            }
-            set {
-                $this->contract = $value;
-            }
-        },
+        public readonly int $id,
+        public ?string $contract,
     ) {
     }
 

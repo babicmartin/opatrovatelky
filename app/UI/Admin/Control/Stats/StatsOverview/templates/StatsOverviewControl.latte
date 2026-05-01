@@ -1,0 +1,53 @@
+{varType array $sections}
+
+{define statusItems, array $items}
+	{foreach $items as $item}
+		<div class="overflow space10">
+			<a href="{$item['url']}" class="filterLink">
+				<div style="background:{$item['color']|noescape}; width:10px; float:left; margin-right:10px;">&nbsp;</div>
+				<div style="float:left; margin-right:5px;">{$item['title']}</div>
+				<div style="float:right;">{$item['count']}</div>
+			</a>
+		</div>
+	{/foreach}
+{/define}
+
+{define countryItems, array $items}
+	{foreach $items as $item}
+		<div class="overflow space10">
+			<a href="{$item['url']}" class="filterLink">
+				<div style="float:left; margin-right:5px; width:45px;">
+					{if $item['image'] !== ''}
+						<img src="{$basePath}/img/country/{$item['image']}" alt="" style="height:20px; width:auto;" class="rectangle">
+					{/if}
+				</div>
+				<div style="float:left; margin-right:5px;">{$item['title']}</div>
+				<div style="float:right;">{$item['count']}</div>
+			</a>
+		</div>
+	{/foreach}
+{/define}
+
+<div class="row">
+	<div n:foreach="$sections as $section" class="col-3">
+		<div class="divone">
+			<div class="divone-header">
+				<h3 class="divone-title">{$section['title']} - status</h3>
+			</div>
+			<div>
+				{include statusItems, $section['statusItems']}
+			</div>
+		</div>
+
+		<div class="space20"></div>
+
+		<div class="divone">
+			<div class="divone-header">
+				<h3 class="divone-title">{$section['title']} - krajiny</h3>
+			</div>
+			<div>
+				{include countryItems, $section['countryItems']}
+			</div>
+		</div>
+	</div>
+</div>

@@ -33,12 +33,10 @@ class Bootstrap
 			->addDirectory(__DIR__)
 			->register();
 
-		$configurator->addConfig($appDir . '/config/common.neon');
-		$configurator->addConfig($appDir . '/config/extension.neon');
-		$configurator->addConfig($appDir . '/config/services.neon');
-		$configurator->addConfig($appDir . '/config/console.neon');
+		$configurator->addConfig($appDir . '/config/includes.neon');
 
         $configurator->addConfig($appDir . '/config/' . $environment . '/database.neon');
+        $configurator->addConfig($appDir . '/config/' . $environment . '/setup.neon');
 
         $configurator->addDynamicParameters(['env' => $_ENV]);
 

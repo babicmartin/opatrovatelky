@@ -7,15 +7,8 @@ namespace App\Model\Entity;
 class SelectMissingTypeEntity extends BaseEntity
 {
     public function __construct(
-        private readonly int $id,
-        private ?string $action {
-            get {
-                return $this->action;
-            }
-            set {
-                $this->action = $value;
-            }
-        },
+        public readonly int $id,
+        public ?string $action,
     ) {
     }
 

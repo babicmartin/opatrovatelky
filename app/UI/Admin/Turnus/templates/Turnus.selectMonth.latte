@@ -1,0 +1,34 @@
+{block pageTitle}Výber mesiaca turnusov{/block}
+
+{block content}
+	{varType array<int> $years}
+	{varType array<int, string> $months}
+
+	<div class="row">
+		<div n:foreach="$years as $year" class="col-lg-3">
+			<div class="tableone">
+				<div class="tableone-header">
+					<h3 class="tableone-title">Rok {$year}</h3>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-striped card-table table-vcenter text-nowrap">
+						<thead>
+							<tr class="thead">
+								<th class="text-center">Mesiac</th>
+								<th class="tcenter">Možnosti</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr n:foreach="$months as $monthNumber => $monthName">
+								<td class="tcenter">{$monthName}</td>
+								<td class="tcenter">
+									<a href="{link month, year: $year, month: $monthNumber}" class="btn btn-sm btn-success">Detail</a>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+{/block}

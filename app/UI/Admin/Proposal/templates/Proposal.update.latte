@@ -1,0 +1,67 @@
+{varType array $proposal}
+
+{block pageTitle}Detail návrhu{/block}
+
+{block content}
+	<a href="{plink :Admin:Family:update, id: $proposal['familyId']}" class="btn btn-sm btn-success">Úvod</a>
+	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], address: 1}" class="btn btn-sm btn-success">Základné informácie</a>
+	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], proposal: 1}" class="btn btn-sm btn-success">Návrhy</a>
+	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], contract: 1}" class="btn btn-sm btn-success">Zmluvy</a>
+	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], order: 1}" class="btn btn-sm btn-success">Objednávky</a>
+
+	<div class="space20"></div>
+	{form proposalUpdateForm}
+		<div class="row">
+			<div class="col-xl-3 col-md-12">
+				<div class="divone">
+					<div>
+						<div class="mb10">
+							<div class="inputLabel">Status</div>
+							{input status}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-3 col-md-12">
+				<div class="divone">
+					<div>
+						<div class="mb10">
+							<div class="inputLabel">Opatrovateľka</div>
+							{input babysitterId}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-3 col-md-12">
+				<div class="divone">
+					<div>
+						<div class="mb10">
+							<div class="inputLabel">Kedy môže nastúpiť</div>
+							{input dateStartingWork}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">Odoslané klientovi</div>
+							{input dateProposalSended}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-3 col-md-12">
+				<div class="divone">
+					<div>
+						<div class="mb10">
+							<div class="inputLabel">Poznámka</div>
+							{input notice}
+						</div>
+						{input save}
+					</div>
+				</div>
+			</div>
+		</div>
+	{/form}
+
+	<script src="{$basePath}/js/autosaveForm.js"></script>
+{/block}

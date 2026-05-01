@@ -7,15 +7,8 @@ namespace App\Model\Entity;
 class SelectAccommodationTypeEntity extends BaseEntity
 {
     public function __construct(
-        private readonly int $id,
-        private ?string $accommodationType {
-            get {
-                return $this->accommodationType;
-            }
-            set {
-                $this->accommodationType = $value;
-            }
-        },
+        public readonly int $id,
+        public ?string $accommodationType,
     ) {
     }
 

@@ -7,23 +7,9 @@ namespace App\Model\Entity;
 class StatusFamilyEntity extends BaseEntity
 {
     public function __construct(
-        private readonly int $id,
-        private ?string $status {
-            get {
-                return $this->status;
-            }
-            set {
-                $this->status = $value;
-            }
-        },
-        private ?string $color {
-            get {
-                return $this->color;
-            }
-            set {
-                $this->color = $value;
-            }
-        },
+        public readonly int $id,
+        public ?string $status,
+        public ?string $color,
     ) {
     }
 

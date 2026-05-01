@@ -1,0 +1,83 @@
+{varType array|null $newRow}
+{varType array $rows}
+{varType App\Model\Utils\Paginator\Paginator $paginator}
+
+{define registryRow, array $row}
+	{form "registryForm-$row[id]"}
+		<div class="row">
+			<div class="col-xl-2 col-md-12">
+				<div class="mb10">
+					<div class="inputLabel">Kto</div>
+					{input userId}
+				</div>
+			</div>
+			<div class="col-xl-2 col-md-12">
+				<div class="mb10">
+					<div style="font-weight:bold; font-size:16px;">Od</div>
+					{input dateFrom}
+				</div>
+			</div>
+			<div class="col-xl-2 col-md-12">
+				<div class="mb10">
+					<div style="font-weight:bold; font-size:16px;">Do</div>
+					{input dateTo}
+				</div>
+			</div>
+			<div class="col-xl-3 col-md-12">
+				<div class="mb10 mt-3 row">
+					<div class="col-4">{input typePn} PN</div>
+					<div class="col-4">{input typeOcr} OČR</div>
+					<div class="col-4">{input typeLekar} Lekár</div>
+					<div class="col-4">{input typeSviatok} Sviatok</div>
+					<div class="col-4">{input typeZastup} Zástup</div>
+					<div class="col-4">{input typeSluzba} Služba</div>
+					<div class="col-8">{input typeDovolenka} Dovolenka</div>
+				</div>
+			</div>
+			<div class="col-xl-2 col-md-12">
+				<div class="mb10">
+					<div style="font-weight:bold; font-size:16px;">Poznámka</div>
+					{input notice}
+				</div>
+			</div>
+			<div class="col-xl-1 col-md-12">
+				<a n:href="delete!, id: $row['id']" onclick="return confirm('Naozaj chceš odstrániť evidenciu neprítomnosti?');" title="Odstrániť">
+					<img src="{$basePath}/img/icons/x.png" style="height:30px; cursor:pointer; margin-top:30px;" alt="Odstrániť">
+				</a>
+				{input save}
+			</div>
+		</div>
+	{/form}
+{/define}
+
+<div class="space20"></div>
+<a n:href="create!" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;">Pridať novú evidenciu</a>
+
+<div class="space20"></div>
+{if $newRow !== null}
+	<div class="divone">
+		<div class="divone-header">
+			<h3 class="divone-title">Nový záznam</h3>
+		</div>
+		<div>
+			{include registryRow, $newRow}
+		</div>
+	</div>
+{/if}
+
+<div class="space20"></div>
+<div class="divone">
+	<div class="divone-header">
+		<h3 class="divone-title">Evidencia</h3>
+	</div>
+	<div>
+		{foreach $rows as $row}
+			{include registryRow, $row}
+		{/foreach}
+	</div>
+</div>
+
+<div class="space20"></div>
+{include '../../../../templates/components/paginator.latte', paginator: $paginator}
+
+<script src="{$basePath}/js/autosaveForm.js"></script>

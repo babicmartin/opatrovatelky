@@ -7,23 +7,9 @@ namespace App\Model\Entity;
 class BabysitterPositionPreferenceEntity extends BaseEntity
 {
     public function __construct(
-        private readonly int $id,
-        private ?string $babysitterId {
-            get {
-                return $this->babysitterId;
-            }
-            set {
-                $this->babysitterId = $value;
-            }
-        },
-        private ?string $workPositionId {
-            get {
-                return $this->workPositionId;
-            }
-            set {
-                $this->workPositionId = $value;
-            }
-        },
+        public readonly int $id,
+        public ?string $babysitterId,
+        public ?string $workPositionId,
     ) {
     }
 

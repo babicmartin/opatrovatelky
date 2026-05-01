@@ -1,0 +1,58 @@
+{varType App\Model\Utils\Paginator\Paginator $paginator}
+
+{if $paginator->hasMultiplePages()}
+	<nav aria-label="Stránkovanie">
+		<ul class="pagination justify-content-center">
+			<li n:class="page-item, $paginator->getCurrentPage() === 1 ? disabled">
+				{if $paginator->getCurrentPage() === 1}
+					<span class="page-link" aria-hidden="true">&laquo;</span>
+				{else}
+					<a class="page-link" href="{$paginator->getQueryForPage(1)}" aria-label="Prvá stránka">&laquo;</a>
+				{/if}
+			</li>
+
+			{*
+			Previous page control, intentionally hidden for now.
+			<li n:class="page-item, $paginator->getCurrentPage() === 1 ? disabled">
+				{if $paginator->getCurrentPage() === 1}
+					<span class="page-link" aria-hidden="true">&lsaquo;</span>
+				{else}
+					<a class="page-link" href="{$paginator->getQueryForPage($paginator->getCurrentPage() - 1)}" aria-label="Predchádzajúca stránka">&lsaquo;</a>
+				{/if}
+			</li>
+			*}
+
+			{foreach $paginator->getVisiblePageItems() as $pageItem}
+				<li n:if="is_int($pageItem)" n:class="page-item, $pageItem === $paginator->getCurrentPage() ? active">
+					{if $pageItem === $paginator->getCurrentPage()}
+						<span class="page-link" aria-current="page">{$pageItem}</span>
+					{else}
+						<a class="page-link" href="{$paginator->getQueryForPage($pageItem)}" aria-label="Stránka {$pageItem}">{$pageItem}</a>
+					{/if}
+				</li>
+				<li n:if="!is_int($pageItem)" class="page-item disabled paginator-ellipsis">
+					<span class="page-link" aria-hidden="true">&hellip;</span>
+				</li>
+			{/foreach}
+
+			{*
+			Next page control, intentionally hidden for now.
+			<li n:class="page-item, $paginator->getCurrentPage() === $paginator->getTotalPages() ? disabled">
+				{if $paginator->getCurrentPage() === $paginator->getTotalPages()}
+					<span class="page-link" aria-hidden="true">&rsaquo;</span>
+				{else}
+					<a class="page-link" href="{$paginator->getQueryForPage($paginator->getCurrentPage() + 1)}" aria-label="Ďalšia stránka">&rsaquo;</a>
+				{/if}
+			</li>
+			*}
+
+			<li n:class="page-item, $paginator->getCurrentPage() === $paginator->getTotalPages() ? disabled">
+				{if $paginator->getCurrentPage() === $paginator->getTotalPages()}
+					<span class="page-link" aria-hidden="true">&raquo;</span>
+				{else}
+					<a class="page-link" href="{$paginator->getQueryForPage($paginator->getTotalPages())}" aria-label="Posledná stránka">&raquo;</a>
+				{/if}
+			</li>
+		</ul>
+	</nav>
+{/if}

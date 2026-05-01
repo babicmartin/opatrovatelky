@@ -1,0 +1,145 @@
+
+
+.pdfOverflow {
+    overflow: hidden;
+}
+
+.pdfOverflowMain {
+    overflow: hidden;
+    padding-bottom:10px; width:500px;
+    margin-bottom:10px;
+}
+
+.pdfMain {
+    font-family: Bahnschrift Condensed;
+}
+
+.pdfHeader1 {
+    background-image: url(web/img/profil/header1.png);
+    background-size: cover;
+    width: 101%;
+    height: 260px;
+}
+
+.pdfHeader2 {
+    background-image: url(web/img/profil/header2.png);
+    background-size: cover;
+    width: 101%;
+    height: 260px;
+}
+
+.pdfLeftBlock1Overflow {
+    width:270px; line-height:18px; float:left;
+}
+
+
+.pdfLeftBlock1 {
+    background:#e6e7e8; width:270px; border-radius:0 20px 20px 0; height:600px; line-height:18px;
+}
+
+.pdfLeftBlock2 {
+    background:#e6e7e8; width:270px; border-radius:0 20px 20px 0; margin-top:10px; height:200px; line-height:18px;
+}
+
+
+.pdfBlock1Box1 {
+    width:100px; float:left; height:40px;
+}
+
+.pdfBlock1Box2 {
+    width:165px; float:left; overflow:hidden;
+}
+
+.pdfBlock1Box3 {
+    width:80px; float:left; height:40px;
+}
+.pdfBlock1Box4 {
+    width:400px; float:left;
+}
+.pdfBlock1Box5 {
+    width:190px; margin-right:10px; float:left;
+}
+
+.pdfBlockDisease {
+    margin-left:60px;
+}
+
+
+.pdfBlock1Box6 {
+    width:400px; margin-left:100px; float:left; border:1px solid #000; height:150px;
+}
+
+
+
+.pdfBlock1Box2Text1 {
+    color:#6d6e71; font-size:11px; font-weight:bold;
+}
+
+.pdfBlock1Box2Text2 {
+    color:#231f20; font-size:15px; letter-spacing:0px;
+    line-height:24px;
+    font-family: 'Roboto';
+}
+
+.pdfBlock1Box2Text3 {
+    color:#8a2061; font-size:16px; letter-spacing:0px;
+    line-height:24px;
+    font-family: 'Roboto';
+}
+
+.pdfBlock1Box2Text4 {
+    color:#000000; font-size:14px; letter-spacing:0px;
+    line-height:20px;
+    font-family: 'Roboto';
+}
+
+.pdfBlock1Box2Text5 {
+    color:#b2b1b0; font-size:11px; letter-spacing:0px; font-weight:bold;
+    line-height:18px;
+    font-family: 'Roboto';
+}
+
+.pdfBlock1Box2Text6 {
+    color:#912686;
+    font-size:14px;
+    letter-spacing:-0.5px;
+    font-weight:bold;
+    line-height:20px;
+    font-family: 'Roboto';
+}
+
+.pdfBlockText7 {
+    color: #000000;
+    line-height:30px;
+    letter-spacing:-0.5px;
+    font-family: 'Roboto';
+    text-indent:24px;
+
+}
+.pdfBlockText8 {
+    color:#8a2061;
+    font-size:14px;
+    letter-spacing:-0.5px;
+    line-height:30px;
+    font-family: 'Roboto';
+}
+
+img.pdfBlock1Icon  {
+    width:50px;
+    float:right;
+    margin-top:5px;
+    margin-right:10px;
+}
+
+
+
+.pt5 {
+    padding-top:5px;
+}
+.pt10 {
+    padding-top:10px;
+}
+
+.mb30 {
+    margin-bottom:30px;
+}

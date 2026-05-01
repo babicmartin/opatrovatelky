@@ -1,0 +1,29 @@
+application:
+	errorPresenter:
+		4xx: Error4xx
+		5xx: Error5xx
+
+	mapping:
+		*: [App\UI, * ,*\*Presenter]
+
+	aliases:
+		login: Login:Login:default
+		logout: Login:Login:logout
+		home: Admin:Home:default
+
+security:
+	authentication:
+		expiration: 1 day
+		storage: session
+
+session:
+	expiration: 1 day
+
+di:
+	export:
+		parameters: no
+		tags: no
+
+
+php:
+    date.timezone: 'Europe/Bratislava'

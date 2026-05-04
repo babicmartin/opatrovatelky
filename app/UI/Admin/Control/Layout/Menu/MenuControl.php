@@ -46,6 +46,7 @@ class MenuControl extends Control
 			'user-management' => ':Admin:UserManagement:default',
 			'translation' => ':Admin:Translation:default',
 			'missing-registry' => ':Admin:MissingRegistry:default',
+			'todo' => ':Admin:Todo:default',
 		];
 	}
 }

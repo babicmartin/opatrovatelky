@@ -13,11 +13,13 @@
 {/define}
 
 {define babysitterImage, string $image}
-	{if $image !== ''}
-		<img src="{$basePath}/img/opatrovatelka/{$image}" alt="img" style="height:26px; width:auto;">
-	{else}
-		<img src="{$basePath}/img/empty.jpg" alt="img" style="width:26px; height:26px">
-	{/if}
+	<span class="header-avatar1">
+		{if $image !== ''}
+			<img src="{$basePath}/img/opatrovatelka/{$image}" alt="img" style="height:26px; width:26px; object-fit:cover;" class="rounded-circle">
+		{else}
+			<img src="{$basePath}/img/empty.jpg" alt="img" style="height:26px; width:26px; object-fit:cover;" class="rounded-circle">
+		{/if}
+	</span>
 {/define}
 
 <div n:if="$rows !== []" class="tableone">

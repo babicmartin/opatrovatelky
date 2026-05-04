@@ -18,6 +18,7 @@ enum Resource: string
 	case SETTINGS = 'settings';
 	case COUNTRY = 'country';
 	case TODO = 'todo';
+	case TODO_VIEW_ALL = 'todoViewAll';
 	case TRANSLATION = 'translation';
 	case PROPOSAL = 'proposal';
 	case MISSING = 'missing-registry';

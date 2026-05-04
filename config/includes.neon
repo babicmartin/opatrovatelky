@@ -27,3 +27,5 @@ includes:
     - control/familyList.neon
     - control/familyDocuments.neon
     - control/babysitterList.neon
+    - control/todoActiveList.neon
+    - control/todoClosedList.neon

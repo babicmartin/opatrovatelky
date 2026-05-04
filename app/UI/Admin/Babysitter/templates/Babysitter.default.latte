@@ -1,9 +1,126 @@
 {varType ?int $page}
+{varType ?int $country}
+{varType ?int $language}
+{varType ?int $workingStatus}
+{varType ?int $gender}
+{varType ?int $driver}
+{varType ?int $smoker}
+{varType ?int $agency}
+{varType ?int $status}
 {varType ?string $firstLetter}
+{varType array $countries}
+{varType array $languages}
+{varType array $workingStatuses}
+{varType array $genders}
+{varType array $yesNoOptions}
+{varType array $agencies}
+{varType array $statuses}
+{varType bool $canManageBabysitter}
 
 {block pageTitle}Zoznam opatrovateliek{/block}
 
 {block content}
+	{if $canManageBabysitter}
+		<a href="{link create!}" class="btn btn-success btn-sm" style="margin:0 0 20px 0;">Pridať novú opatrovateľku</a>
+	{/if}
+
+	<div class="row mt-2 mb-4" style="border:1px solid #E2C2DA; background:#E2C2DA; padding:5px 10px 10px;">
+		<div class="col-md-12">
+			<div class="d-inline-block me-4">
+				<div class="fw-bold">Krajina:</div>
+				<select name="filter-country" id="filter-country" class="form-control filter-babysitter">
+					<option value="">---</option>
+					<option n:foreach="$countries as $filterCountry" value="{$filterCountry['id']}" n:attr="selected: $country === $filterCountry['id']">{$filterCountry['name']}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block me-4" style="max-width:150px;">
+				<div class="fw-bold">Úroveň nemčiny:</div>
+				<select name="filter-language" id="filter-language" class="form-control filter-babysitter">
+					<option value="">---</option>
+					<option n:foreach="$languages as $filterLanguage" value="{$filterLanguage['id']}" n:attr="selected: $language === $filterLanguage['id']">{$filterLanguage['label']}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block me-4">
+				<div class="fw-bold">Pracovný status:</div>
+				<select name="filter-working-status" id="filter-working-status" class="form-control filter-babysitter">
+					<option value="">---</option>
+					<option n:foreach="$workingStatuses as $filterWorkingStatus" value="{$filterWorkingStatus['id']}" n:attr="selected: $workingStatus === $filterWorkingStatus['id']">{$filterWorkingStatus['label']}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block me-4">
+				<div class="fw-bold">Pohlavie:</div>
+				<select name="filter-gender" id="filter-gender" class="form-control filter-babysitter">
+					<option value="">---</option>
+					<option n:foreach="$genders as $filterGender" value="{$filterGender['id']}" n:attr="selected: $gender === $filterGender['id']">{$filterGender['label']}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block me-4">
+				<div class="fw-bold">Vodičský:</div>
+				<select name="filter-driver-license" id="filter-driver-license" class="form-control filter-babysitter">
+					<option value="">---</option>
+					<option n:foreach="$yesNoOptions as $filterDriver" value="{$filterDriver['id']}" n:attr="selected: $driver === $filterDriver['id']">{$filterDriver['label']}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block me-4">
+				<div class="fw-bold">Fajčiar/ka:</div>
+				<select name="filter-smoker" id="filter-smoker" class="form-control filter-babysitter">
+					<option value="">---</option>
+					<option n:foreach="$yesNoOptions as $filterSmoker" value="{$filterSmoker['id']}" n:attr="selected: $smoker === $filterSmoker['id']">{$filterSmoker['label']}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block me-4" style="max-width:150px;">
+				<div class="fw-bold">Agentúra</div>
+				<select name="filter-agency" id="filter-agency" class="form-control filter-babysitter">
+					<option value="">---</option>
+					<option n:foreach="$agencies as $filterAgency" value="{$filterAgency['id']}" n:attr="selected: $agency === $filterAgency['id']">{$filterAgency['name']}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block">
+				<div class="fw-bold">Status:</div>
+				<select name="filter-status" id="filter-status" class="form-control filter-babysitter">
+					<option value="">---</option>
+					<option n:foreach="$statuses as $filterStatus" value="{$filterStatus['id']}" n:attr="selected: $status === $filterStatus['id']">{$filterStatus['label']}</option>
+				</select>
+			</div>
+		</div>
+	</div>
+
 	{control alphabetFilter}
 	{control babysitterList}
+{/block}
+
+{block scripts}
+	<script>
+		document.querySelectorAll('.filter-babysitter').forEach(select => {
+			select.addEventListener('change', () => {
+				const params = new URLSearchParams();
+				const country = document.getElementById('filter-country').value;
+				const language = document.getElementById('filter-language').value;
+				const workingStatus = document.getElementById('filter-working-status').value;
+				const gender = document.getElementById('filter-gender').value;
+				const driver = document.getElementById('filter-driver-license').value;
+				const smoker = document.getElementById('filter-smoker').value;
+				const agency = document.getElementById('filter-agency').value;
+				const status = document.getElementById('filter-status').value;
+
+				if (country) params.set('country', country);
+				if (language) params.set('language', language);
+				if (workingStatus) params.set('working-status', workingStatus);
+				if (gender) params.set('gender', gender);
+				if (driver) params.set('driver', driver);
+				if (smoker) params.set('smoker', smoker);
+				if (agency) params.set('agency', agency);
+				if (status) params.set('status', status);
+
+				window.location.href = params.toString() ? '?' + params.toString() : window.location.pathname;
+			});
+		});
+	</script>
 {/block}

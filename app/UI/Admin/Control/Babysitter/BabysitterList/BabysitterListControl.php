@@ -13,6 +13,22 @@ class BabysitterListControl extends Control
 
 	private int $page = 1;
 
+	private ?int $countryId = null;
+
+	private ?int $languageSkillId = null;
+
+	private ?int $workingStatusId = null;
+
+	private ?int $genderId = null;
+
+	private ?int $driverLicence = null;
+
+	private ?int $smokerTypeId = null;
+
+	private ?int $agencyId = null;
+
+	private ?int $statusId = null;
+
 	private ?string $firstLetter = null;
 
 	private int $pageCount = 1;
@@ -33,8 +49,26 @@ class BabysitterListControl extends Control
 		return $this;
 	}
 
-	public function setFirstLetter(?string $firstLetter): static
+	public function setFilters(
+		?int $countryId,
+		?int $languageSkillId,
+		?int $workingStatusId,
+		?int $genderId,
+		?int $driverLicence,
+		?int $smokerTypeId,
+		?int $agencyId,
+		?int $statusId,
+		?string $firstLetter,
+	): static
 	{
+		$this->countryId = $countryId;
+		$this->languageSkillId = $languageSkillId;
+		$this->workingStatusId = $workingStatusId;
+		$this->genderId = $genderId;
+		$this->driverLicence = $driverLicence;
+		$this->smokerTypeId = $smokerTypeId;
+		$this->agencyId = $agencyId;
+		$this->statusId = $statusId;
 		$this->firstLetter = $firstLetter;
 
 		return $this;
@@ -59,6 +93,14 @@ class BabysitterListControl extends Control
 			$this->rows = $this->babysitterRepository->findBabysitterRows(
 				$this->page,
 				self::ITEMS_PER_PAGE,
+				$this->countryId,
+				$this->languageSkillId,
+				$this->workingStatusId,
+				$this->genderId,
+				$this->driverLicence,
+				$this->smokerTypeId,
+				$this->agencyId,
+				$this->statusId,
 				$this->firstLetter,
 				$pageCount,
 			);
@@ -79,6 +121,14 @@ class BabysitterListControl extends Control
 			'this',
 			array_filter(
 				[
+					'country' => $this->countryId,
+					'language' => $this->languageSkillId,
+					'working-status' => $this->workingStatusId,
+					'gender' => $this->genderId,
+					'driver' => $this->driverLicence,
+					'smoker' => $this->smokerTypeId,
+					'agency' => $this->agencyId,
+					'status' => $this->statusId,
 					'first-letter' => $this->firstLetter,
 				],
 				static fn (mixed $value): bool => $value !== null && $value !== '',

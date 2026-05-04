@@ -34,6 +34,7 @@ final class AuthorizatorFactory
 		}
 
 		$acl->allow(UserRole::CEO->value, Resource::FAMILY_MANAGEMENT->value);
+		$acl->allow(UserRole::CEO->value, Resource::TODO_VIEW_ALL->value);
 
 		foreach ($this->pageRepository->getAll() as $page) {
 			$url = $page->url;

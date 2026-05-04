@@ -1,0 +1,3 @@
+services:
+    -
+        implement: App\UI\Admin\Control\Family\FamilyDocuments\FamilyDocumentsControlFactory

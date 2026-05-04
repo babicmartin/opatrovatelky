@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "nette-inspector": {
+            "command": "C:\\wamp64\\bin\\php\\php8.5.0\\php.exe",
+            "args": [
+                "vendor/nette/mcp-inspector/bin/mcp-inspector",
+                "--project=C:/wamp64/www/monika/opatrovatelky/local"
+            ]
+        }
+    }
+}

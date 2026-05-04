@@ -1,6 +1,92 @@
-{varType ?int $status}
+{varType ?int $page}
 {varType ?int $country}
+{varType ?int $status}
+{varType ?int $partner}
+{varType ?string $city}
+{varType ?int $managerUser}
+{varType ?string $firstLetter}
+{varType array $countries}
+{varType array $statuses}
+{varType array $partners}
+{varType string[] $cities}
+{varType array $managerCounts}
+{varType bool $canManageFamilies}
+
+{block pageTitle}Správa rodín{/block}
 
 {block content}
-	{* TODO: migrate legacy families list page. Active filters: status={$status}, country={$country}. *}
+	<a href="{link create!}" class="btn btn-success btn-sm" style="margin:0 0 20px 0;">Pridať novú rodinu</a>
+
+	{if $canManageFamilies && $user->isAllowed('familyManagement')}
+		<h2>Správa rodín</h2>
+		<div class="mt-2 mb-4 row">
+			{foreach $managerCounts as $manager}
+				{var $count = $manager['count']}
+				{var $familyCountWordShape = $count === 1 ? 'rodina' : ($count > 1 && $count < 5 ? 'rodiny' : 'rodín')}
+				<div class="col-auto mb-2">
+					<a href="{link this, user: $manager['id'], status: 1}" class="btn btn-success">{$manager['name']} {$manager['secondName']} - {$count} {$familyCountWordShape}</a>
+				</div>
+			{/foreach}
+		</div>
+	{/if}
+
+	<div class="row mt-2 mb-4" style="border:1px solid #E2C2DA; background:#E2C2DA; padding:5px 10px 10px;">
+		<div class="col-md-12">
+			<div class="d-inline-block me-4">
+				<div class="fw-bold">Krajina:</div>
+				<select name="filter-country" id="filter-country" class="form-control filter-family">
+					<option value="">---</option>
+					<option n:foreach="$countries as $filterCountry" value="{$filterCountry['id']}" n:attr="selected: $country === $filterCountry['id']">{$filterCountry['name']}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block me-4" style="max-width:150px;">
+				<div class="fw-bold">Partner</div>
+				<select name="filter-partner" id="filter-partner" class="form-control filter-family">
+					<option value="">---</option>
+					<option n:foreach="$partners as $filterPartner" value="{$filterPartner['id']}" n:attr="selected: $partner === $filterPartner['id']">{$filterPartner['name']}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block me-4">
+				<div class="fw-bold">Mesto:</div>
+				<select name="filter-city" id="filter-city" class="form-control filter-family" style="max-width:150px;">
+					<option value="">---</option>
+					<option n:foreach="$cities as $filterCity" value="{$filterCity}" n:attr="selected: $city === $filterCity">{$filterCity}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block">
+				<div class="fw-bold">Status:</div>
+				<select name="filter-status" id="filter-status" class="form-control filter-family">
+					<option value="">---</option>
+					<option n:foreach="$statuses as $filterStatus" value="{$filterStatus['id']}" n:attr="selected: $status === $filterStatus['id']">{$filterStatus['status']}</option>
+				</select>
+			</div>
+		</div>
+	</div>
+
+	{control alphabetFilter}
+	{control familyList}
+{/block}
+
+{block scripts}
+	<script>
+		document.querySelectorAll('.filter-family').forEach(select => {
+			select.addEventListener('change', () => {
+				const params = new URLSearchParams();
+				const country = document.getElementById('filter-country').value;
+				const partner = document.getElementById('filter-partner').value;
+				const status = document.getElementById('filter-status').value;
+				const city = document.getElementById('filter-city').value;
+
+				if (country) params.set('country', country);
+				if (partner) params.set('partner', partner);
+				if (status) params.set('status', status);
+				if (city) params.set('city', city);
+
+				window.location.href = params.toString() ? '?' + params.toString() : window.location.pathname;
+			});
+		});
+	</script>
 {/block}

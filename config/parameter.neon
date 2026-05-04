@@ -2,5 +2,8 @@ parameters:
     storageDir:
         userImages: img/users
         userImagesEmpty: img/users/empty.jpg
+        countryImages: img/country
+        documents: documents
+        documentTypeImages: img/type
     url:
         appName: 4MS

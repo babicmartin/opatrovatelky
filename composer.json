@@ -28,7 +28,8 @@
 		"mockery/mockery": "^1.6",
 		"symfony/thanks": "^1.4",
 		"phpstan/phpstan": "^2.1",
-		"phpstan/phpstan-nette": "^2.0"
+		"phpstan/phpstan-nette": "^2.0",
+		"nette/mcp-inspector": "^1.0.x-dev"
 	},
 	"autoload": {
 		"psr-4": {
@@ -43,7 +44,8 @@
 	"minimum-stability": "stable",
 	"config": {
 		"allow-plugins": {
-			"symfony/thanks": true
+			"symfony/thanks": true,
+			"php-http/discovery": true
 		},
 		"platform": {
 			"php": "8.5"

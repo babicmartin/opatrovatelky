@@ -73,7 +73,7 @@ class TurnusRepository extends BaseRepository
 			ORDER BY $t." . TurnusTableMap::COL_ID . " DESC
 		";
 
-		$rows = array_values($this->database->query(
+		$rows = $this->database->query(
 			$sql,
 			$monthPrefix . '%',
 			$monthPrefix . '%',
@@ -81,7 +81,7 @@ class TurnusRepository extends BaseRepository
 			$lastDay,
 			$firstDay,
 			$firstDay,
-		)->fetchAll());
+		)->fetchAll();
 
 		return array_map(
 			static fn (Row $row): array => [
@@ -154,7 +154,7 @@ class TurnusRepository extends BaseRepository
 				AND $t." . TurnusTableMap::COL_STATUS . " < 30
 			ORDER BY $t." . TurnusTableMap::COL_ID . " DESC
 		";
-		$rows = array_values($this->database->query($sql)->fetchAll());
+		$rows = $this->database->query($sql)->fetchAll();
 
 		return array_map(
 			static fn (Row $row): array => [

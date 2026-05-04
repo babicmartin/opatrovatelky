@@ -1,0 +1,20 @@
+{varType string[] $letters}
+{varType ?string $selectedLetter}
+{varType array $routeParams}
+
+<div class="row my-3">
+	<div class="col">
+		<div class="btn-group border rounded-2" role="group">
+			<div class="bg-light px-3 fw-bold d-flex align-items-center">Začína na:</div>
+			{foreach $letters as $letter}
+				{var $lowerLetter = strtolower($letter)}
+				{var $isActive = $selectedLetter === $lowerLetter}
+				{var $params = $routeParams}
+				{if !$isActive}
+					{do $params['first-letter'] = $lowerLetter}
+				{/if}
+				<a href="{plink this, (expand) $params}" n:class="btn, $isActive ? btn-danger : btn-light">{$letter}</a>
+			{/foreach}
+		</div>
+	</div>
+</div>

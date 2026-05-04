@@ -11,6 +11,7 @@ enum Resource: string
 	case AGENCY = 'agency';
 	case WORKER = 'worker';
 	case PROJECT = 'project';
+	case FAMILY_MANAGEMENT = 'familyManagement';
 	case TURNUS = 'turnus';
 	case STATS = 'stats';
 	case USER_MANAGEMENT = 'userManagement';

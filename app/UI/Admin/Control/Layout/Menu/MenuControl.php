@@ -41,6 +41,10 @@ class MenuControl extends Control
 			'proposal' => ':Admin:Proposal:default',
 			'proposal-records' => ':Admin:Proposal:default',
 			'stats' => ':Admin:Stats:default',
+			'settings' => ':Admin:Settings:default',
+			'country' => ':Admin:Country:default',
+			'user-management' => ':Admin:UserManagement:default',
+			'translation' => ':Admin:Translation:default',
 			'missing-registry' => ':Admin:MissingRegistry:default',
 		];
 	}

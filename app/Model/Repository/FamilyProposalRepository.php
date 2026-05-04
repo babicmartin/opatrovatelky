@@ -69,7 +69,7 @@ class FamilyProposalRepository extends BaseRepository
 
 		return array_map(
 			[$this, 'mapListRow'],
-			array_values($this->database->query($sql, $itemsPerPage, $offset)->fetchAll()),
+			$this->database->query($sql, $itemsPerPage, $offset)->fetchAll(),
 		);
 	}
 
@@ -107,6 +107,64 @@ class FamilyProposalRepository extends BaseRepository
 			FamilyProposalTableMap::COL_DATE_PROPOSAL_SENDED => $this->normalizeDate($form->dateProposalSended),
 			FamilyProposalTableMap::COL_NOTICE => $form->notice,
 		]);
+	}
+
+	public function createForFamily(int $familyId, int $userId): int
+	{
+		$row = $this->insert([
+			FamilyProposalTableMap::COL_FAMILY_ID => $familyId,
+			FamilyProposalTableMap::COL_DATE_CREATED => date('Y-m-d'),
+			FamilyProposalTableMap::COL_USER_CREATED => $userId,
+		]);
+
+		if (!$row instanceof \Nette\Database\Table\ActiveRow) {
+			throw new \RuntimeException('Proposal row was not created.');
+		}
+
+		return (int) $row->{FamilyProposalTableMap::COL_ID};
+	}
+
+	/**
+	 * @return list<array<string, mixed>>
+	 */
+	public function findRowsByFamilyId(int $familyId): array
+	{
+		$p = FamilyProposalTableMap::TABLE_NAME;
+		$b = OpatrovatelkaTableMap::TABLE_NAME;
+		$status = StatusProposalTableMap::TABLE_NAME;
+
+		$sql = "
+			SELECT
+				$p." . FamilyProposalTableMap::COL_ID . " AS id,
+				$p." . FamilyProposalTableMap::COL_BABYSITTER_ID . " AS babysitter_id,
+				$p." . FamilyProposalTableMap::COL_DATE_PROPOSAL_SENDED . " AS date_proposal_sended,
+				$p." . FamilyProposalTableMap::COL_DATE_STARTING_WORK . " AS date_starting_work,
+				$p." . FamilyProposalTableMap::COL_NOTICE . " AS notice,
+				$status." . StatusProposalTableMap::COL_STATUS . " AS proposal_status,
+				$status." . StatusProposalTableMap::COL_COLOR . " AS proposal_status_color,
+				$b." . OpatrovatelkaTableMap::COL_NAME . " AS babysitter_name,
+				$b." . OpatrovatelkaTableMap::COL_SURNAME . " AS babysitter_surname
+			FROM $p
+			LEFT JOIN $status ON $status." . StatusProposalTableMap::COL_ID . " = $p." . FamilyProposalTableMap::COL_STATUS . "
+			LEFT JOIN $b ON $b." . OpatrovatelkaTableMap::COL_ID . " = $p." . FamilyProposalTableMap::COL_BABYSITTER_ID . "
+			WHERE $p." . FamilyProposalTableMap::COL_FAMILY_ID . " = ?
+				AND $p." . FamilyProposalTableMap::COL_DELETED . " = 0
+			ORDER BY $p." . FamilyProposalTableMap::COL_ID . " DESC
+		";
+
+		return array_map(
+			static fn (Row $row): array => [
+				'id' => (int) $row->id,
+				'babysitterId' => (int) ($row->babysitter_id ?? 0),
+				'status' => (string) ($row->proposal_status ?? ''),
+				'statusColor' => (string) ($row->proposal_status_color ?? ''),
+				'dateProposalSended' => self::formatDate((string) ($row->date_proposal_sended ?? '')),
+				'dateStartingWork' => self::formatDate((string) ($row->date_starting_work ?? '')),
+				'babysitterName' => trim((string) ($row->babysitter_name ?? '') . ' ' . (string) ($row->babysitter_surname ?? '')),
+				'notice' => (string) ($row->notice ?? ''),
+			],
+			$this->database->query($sql, $familyId)->fetchAll(),
+		);
 	}
 
 	/**

@@ -1,4 +1,211 @@
+{varType int $id}
+{varType array $family}
+{varType string $activeTab}
+{varType string $pageTitleText}
+{varType bool $canManageFamily}
+{varType bool $canOpenProposal}
+{varType bool $canOpenBabysitter}
+{varType bool $canOpenTurnus}
+{varType bool $canDeleteFamily}
+{varType array $turnusRows}
+{varType array $proposalRows}
+
+{block pageTitle}{$pageTitleText}{/block}
+
 {block content}
-	{varType int $id}
-	{* TODO: migrate legacy families-update page for ID {$id}. *}
+	{if $canManageFamily}
+		<a href="{plink :Admin:Family:update, id: $id, tab: 'main'}" class="btn btn-sm btn-success">Úvod</a>
+		<a href="{plink :Admin:Family:update, id: $id, tab: 'info'}" class="btn btn-sm btn-success">Základné informácie</a>
+		<a href="{plink :Admin:Family:update, id: $id, tab: 'proposals'}" class="btn btn-sm btn-success">Návrhy</a>
+		<a href="{plink :Admin:Family:update, id: $id, tab: 'contracts'}" class="btn btn-sm btn-success">Zmluvy</a>
+		<a href="{plink :Admin:Family:update, id: $id, tab: 'orders'}" class="btn btn-sm btn-success">Objednávky</a>
+
+		<div class="space20">&nbsp;</div>
+
+		{if $activeTab === 'main'}
+			<div class="row">
+				<div class="col-xl-2 col-md-12">
+					{include shortInfo}
+				</div>
+
+				<div class="col-xl-2 col-md-12">
+					{include infoForm}
+				</div>
+
+				<div class="col-xl-8 col-md-12">
+					<div style="border:1px solid #E2C2DA; padding:10px;">
+						<h3 style="font-size:18px; margin:0 0 15px;">{if (int) $family['type'] === 1}Evidencia opatrovania{else}Evidencia pracovných turnusov{/if}</h3>
+
+						<a href="{link createTurnus!, familyId: $id}" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;">Vytvoriť novú evidenciu</a>
+
+						{if count($turnusRows) > 0}
+							<div class="table-responsive">
+								<table class="table table-striped card-table table-vcenter text-nowrap">
+									<thead>
+										<tr class="thead">
+											<th class="tcenter">Od</th>
+											<th class="tcenter">Do</th>
+											<th class="tcenter">Status</th>
+											<th class="tcenter">Možnosti</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr n:foreach="$turnusRows as $turnus">
+											<td class="tcenter">{$turnus['dateFrom']}</td>
+											<td class="tcenter">{$turnus['dateTo']}</td>
+											<td class="tcenter"><span n:if="$turnus['status'] !== ''" class="badge" style="background-color:{$turnus['statusColor']|noescape}">{$turnus['status']}</span></td>
+											<td class="tcenter">
+												<a n:if="$canOpenTurnus" href="{plink :Admin:Turnus:update, id: $turnus['id']}" class="btn btn-success btn-sm">&gt;</a>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						{/if}
+					</div>
+				</div>
+			</div>
+		{elseif $activeTab === 'info'}
+			<div class="row">
+				<div class="col-xl-2 col-md-12">
+					{include shortInfo}
+				</div>
+				{form familyAddressForm}
+					<div class="col-xl-2 col-md-12">
+						<div style="border:1px solid #E2C2DA; padding:10px;">
+							<div n:if="(int) $family['type'] === 2" class="mb10">{label companyName class => 'inputLabel' /}{input companyName}</div>
+							<div class="mb10">{label name class => 'inputLabel' /}{input name}</div>
+							<div class="mb10">{label surname class => 'inputLabel' /}{input surname}</div>
+							<div class="mb10">{label street class => 'inputLabel' /}{input street}</div>
+						</div>
+					</div>
+					<div class="col-xl-2 col-md-12">
+						<div style="border:1px solid #E2C2DA; padding:10px;">
+							<div class="mb10">{label streetNumber class => 'inputLabel' /}{input streetNumber}</div>
+							<div class="mb10">{label psc class => 'inputLabel' /}{input psc}</div>
+							<div class="mb10">{label city class => 'inputLabel' /}{input city}</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-md-12">
+						<div style="border:1px solid #E2C2DA; padding:10px;">
+							<div class="mb10">{label billing class => 'inputLabel' /}{input billing}</div>
+							<div n:if="(int) $family['type'] === 2" class="mb10">{label employer class => 'inputLabel' /}{input employer}</div>
+							<div n:if="(int) $family['type'] === 2" class="mb10">{label accommodationAddress class => 'inputLabel' /}{input accommodationAddress}</div>
+							<div class="mb10">{label notice class => 'inputLabel' /}{input notice}</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-md-12">
+						<div style="border:1px solid #E2C2DA; padding:10px;">
+							<div class="mb10">{label personSurname class => 'inputLabel' /}{input personSurname}</div>
+							<div class="mb10">{label personName class => 'inputLabel' /}{input personName}</div>
+							<div class="mb10">{label personPhone class => 'inputLabel' /}{input personPhone}</div>
+							<div class="mb10">{label personEmail class => 'inputLabel' /}{input personEmail}</div>
+							<div class="mb10">{label patientPhone class => 'inputLabel' /}{input patientPhone}</div>
+							{input save}
+						</div>
+					</div>
+				{/form}
+			</div>
+		{elseif $activeTab === 'proposals'}
+			<div class="row">
+				<div class="col-xl-2 col-md-12">
+					{include shortInfo}
+				</div>
+				<div class="col-xl-10 col-md-12">
+					<div style="border:1px solid #E2C2DA; padding:10px;">
+						<h3 style="font-size:18px; margin:0 0 15px;">Návrhy opatrovateliek</h3>
+						<a href="{link createProposal!, familyId: $id}" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;">Vytvoriť nový návrh</a>
+						<div n:if="count($proposalRows) > 0" class="table-responsive">
+							<table class="table table-striped card-table table-vcenter text-nowrap">
+								<thead>
+									<tr class="thead">
+										<th class="tcenter">Status</th>
+										<th class="tcenter w90">Odoslaný návrh</th>
+										<th class="tcenter w90">Možný nástup</th>
+										<th class="tcenter">Opatrovateľka</th>
+										<th class="tcenter">Poznámka</th>
+										<th class="tcenter">Možnosti</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr n:foreach="$proposalRows as $proposal">
+										<td class="tcenter"><span n:if="$proposal['status'] !== ''" class="badge" style="background-color:{$proposal['statusColor']|noescape}">{$proposal['status']}</span></td>
+										<td class="tcenter">{$proposal['dateProposalSended']}</td>
+										<td class="tcenter">{$proposal['dateStartingWork']}</td>
+										<td class="tcenter">
+											<a n:if="$canOpenBabysitter && $proposal['babysitterId'] > 0" href="{plink :Admin:Babysitter:update, id: $proposal['babysitterId']}" class="filterLink">{$proposal['babysitterName']}</a>
+											<span n:if="!$canOpenBabysitter || $proposal['babysitterId'] <= 0">{$proposal['babysitterName']}</span>
+										</td>
+										<td>{$proposal['notice']}</td>
+										<td class="tcenter"><a n:if="$canOpenProposal" href="{plink :Admin:Proposal:update, id: $proposal['id']}" class="btn btn-success btn-sm">&gt;</a></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		{elseif $activeTab === 'contracts'}
+			<div class="row">
+				<div class="col-xl-2 col-md-12">
+					{include shortInfo}
+				</div>
+				<div class="col-xl-10 col-md-12">
+					{control familyContractsDocuments}
+				</div>
+			</div>
+		{elseif $activeTab === 'orders'}
+			<div class="row">
+				<div class="col-xl-2 col-sm-12">
+					{include shortInfo}
+				</div>
+				<div class="col-xl-10 col-md-12">
+					{control familyOrdersDocuments}
+				</div>
+			</div>
+		{/if}
+	{/if}
+{/block}
+
+{define shortInfo}
+	<div style="border:1px solid #E2C2DA; padding:10px;">
+		{form familyShortInfoForm}
+			<div class="mb10">{label displayName class => 'inputLabel' /}{input displayName}</div>
+			<div class="mb10">{label clientNumber class => 'inputLabel' /}{input clientNumber}</div>
+			<div n:if="(int) $family['type'] === 2" class="mb10">{label deProjectNumber class => 'inputLabel' /}{input deProjectNumber}</div>
+			<div class="mb10">{label state class => 'inputLabel' /}{input state}</div>
+			{input save}
+		{/form}
+	</div>
+
+	<div n:if="$canDeleteFamily" style="border:1px solid #E2C2DA; padding:10px; margin-top:20px;">
+		<h3 style="font-size:18px; margin:0 0 15px;">Vymazať rodinu</h3>
+		<a href="{link delete!, familyId: $id}" class="btn btn-danger btn-sm">Vymazať</a>
+	</div>
+{/define}
+
+{define infoForm}
+	<div style="border:1px solid #E2C2DA; padding:10px;">
+		{form familyInfoForm}
+			<div class="mb10">{label type class => 'inputLabel' /}{input type}</div>
+			<div class="mb10">{label partnerId class => 'inputLabel' /}{input partnerId}</div>
+			<div class="mb10">{label acquiredByUserId class => 'inputLabel' /}{input acquiredByUserId}</div>
+			<div class="mb10">{label userId class => 'inputLabel' /}{input userId}</div>
+			<div class="mb10">{label status class => 'inputLabel' /}{input status}</div>
+			<div class="mb10">{label phone class => 'inputLabel' /}{input phone}</div>
+			<div class="mb10">{label dateStart class => 'inputLabel' /}{input dateStart}</div>
+			<div class="mb10">{label dateTo class => 'inputLabel' /}{input dateTo}</div>
+			<div class="mb10">{label orderStatus class => 'inputLabel' /}{input orderStatus}</div>
+			<div class="mb10">{label contractStatus class => 'inputLabel' /}{input contractStatus}</div>
+			<div n:if="(int) $family['type'] === 2" class="mb10">{label workStatusStaff class => 'inputLabel' /}{input workStatusStaff}</div>
+			<div n:if="(int) $family['type'] === 2" class="mb10">{label projectDescription class => 'inputLabel' /}{input projectDescription}</div>
+			<div n:if="(int) $family['type'] === 2" class="mb10">{label projectPositions class => 'inputLabel' /}{input projectPositions}</div>
+			<div n:if="(int) $family['type'] === 2" class="mb10">{label projectAvailablePositions class => 'inputLabel' /}{input projectAvailablePositions}</div>
+			{input save}
+		{/form}
+	</div>
+{/define}
+
+{block scripts}
+	<script src="{$basePath}/js/autosaveForm.js"></script>
 {/block}

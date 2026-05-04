@@ -1,0 +1,22 @@
+{block pageTitle}Preklady profilu{/block}
+
+{block content}
+{varType list<array{id:int,slovak:string,german:string}> $translations}
+
+	<div class="row">
+		<div class="col-lg-3" n:foreach="$translations as $translation">
+			{form "translationForm-$translation[id]"}
+				<div class="mb10">
+					{label german class => 'inputLabel' /}
+					{input german}
+					{input save}
+				</div>
+			{/form}
+		</div>
+	</div>
+{/block}
+
+{block scripts}
+	{include parent}
+	<script src="{$basePath}/js/autosaveForm.js"></script>
+{/block}

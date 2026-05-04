@@ -1,0 +1,117 @@
+{block pageTitle}Profil používateľa{/block}
+
+{block content}
+{varType array{name:string,secondName:string,acronym:string,email:string,color:string,permission:int,active:int} $profileUser}
+{varType string $imagePath}
+{varType bool $canEditAccess}
+
+<div class="row">
+	<div class="col-3">
+		<div class="divone">
+			<div>
+				{form userProfileUpdateForm}
+					<ul class="alert alert-danger" n:ifcontent>
+						<li n:foreach="$form->ownErrors as $error">{$error}</li>
+					</ul>
+					<div class="mb10">
+						{label name class => 'inputLabel' /}
+						{input name}
+						<div class="text-danger fs-12" n:ifcontent>{inputError name}</div>
+					</div>
+					<div class="mb10">
+						{label secondName class => 'inputLabel' /}
+						{input secondName}
+						<div class="text-danger fs-12" n:ifcontent>{inputError secondName}</div>
+					</div>
+					<div class="mb10">
+						{label acronym class => 'inputLabel' /}
+						{input acronym}
+						<div class="text-danger fs-12" n:ifcontent>{inputError acronym}</div>
+					</div>
+					<div class="mb10">
+						{label email class => 'inputLabel' /}
+						{input email}
+						<div class="text-danger fs-12" n:ifcontent>{inputError email}</div>
+					</div>
+					<div class="mb10">
+						{label color class => 'inputLabel' /}
+						{input color}
+						<div class="text-danger fs-12" n:ifcontent>{inputError color}</div>
+					</div>
+					{input save}
+				{/form}
+			</div>
+		</div>
+	</div>
+
+	<div class="col-3">
+		<div class="divone">
+			<div>
+				{if $canEditAccess && $user->isAllowed('userManagement')}
+					{form userAccessUpdateForm}
+						<div class="mb10">
+							{label permission class => 'inputLabel' /}
+							{input permission}
+						</div>
+						<div class="mb10">
+							{label active class => 'inputLabel' /}
+							{input active}
+						</div>
+						{input save}
+					{/form}
+				{/if}
+			</div>
+		</div>
+
+		<div class="divone" style="margin-top:40px;">
+			<div>
+				<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">Nastavenie hesla</div>
+				{form userPasswordUpdateForm}
+					<ul class="alert alert-danger" n:ifcontent>
+						<li n:foreach="$form->ownErrors as $error">{$error}</li>
+					</ul>
+					<div class="mb10">
+						{label password class => 'inputLabel' /}
+						{input password}
+						<div class="text-danger fs-12" n:ifcontent>{inputError password}</div>
+					</div>
+					<div class="mb10">
+						{label passwordRepeat class => 'inputLabel' /}
+						{input passwordRepeat}
+						<div class="text-danger fs-12" n:ifcontent>{inputError passwordRepeat}</div>
+					</div>
+					{input save}
+				{/form}
+			</div>
+		</div>
+	</div>
+
+	<div class="col-3">
+		<div class="divone">
+			<div>
+				<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">Profilový obrázok</div>
+				<img src="{$basePath}/{$imagePath}" alt="Profilový obrázok" style="max-width:120px; max-height:120px;">
+
+				<div style="font-weight:bold; font-size:16px; margin-top:20px;">Upraviť obrázok</div>
+				<div style="font-size:12px; margin-bottom:10px;">Iba obrázky typu .png, .jpg</div>
+
+				{form userImageUpdateForm}
+					<ul class="alert alert-danger" n:ifcontent>
+						<li n:foreach="$form->ownErrors as $error">{$error}</li>
+					</ul>
+					<div class="mb10">
+						{input image}
+						<div class="text-danger fs-12" n:ifcontent>{inputError image}</div>
+					</div>
+					{input save}
+				{/form}
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+{block scripts}
+	{include parent}
+	<script src="{$basePath}/js/autosaveForm.js"></script>
+{/block}

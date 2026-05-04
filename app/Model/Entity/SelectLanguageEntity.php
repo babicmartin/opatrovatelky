@@ -10,7 +10,7 @@ class SelectLanguageEntity extends BaseEntity
         public readonly int $id,
         public ?string $slovak,
         public ?string $german,
-        public ?string $stars,
+        public ?int $stars,
     ) {
     }
 

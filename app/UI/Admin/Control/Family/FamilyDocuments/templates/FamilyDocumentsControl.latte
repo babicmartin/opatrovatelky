@@ -1,0 +1,62 @@
+{varType string $title}
+{varType array $documents}
+{varType array $statusOptions}
+{varType string $documentBasePath}
+{varType string $typeImageBasePath}
+{varType bool $canManageFamily}
+
+{if $canManageFamily}
+	<div style="border:1px solid #E2C2DA; padding:10px; margin-bottom:20px;">
+		{if $title !== ''}
+			<h3 style="font-size:18px; margin:0 0 15px;">{$title}</h3>
+		{/if}
+		{foreach $documents as $document}
+			<div class="overflow space20">
+				<div style="width:60px;">
+					<a href="{$basePath}/{$documentBasePath}/{$document['name']}" target="_blank">
+						<img src="{$basePath}/{$typeImageBasePath}/{$document['type']}.png" style="height:60px; float:left; margin-right:10px;" alt="">
+					</a>
+				</div>
+
+				{form "documentForm-$document[id]"}
+					<div style="margin-right:10px; float:left; width:25%;">
+						{label notice /}
+						{input notice}
+					</div>
+					<div style="margin-right:10px; float:left; width:15%;">
+						{label validFrom /}
+						{input validFrom}
+					</div>
+					<div style="margin-right:10px; float:left; width:15%;">
+						{label validTo /}
+						{input validTo}
+					</div>
+					<div style="margin-right:10px; float:left; width:15%;">
+						{label status /}
+						{input status}
+					</div>
+					{input save}
+				{/form}
+
+				<div style="margin-right:10px; float:left; width:10%; padding-top:8px;">
+					<div style="font-weight:bold; font-size:16px;">Nahral</div>
+					<span n:if="$document['userAcronym'] !== ''" style="background:{$document['userColor']|noescape}; color:#fff; padding:3px 5px;">{$document['userAcronym']}</span>
+				</div>
+				<div style="margin-right:10px; float:right; width:5%; padding-top:25px;">
+					<a href="{link delete!, id: $document['id']}" title="Odstrániť">
+						<img src="{$basePath}/img/icons/x.png" style="height:30px; cursor:pointer" alt="Odstrániť">
+					</a>
+				</div>
+			</div>
+		{/foreach}
+
+		<div id="error" class="space20" style="color:red; font-weight:bold;"></div>
+		<div>
+			{form uploadForm}
+				{input fileAll}
+				{input upload}
+			{/form}
+		</div>
+		<div class="space20"></div>
+	</div>
+{/if}

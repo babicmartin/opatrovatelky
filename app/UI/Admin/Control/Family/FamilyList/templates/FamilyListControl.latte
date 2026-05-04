@@ -1,0 +1,69 @@
+{varType array $rows}
+{varType App\Model\Utils\Paginator\Paginator $paginator}
+
+{define statusBadge, string $label, string $color}
+	<span n:if="$label !== ''" class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$label}</span>
+{/define}
+
+{define countryImage, string $image}
+	<span class="header-avatar1">
+		<img n:if="$image !== ''" src="{$basePath}/img/country/{$image}" alt="img" style="height:20px; width:auto;" class="">
+		<img n:if="$image === ''" src="{$basePath}/img/empty.jpg" alt="img" style="width:20px; height:20px" class="">
+	</span>
+{/define}
+
+{define userBadge, string $label, string $color}
+	<span n:if="$label !== ''" class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$label}</span>
+{/define}
+
+<div n:if="$rows !== []" class="tableone">
+	<div class="tableone-header">
+		<h3 class="tableone-title">Zoznam rodín</h3>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped card-table table-vcenter text-nowrap">
+			<thead>
+				<tr class="thead">
+					<th class="tcenter w50">Číslo klienta</th>
+					<th>Priezvisko, meno</th>
+					<th class="tcenter w50">Národnosť</th>
+					<th class="tcenter">Email</th>
+					<th class="tcenter" style="max-width:150px;">Partner</th>
+					<th class="tcenter">Spravuje</th>
+					<th class="tcenter">Status</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr n:foreach="$rows as $row">
+					<td class="tcenter">{$row['clientNumber']}</td>
+					<td><a href="{plink :Admin:Family:update, id: $row['id']}" class="titleLink">{$row['surname']} {$row['name']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:default, country: $row['countryId']}">{include countryImage, $row['countryImage']}</a></td>
+					<td class="tcenter"><a href="mailto:{$row['personEmail']}" class="filterLink">{$row['personEmail']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:default, partner: $row['partnerId']}" class="filterLink">{$row['partnerName']|truncate:20,''}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:default, user: $row['userId']}" class="filterLink">{include userBadge, $row['userAcronym'], $row['userColor']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:default, status: $row['statusId']}" class="filterLink">{include statusBadge, $row['statusLabel'], $row['statusColor']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Family:update, id: $row['id']}" class="btn btn-success btn-sm">Upraviť</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div n:if="$rows === []" class="tableone">
+	<div class="tableone-header">
+		<h3 class="tableone-title">Zoznam rodín</h3>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped card-table table-vcenter text-nowrap">
+			<tbody>
+				<tr>
+					<td class="tcenter">Žiadne rodiny.</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="space20"></div>
+{include '../../../../templates/components/paginator.latte', paginator: $paginator}

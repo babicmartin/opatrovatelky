@@ -33,6 +33,8 @@ final class AuthorizatorFactory
 			}
 		}
 
+		$acl->allow(UserRole::CEO->value, Resource::FAMILY_MANAGEMENT->value);
+
 		foreach ($this->pageRepository->getAll() as $page) {
 			$url = $page->url;
 			$permission = $page->permission;
@@ -46,6 +48,10 @@ final class AuthorizatorFactory
 
 			$role = UserRole::fromPermissionId($permission);
 			$acl->allow($role->value, $url);
+
+			if ($url === 'user-management') {
+				$acl->allow($role->value, Resource::USER_MANAGEMENT->value);
+			}
 		}
 
 		return $acl;

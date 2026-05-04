@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Model\Entity;
 
+use DateTimeImmutable;
+
 class AgencyEntity extends BaseEntity
 {
     public function __construct(
@@ -13,15 +15,15 @@ class AgencyEntity extends BaseEntity
         public ?string $streetNumber,
         public ?string $psc,
         public ?string $city,
-        public ?string $state,
+        public ?int $state,
         public ?string $ico,
         public ?string $icDph,
         public ?string $web,
         public ?string $phone,
         public ?string $email,
-        public ?string $dateStart,
-        public ?string $status,
-        public ?string $active,
+        public ?DateTimeImmutable $dateStart,
+        public ?int $status,
+        public ?int $active,
         public ?string $personName,
         public ?string $personSurname,
         public ?string $notice,

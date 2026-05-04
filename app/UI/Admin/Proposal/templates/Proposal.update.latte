@@ -3,11 +3,11 @@
 {block pageTitle}Detail návrhu{/block}
 
 {block content}
-	<a href="{plink :Admin:Family:update, id: $proposal['familyId']}" class="btn btn-sm btn-success">Úvod</a>
-	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], address: 1}" class="btn btn-sm btn-success">Základné informácie</a>
-	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], proposal: 1}" class="btn btn-sm btn-success">Návrhy</a>
-	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], contract: 1}" class="btn btn-sm btn-success">Zmluvy</a>
-	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], order: 1}" class="btn btn-sm btn-success">Objednávky</a>
+	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], tab: 'main'}" class="btn btn-sm btn-success">Úvod</a>
+	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], tab: 'info'}" class="btn btn-sm btn-success">Základné informácie</a>
+	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], tab: 'proposals'}" class="btn btn-sm btn-success">Návrhy</a>
+	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], tab: 'contracts'}" class="btn btn-sm btn-success">Zmluvy</a>
+	<a href="{plink :Admin:Family:update, id: $proposal['familyId'], tab: 'orders'}" class="btn btn-sm btn-success">Objednávky</a>
 
 	<div class="space20"></div>
 	{form proposalUpdateForm}

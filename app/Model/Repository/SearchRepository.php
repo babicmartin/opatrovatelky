@@ -106,7 +106,7 @@ class SearchRepository
 				'statusColor' => (string) ($row->status_color ?? ''),
 				'image' => (string) ($row->image ?? ''),
 			],
-			array_values($this->database->query($sql, $like, $like, $like)->fetchAll()),
+			$this->database->query($sql, $like, $like, $like)->fetchAll(),
 		);
 	}
 
@@ -175,7 +175,7 @@ class SearchRepository
 				'statusLabel' => (string) ($row->status_label ?? ''),
 				'statusColor' => (string) ($row->status_color ?? ''),
 			],
-			array_values($this->database->query($sql, ...$params)->fetchAll()),
+			$this->database->query($sql, ...$params)->fetchAll(),
 		);
 	}
 
@@ -217,7 +217,7 @@ class SearchRepository
 				'statusColor' => (string) ($row->status_color ?? ''),
 				'type' => $agency ? 'agency' : 'partner',
 			],
-			array_values($this->database->query($sql, $like, $like)->fetchAll()),
+			$this->database->query($sql, $like, $like)->fetchAll(),
 		);
 	}
 

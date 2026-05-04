@@ -12,7 +12,7 @@ class CountryEntity extends BaseEntity
         public ?string $country,
         public ?string $german,
         public ?string $image,
-        public ?string $active,
+        public ?int $active,
     ) {
     }
 

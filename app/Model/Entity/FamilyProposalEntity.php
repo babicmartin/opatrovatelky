@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Model\Entity;
 
+use DateTimeImmutable;
+
 class FamilyProposalEntity extends BaseEntity
 {
     public function __construct(
         public readonly int $id,
-        public ?string $familyId,
-        public ?string $babysitterId,
-        public ?string $dateStartingWork,
-        public ?string $dateProposalSended,
-        public ?string $status,
+        public ?int $familyId,
+        public ?int $babysitterId,
+        public ?DateTimeImmutable $dateStartingWork,
+        public ?DateTimeImmutable $dateProposalSended,
+        public ?int $status,
         public ?string $notice,
-        public ?string $userCreated,
-        public ?string $dateCreated,
-        public ?string $deleted,
+        public ?int $userCreated,
+        public ?DateTimeImmutable $dateCreated,
+        public ?int $deleted,
     ) {
     }
 

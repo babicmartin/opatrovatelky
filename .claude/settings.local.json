@@ -36,8 +36,14 @@
       "Read(//tmp/**)",
       "Bash(grep -oP 'class=\"[^\"]*tracy-bs[^\"]*\"[^>]*>[^<]{0,200}' /tmp/admin_home.html)",
       "Bash(grep -oP '<h1[^>]*>[^<]{0,200}' /tmp/admin_home.html)",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Bash(C:/wamp64/bin/php/php8.5.0/php.exe *)",
+      "Bash(C:\\\\wamp64\\\\bin\\\\mariadb\\\\mariadb11.4.9\\\\bin\\\\mysqldump.exe *)",
+      "Read(//c/Users/marti/.claude/**)"
     ]
   },
+  "enabledMcpjsonServers": [
+    "nette-inspector"
+  ],
   "hooks": {}
 }

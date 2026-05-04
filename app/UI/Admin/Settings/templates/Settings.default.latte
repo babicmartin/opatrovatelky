@@ -1,0 +1,8 @@
+{block pageTitle}Nastavenia{/block}
+
+{block content}
+	<a n:if="$user->isAllowed('missing-registry')" href="{plink :Admin:MissingRegistry:default}" class="btn btn-success btn-sm">Evidencia neprítomnosti</a>
+	<a n:if="$user->isAllowed('country')" href="{plink :Admin:Country:default}" class="btn btn-success btn-sm">Správa krajín</a>
+	<a n:if="$user->isAllowed('userManagement')" href="{plink :Admin:UserManagement:default}" class="btn btn-success btn-sm">Správa užívateľov</a>
+	<a n:if="$user->isAllowed('translation')" href="{plink :Admin:Translation:default}" class="btn btn-success btn-sm">Preklady profilu</a>
+{/block}

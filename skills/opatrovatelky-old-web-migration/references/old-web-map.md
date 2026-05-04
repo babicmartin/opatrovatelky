@@ -32,6 +32,8 @@ The old CRM uses simple `?page=` routing through `index.php`, Router, Controller
 
 Proposal records note: the `Možnosti` button in `template/pages/proposal-records.php` links to `?page=proposal-update&id={proposal.id}`. When migrating the list, keep this as `Admin:Proposal:update`, not `Admin:Family:update`.
 
+Migration note: `settings`, `country`/`country-update`, `translation`, and `user-management`/`user-management-update` are migrated in the new admin. `settings` is a link hub to `MissingRegistry`, `Country`, `UserManagement`, and `Translation`. `UserManagement:update` without `id` edits the current user; editing other users is restricted to CEO/admin, with admin accounts/admin permission protected for admin only.
+
 ## Detail Tabs
 
 Babysitter update subtemplates live in `template/pages/babysitters/`:

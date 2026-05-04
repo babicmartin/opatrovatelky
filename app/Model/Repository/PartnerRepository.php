@@ -36,7 +36,7 @@ class PartnerRepository extends BaseRepository
 			ORDER BY $p." . PartnerTableMap::COL_ID . " DESC
 		";
 
-		$rows = array_values($this->database->query($sql, self::ACTIVE_FAMILY_STATUS)->fetchAll());
+		$rows = $this->database->query($sql, self::ACTIVE_FAMILY_STATUS)->fetchAll();
 
 		return array_map(
 			static fn (Row $row): array => [

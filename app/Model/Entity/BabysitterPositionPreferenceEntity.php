@@ -8,8 +8,8 @@ class BabysitterPositionPreferenceEntity extends BaseEntity
 {
     public function __construct(
         public readonly int $id,
-        public ?string $babysitterId,
-        public ?string $workPositionId,
+        public ?int $babysitterId,
+        public ?int $workPositionId,
     ) {
     }
 

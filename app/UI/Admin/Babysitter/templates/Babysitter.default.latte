@@ -1,6 +1,9 @@
-{varType ?int $status}
-{varType ?int $country}
+{varType ?int $page}
+{varType ?string $firstLetter}
+
+{block pageTitle}Zoznam opatrovateliek{/block}
 
 {block content}
-	{* TODO: migrate legacy opatrovatelky list page. Active filters: status={$status}, country={$country}. *}
+	{control alphabetFilter}
+	{control babysitterList}
 {/block}

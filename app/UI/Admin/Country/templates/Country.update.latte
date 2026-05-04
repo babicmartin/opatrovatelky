@@ -1,0 +1,50 @@
+{block pageTitle}Úprava krajiny{/block}
+
+{block content}
+{varType array{id:int,name:string,german:string,image:string,active:int} $country}
+{varType ?string $imagePath}
+
+	<div class="row">
+		<div class="col-3">
+			<div class="divone">
+				{form countryUpdateForm}
+					<div class="mb10">
+						{label name class => 'inputLabel' /}
+						{input name}
+					</div>
+					<div class="mb10">
+						{label german class => 'inputLabel' /}
+						{input german}
+					</div>
+					{input save}
+				{/form}
+			</div>
+		</div>
+
+		<div class="col-3">
+			<div class="divone">
+				<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">Obrázok</div>
+				<img n:if="$imagePath !== null" src="{$basePath}/{$imagePath}" alt="" style="height:60px; width:auto;" class="rectangle">
+
+				<div style="font-weight:bold; font-size:16px; margin-top:20px;">Upraviť obrázok</div>
+				<div style="font-size:12px; margin-bottom:10px;">Iba obrázky typu .png, .jpg</div>
+
+				{form countryImageUpdateForm}
+					<ul class="alert alert-danger" n:ifcontent>
+						<li n:foreach="$form->ownErrors as $error">{$error}</li>
+					</ul>
+					<div class="mb10">
+						{input image}
+						<div class="text-danger fs-12" n:ifcontent>{inputError image}</div>
+					</div>
+					{input save}
+				{/form}
+			</div>
+		</div>
+	</div>
+{/block}
+
+{block scripts}
+	{include parent}
+	<script src="{$basePath}/js/autosaveForm.js"></script>
+{/block}

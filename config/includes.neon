@@ -23,3 +23,7 @@ includes:
     - control/statsOverview.neon
     - control/missingRegistryList.neon
     - control/proposalList.neon
+    - control/alphabetFilter.neon
+    - control/familyList.neon
+    - control/familyDocuments.neon
+    - control/babysitterList.neon

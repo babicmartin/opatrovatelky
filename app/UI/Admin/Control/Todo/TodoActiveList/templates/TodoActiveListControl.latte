@@ -1,0 +1,85 @@
+{varType list $rows}
+{varType bool $canManage}
+
+{define statusBadge, string $label, string $color}
+	<span n:if="$label !== ''" class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$label}</span>
+{/define}
+
+{define userAcronym, string $acronym, string $color}
+	<span n:if="$acronym !== ''" class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$acronym}</span>
+{/define}
+
+<div n:if="$rows !== []" class="tableone">
+	<div class="tableone-header">
+		<h3 class="tableone-title">Zoznam úloh</h3>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped card-table table-vcenter text-nowrap">
+			<thead>
+				<tr class="thead">
+					<th class="tcenter">Názov úlohy</th>
+					<th class="tcenter">Rodina</th>
+					<th class="tcenter">Opatrovateľka</th>
+					<th class="tcenter w50">Vytvoril</th>
+					<th class="tcenter w90">Spracováva</th>
+					<th class="tcenter">Dátum vytvorenia</th>
+					<th class="tcenter">Deadline</th>
+					<th class="tcenter">Status</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr n:foreach="$rows as $row">
+					<td class="tcenter w300 text-wrap">{$row['title']}</td>
+					<td class="tcenter">
+						{if $row['familyId'] === 0 && $row['babysitterId'] === 0}
+							4MS
+						{/if}
+						{if $row['familyId'] > 0}
+							<a href="{plink :Admin:Family:update, id: $row['familyId']}" class="titleLink">
+								{$row['familySurname']}, {$row['familyClientNumber']}
+							</a>
+						{/if}
+					</td>
+					<td class="tcenter">
+						{if $row['babysitterId'] > 0}
+							<a href="{plink :Admin:Babysitter:update, id: $row['babysitterId']}" class="titleLink">
+								{$row['babysitterSurname']}, {$row['babysitterClientNumber']}
+							</a>
+						{/if}
+					</td>
+					<td class="tcenter">{include userAcronym, $row['fromUserAcronym'], $row['fromUserColor']}</td>
+					<td class="tcenter">
+						{if $row['toUser1Id'] > 0}{include userAcronym, $row['toUser1Acronym'], $row['toUser1Color']}{/if}
+						{if $row['toUser2Id'] > 0}, {include userAcronym, $row['toUser2Acronym'], $row['toUser2Color']}{/if}
+					</td>
+					<td class="tcenter">{$row['createdDate']}</td>
+					<td class="tcenter">{$row['deadlineDate']}</td>
+					<td class="tcenter">
+						<a href="{plink :Admin:Todo:default, status: $row['statusId']}" class="filterLink">
+							{include statusBadge, $row['statusLabel'], $row['statusColor']}
+						</a>
+					</td>
+					<td class="tcenter">
+						<a n:if="$canManage" href="{plink :Admin:Todo:update, id: $row['id']}" class="btn btn-success btn-sm">Upraviť</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div n:if="$rows === []" class="tableone">
+	<div class="tableone-header">
+		<h3 class="tableone-title">Zoznam úloh</h3>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped card-table table-vcenter text-nowrap">
+			<tbody>
+				<tr>
+					<td class="tcenter">Žiadne úlohy.</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

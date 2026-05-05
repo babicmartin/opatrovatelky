@@ -84,13 +84,13 @@ class TurnusRepository extends BaseRepository
 		)->fetchAll();
 
 		return array_map(
-			static fn (Row $row): array => [
+			fn (Row $row): array => [
 				'id' => (int) $row->id,
 				'statusId' => (int) $row->status_id,
 				'status' => (string) ($row->status ?? ''),
 				'statusColor' => (string) ($row->status_color ?? ''),
-				'dateFrom' => self::formatDate((string) ($row->date_from ?? '')),
-				'dateTo' => self::formatDate((string) ($row->date_to ?? '')),
+				'dateFrom' => $this->dateService->tryCreateFromDb((string) ($row->date_from ?? '')),
+				'dateTo' => $this->dateService->tryCreateFromDb((string) ($row->date_to ?? '')),
 				'familyId' => (int) $row->family_id,
 				'familyName' => trim((string) ($row->family_name ?? '') . ' ' . (string) ($row->family_surname ?? '')),
 				'babysitterId' => (int) $row->babysitter_id,
@@ -221,8 +221,8 @@ class TurnusRepository extends BaseRepository
 				'id' => (int) $row->id,
 				'babysitterId' => (int) $row->babysitter_id,
 				'familyId' => (int) $row->family_id,
-				'dateFrom' => self::formatDate((string) ($row->date_from ?? '')),
-				'dateTo' => self::formatDate((string) ($row->date_to ?? '')),
+				'dateFrom' => $this->dateService->tryCreateFromDb((string) ($row->date_from ?? '')),
+				'dateTo' => $this->dateService->tryCreateFromDb((string) ($row->date_to ?? '')),
 				'familyName' => trim((string) ($row->family_name ?? '') . ' ' . (string) ($row->family_surname ?? '')),
 				'babysitterName' => trim((string) ($row->babysitter_name ?? '') . ' ' . (string) ($row->babysitter_surname ?? '')),
 				'countryImage' => (string) ($row->country_image ?? ''),
@@ -240,20 +240,6 @@ class TurnusRepository extends BaseRepository
 			&& in_array((int) $row->invoice_status_id, self::UNPAID_INVOICE_STATUSES, true)
 			&& !in_array((int) $row->status_id, self::UNPAID_INVOICE_EXCLUDED_TURNUS_STATUSES, true)
 			&& (int) $row->family_state === self::GERMANY_COUNTRY_ID;
-	}
-
-	private static function formatDate(string $date): string
-	{
-		if ($date === '' || $date === '0000-00-00') {
-			return '';
-		}
-
-		$parts = explode('-', substr($date, 0, 10));
-		if (count($parts) !== 3) {
-			return '';
-		}
-
-		return $parts[2] . '.' . $parts[1] . '.' . $parts[0];
 	}
 
 	private static function truncate(string $value, int $length): string

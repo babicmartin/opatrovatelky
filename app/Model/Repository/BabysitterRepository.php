@@ -77,7 +77,7 @@ class BabysitterRepository extends BaseRepository
 			'pohlavie' => (int) ($row->{OpatrovatelkaTableMap::COL_POHLAVIE} ?? 0),
 			'country' => (int) ($row->{OpatrovatelkaTableMap::COL_COUNTRY} ?? 0),
 			'status' => (int) ($row->{OpatrovatelkaTableMap::COL_STATUS} ?? 0),
-			'birthday' => self::formatDate((string) ($row->{OpatrovatelkaTableMap::COL_BIRTHDAY} ?? '')),
+			'birthday' => $this->dateService->tryCreateFromDb((string) ($row->{OpatrovatelkaTableMap::COL_BIRTHDAY} ?? '')),
 			'image' => (string) ($row->{OpatrovatelkaTableMap::COL_IMAGE} ?? ''),
 			'smoker' => (int) ($row->{OpatrovatelkaTableMap::COL_SMOKER} ?? 0),
 			'height' => (string) ($row->{OpatrovatelkaTableMap::COL_HEIGHT} ?? ''),
@@ -126,7 +126,7 @@ class BabysitterRepository extends BaseRepository
 	}
 
 	/**
-	 * @return list<array{id:int,clientNumber:string,name:string,surname:string,birthday:?string,age:?int,
+	 * @return list<array{id:int,clientNumber:string,name:string,surname:string,birthday:?\DateTimeImmutable,age:?int,
 	 *     pohlavieId:int,pohlavieLabel:string,countryId:int,countryImage:string,
 	 *     agencyId:int,agencyName:string,statusId:int,statusLabel:string,statusColor:string,
 	 *     image:string}>
@@ -234,8 +234,8 @@ class BabysitterRepository extends BaseRepository
 		$rows = $this->database->query($sql, ...$queryParams)->fetchAll();
 
 		return array_map(
-			static function ($row): array {
-				$birthday = $row->birthday !== null ? (string) $row->birthday : null;
+			function ($row): array {
+				$birthday = $this->dateService->tryCreateFromDb($row->birthday !== null ? (string) $row->birthday : null);
 
 				return [
 					'id' => (int) $row->id,
@@ -538,7 +538,7 @@ class BabysitterRepository extends BaseRepository
 		$this->update($form->id, [
 			OpatrovatelkaTableMap::COL_NAME => $form->name,
 			OpatrovatelkaTableMap::COL_SURNAME => $form->surname,
-			OpatrovatelkaTableMap::COL_BIRTHDAY => $this->normalizeDate($form->birthday),
+			OpatrovatelkaTableMap::COL_BIRTHDAY => $form->birthday?->format('Y-m-d'),
 			OpatrovatelkaTableMap::COL_POHLAVIE => $form->pohlavie,
 			OpatrovatelkaTableMap::COL_COUNTRY => $form->country,
 			OpatrovatelkaTableMap::COL_CITY => $form->city,
@@ -674,12 +674,12 @@ class BabysitterRepository extends BaseRepository
 		";
 
 		return array_map(
-			static fn (Row $row): array => [
+			fn (Row $row): array => [
 				'id' => (int) $row->id,
 				'familyId' => (int) ($row->family_id ?? 0),
 				'babysitterId' => (int) ($row->babysitter_id ?? 0),
-				'dateFrom' => self::formatDate((string) ($row->date_from ?? '')),
-				'dateTo' => self::formatDate((string) ($row->date_to ?? '')),
+				'dateFrom' => $this->dateService->tryCreateFromDb((string) ($row->date_from ?? '')),
+				'dateTo' => $this->dateService->tryCreateFromDb((string) ($row->date_to ?? '')),
 				'status' => (string) ($row->status ?? ''),
 				'statusColor' => (string) ($row->status_color ?? ''),
 				'familyName' => trim((string) ($row->family_name ?? '') . ' ' . (string) ($row->family_surname ?? '')),
@@ -691,19 +691,13 @@ class BabysitterRepository extends BaseRepository
 		);
 	}
 
-	private static function computeAge(?string $birthday): ?int
+	private static function computeAge(?\DateTimeImmutable $birthday): ?int
 	{
-		if ($birthday === null || $birthday === '' || $birthday === '0000-00-00') {
+		if ($birthday === null) {
 			return null;
 		}
 
-		try {
-			$birth = new \DateTimeImmutable($birthday);
-		} catch (\Exception) {
-			return null;
-		}
-
-		return (int) $birth->diff(new \DateTimeImmutable('today'))->format('%y');
+		return (int) $birthday->diff(new \DateTimeImmutable('today'))->format('%y');
 	}
 
 	/**
@@ -746,32 +740,4 @@ class BabysitterRepository extends BaseRepository
 		}
 	}
 
-	private static function formatDate(string $date): string
-	{
-		if ($date === '' || $date === '0000-00-00' || $date === '-0001-11-30 00:00:00') {
-			return '';
-		}
-
-		$parts = explode('-', substr($date, 0, 10));
-		if (count($parts) !== 3) {
-			return '';
-		}
-
-		return $parts[2] . '.' . $parts[1] . '.' . $parts[0];
-	}
-
-	private function normalizeDate(string $date): ?string
-	{
-		$date = trim($date);
-		if ($date === '') {
-			return null;
-		}
-
-		$parts = explode('.', $date);
-		if (count($parts) !== 3) {
-			return null;
-		}
-
-		return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
-	}
 }

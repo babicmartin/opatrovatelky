@@ -5,6 +5,7 @@ namespace App\Model\Repository;
 use App\Model\Factory\BaseFactory;
 use App\Model\Factory\TranslateFactory;
 use App\Model\Table\TranslateTableMap;
+use App\Model\Utils\Date\DateService;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
 
@@ -12,9 +13,10 @@ class TranslateRepository extends BaseRepository
 {
 	public function __construct(
 		Explorer $database,
+		DateService $dateService,
 		private readonly TranslateFactory $translateFactory,
 	) {
-		parent::__construct($database);
+		parent::__construct($database, $dateService);
 	}
 
 	protected function getTableName(): string

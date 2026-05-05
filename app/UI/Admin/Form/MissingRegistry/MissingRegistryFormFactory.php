@@ -28,11 +28,11 @@ class MissingRegistryFormFactory
 			->setDefaultValue($row['userId'])
 			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
 		$form->addText('dateFrom', 'Od')
-			->setDefaultValue($row['dateFrom'])
+			->setDefaultValue($row['dateFrom'] instanceof \DateTimeImmutable ? $row['dateFrom']->format('d.m.Y') : '')
 			->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
 			->setHtmlAttribute('autocomplete', 'off');
 		$form->addText('dateTo', 'Do')
-			->setDefaultValue($row['dateTo'])
+			->setDefaultValue($row['dateTo'] instanceof \DateTimeImmutable ? $row['dateTo']->format('d.m.Y') : '')
 			->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
 			->setHtmlAttribute('autocomplete', 'off');
 		$form->addCheckbox('typePn')->setDefaultValue($row['typePn'])->setHtmlAttribute('class', 'updateCheckbox js-autosave-control');

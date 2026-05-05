@@ -5,6 +5,7 @@ namespace App\UI\Admin\Control\MissingRegistry\MissingRegistryList;
 use App\Model\Factory\PaginatorFactory;
 use App\Model\Repository\MissingRegistryRepository;
 use App\Model\Repository\UserRepository;
+use App\Model\Utils\Date\DateService;
 use App\Model\Utils\Paginator\Paginator;
 use App\UI\Admin\Form\MissingRegistry\MissingRegistryFormFactory;
 use Nette\Application\UI\Control;
@@ -30,6 +31,7 @@ class MissingRegistryListControl extends Control
 		private readonly UserRepository $userRepository,
 		private readonly PaginatorFactory $paginatorFactory,
 		private readonly MissingRegistryFormFactory $missingRegistryFormFactory,
+		private readonly DateService $dateService,
 	) {
 	}
 
@@ -86,6 +88,8 @@ class MissingRegistryListControl extends Control
 	 */
 	private function registryFormSucceeded(int $id, array $values): void
 	{
+		$values['dateFrom'] = $this->dateService->tryCreateFromUserInput((string) ($values['dateFrom'] ?? ''));
+		$values['dateTo'] = $this->dateService->tryCreateFromUserInput((string) ($values['dateTo'] ?? ''));
 		$this->missingRegistryRepository->updateRegistryRow($id, $values);
 
 		if ($this->getPresenter()->isAjax()) {

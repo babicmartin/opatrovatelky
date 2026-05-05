@@ -51,8 +51,8 @@
 								<tbody>
 									<tr n:foreach="$turnusRows as $turnus">
 										<td class="tcenter"><span n:if="$turnus['status'] !== ''" class="badge" style="background-color:{$turnus['statusColor']|noescape}">{$turnus['status']}</span></td>
-										<td class="tcenter">{$turnus['dateFrom']}</td>
-										<td class="tcenter">{$turnus['dateTo']}</td>
+										<td class="tcenter">{$turnus['dateFrom']|date:'j.n.Y'}</td>
+										<td class="tcenter">{$turnus['dateTo']|date:'j.n.Y'}</td>
 										<td class="tcenter">
 											<a n:if="$canOpenFamily && $turnus['familyId'] > 0" href="{plink :Admin:Family:update, id: $turnus['familyId']}" class="filterLink">{if (int) $babysitter['type'] === 1}{$turnus['familyName']}{else}{$turnus['familyProjectNumber']}{/if}</a>
 											<span n:if="!$canOpenFamily || $turnus['familyId'] <= 0">{if (int) $babysitter['type'] === 1}{$turnus['familyName']}{else}{$turnus['familyProjectNumber']}{/if}</span>

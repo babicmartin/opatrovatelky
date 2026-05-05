@@ -10,6 +10,7 @@ use App\Model\Factory\UserFactory;
 use App\Model\Table\ActiveTableMap;
 use App\Model\Table\PermissionTableMap;
 use App\Model\Table\UserTableMap;
+use App\Model\Utils\Date\DateService;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
 
@@ -17,9 +18,10 @@ class UserRepository extends BaseRepository
 {
 	public function __construct(
 		Explorer $database,
+		DateService $dateService,
 		private readonly UserFactory $userFactory,
 	) {
-		parent::__construct($database);
+		parent::__construct($database, $dateService);
 	}
 
 	protected function getTableName(): string

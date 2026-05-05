@@ -8,6 +8,7 @@ includes:
     - console.neon
 
     - common/logging.neon
+    - common/utils.neon
 
     #control
     - control/login.neon
@@ -28,5 +29,7 @@ includes:
     - control/familyDocuments.neon
     - control/babysitterList.neon
     - control/babysitterDocuments.neon
+    - control/partnerList.neon
+    - control/partnerDocuments.neon
     - control/todoActiveList.neon
     - control/todoClosedList.neon

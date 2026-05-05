@@ -5,6 +5,7 @@ namespace App\UI\Admin\Form\Family\FamilyInfo;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Form\DTO\Admin\Family\FamilyInfo\FamilyInfoForm;
 use App\Model\Form\Factory\BaseFormFactory;
+use App\Model\Utils\Date\DateService;
 use Nette\Application\UI\Form;
 use Nette\Security\User;
 use Nette\Utils\ArrayHash;
@@ -14,6 +15,7 @@ final readonly class FamilyInfoFormFactory
 	public function __construct(
 		private BaseFormFactory $baseFormFactory,
 		private User $user,
+		private DateService $dateService,
 	) {
 	}
 
@@ -64,11 +66,11 @@ final readonly class FamilyInfoFormFactory
 			->setDefaultValue((string) $family['phone'])
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');
 		$form->addText('dateStart', 'Začiatok spolupráce')
-			->setDefaultValue((string) $family['dateStart'])
+			->setDefaultValue($family['dateStart'] instanceof \DateTimeImmutable ? $family['dateStart']->format('d.m.Y') : '')
 			->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
 			->setHtmlAttribute('autocomplete', 'off');
 		$form->addText('dateTo', 'Koniec spolupráce')
-			->setDefaultValue((string) $family['dateTo'])
+			->setDefaultValue($family['dateTo'] instanceof \DateTimeImmutable ? $family['dateTo']->format('d.m.Y') : '')
 			->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
 			->setHtmlAttribute('autocomplete', 'off');
 		$form->addSelect('orderStatus', 'Status objednávky', $documentStatusOptions)
@@ -104,8 +106,8 @@ final readonly class FamilyInfoFormFactory
 				(int) $values->userId,
 				(int) $values->status,
 				(string) $values->phone,
-				(string) $values->dateStart,
-				(string) $values->dateTo,
+				$this->dateService->tryCreateFromUserInput((string) $values->dateStart),
+				$this->dateService->tryCreateFromUserInput((string) $values->dateTo),
 				(int) $values->orderStatus,
 				(int) $values->contractStatus,
 				(int) $values->workStatusStaff,

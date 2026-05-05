@@ -94,8 +94,8 @@ class FamilyProposalRepository extends BaseRepository
 			'familyId' => (int) ($row->{FamilyProposalTableMap::COL_FAMILY_ID} ?? 0),
 			'status' => (int) ($row->{FamilyProposalTableMap::COL_STATUS} ?? 0),
 			'babysitterId' => (int) ($row->{FamilyProposalTableMap::COL_BABYSITTER_ID} ?? 0),
-			'dateStartingWork' => self::formatDate((string) ($row->{FamilyProposalTableMap::COL_DATE_STARTING_WORK} ?? '')),
-			'dateProposalSended' => self::formatDate((string) ($row->{FamilyProposalTableMap::COL_DATE_PROPOSAL_SENDED} ?? '')),
+			'dateStartingWork' => $this->dateService->tryCreateFromDb((string) ($row->{FamilyProposalTableMap::COL_DATE_STARTING_WORK} ?? '')),
+			'dateProposalSended' => $this->dateService->tryCreateFromDb((string) ($row->{FamilyProposalTableMap::COL_DATE_PROPOSAL_SENDED} ?? '')),
 			'notice' => (string) ($row->{FamilyProposalTableMap::COL_NOTICE} ?? ''),
 		];
 	}
@@ -105,8 +105,8 @@ class FamilyProposalRepository extends BaseRepository
 		$this->update($form->id, [
 			FamilyProposalTableMap::COL_STATUS => $form->status,
 			FamilyProposalTableMap::COL_BABYSITTER_ID => $form->babysitterId,
-			FamilyProposalTableMap::COL_DATE_STARTING_WORK => $this->normalizeDate($form->dateStartingWork),
-			FamilyProposalTableMap::COL_DATE_PROPOSAL_SENDED => $this->normalizeDate($form->dateProposalSended),
+			FamilyProposalTableMap::COL_DATE_STARTING_WORK => $form->dateStartingWork?->format('Y-m-d'),
+			FamilyProposalTableMap::COL_DATE_PROPOSAL_SENDED => $form->dateProposalSended?->format('Y-m-d'),
 			FamilyProposalTableMap::COL_NOTICE => $form->notice,
 		]);
 	}
@@ -155,13 +155,13 @@ class FamilyProposalRepository extends BaseRepository
 		";
 
 		return array_map(
-			static fn (Row $row): array => [
+			fn (Row $row): array => [
 				'id' => (int) $row->id,
 				'babysitterId' => (int) ($row->babysitter_id ?? 0),
 				'status' => (string) ($row->proposal_status ?? ''),
 				'statusColor' => (string) ($row->proposal_status_color ?? ''),
-				'dateProposalSended' => self::formatDate((string) ($row->date_proposal_sended ?? '')),
-				'dateStartingWork' => self::formatDate((string) ($row->date_starting_work ?? '')),
+				'dateProposalSended' => $this->dateService->tryCreateFromDb((string) ($row->date_proposal_sended ?? '')),
+				'dateStartingWork' => $this->dateService->tryCreateFromDb((string) ($row->date_starting_work ?? '')),
 				'babysitterName' => trim((string) ($row->babysitter_name ?? '') . ' ' . (string) ($row->babysitter_surname ?? '')),
 				'notice' => (string) ($row->notice ?? ''),
 			],
@@ -224,43 +224,14 @@ class FamilyProposalRepository extends BaseRepository
 			'partnerId' => (int) ($row->partner_id ?? 0),
 			'status' => (string) ($row->proposal_status ?? ''),
 			'statusColor' => (string) ($row->proposal_status_color ?? ''),
-			'dateProposalSended' => self::formatDate((string) ($row->date_proposal_sended ?? '')),
-			'dateStartingWork' => self::formatDate((string) ($row->date_starting_work ?? '')),
+			'dateProposalSended' => $this->dateService->tryCreateFromDb((string) ($row->date_proposal_sended ?? '')),
+			'dateStartingWork' => $this->dateService->tryCreateFromDb((string) ($row->date_starting_work ?? '')),
 			'familyName' => trim((string) ($row->family_name ?? '') . ' ' . (string) ($row->family_surname ?? '')),
 			'babysitterName' => trim((string) ($row->babysitter_name ?? '') . ' ' . (string) ($row->babysitter_surname ?? '')),
 			'userAcronym' => (string) ($row->user_acronym ?? ''),
 			'userColor' => (string) ($row->user_color ?? ''),
 			'partnerName' => (string) ($row->partner_name ?? ''),
 		];
-	}
-
-	private static function formatDate(string $date): string
-	{
-		if ($date === '' || $date === '0000-00-00' || $date === '-0001-11-30 00:00:00') {
-			return '';
-		}
-
-		$parts = explode('-', substr($date, 0, 10));
-		if (count($parts) !== 3) {
-			return '';
-		}
-
-		return $parts[2] . '.' . $parts[1] . '.' . $parts[0];
-	}
-
-	private function normalizeDate(string $date): ?string
-	{
-		$date = trim($date);
-		if ($date === '') {
-			return null;
-		}
-
-		$parts = explode('.', $date);
-		if (count($parts) !== 3) {
-			return null;
-		}
-
-		return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
 	}
 
 	private function formatBabysitterOption(\Nette\Database\Table\ActiveRow $row): string

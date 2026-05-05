@@ -59,14 +59,16 @@ class MissingRegistryRepository extends BaseRepository
 	}
 
 	/**
-	 * @param array<string, mixed> $data
+	 * @param array{userId?:int,dateFrom?:?\DateTimeImmutable,dateTo?:?\DateTimeImmutable,typePn?:mixed,typeOcr?:mixed,typeLekar?:mixed,typeSviatok?:mixed,typeZastup?:mixed,typeSluzba?:mixed,typeDovolenka?:mixed,notice?:string} $data
 	 */
 	public function updateRegistryRow(int $id, array $data): void
 	{
+		$dateFrom = $data['dateFrom'] ?? null;
+		$dateTo = $data['dateTo'] ?? null;
 		$this->update($id, [
 			MissingRegistryTableMap::COL_USER_ID => (int) ($data['userId'] ?? 0),
-			MissingRegistryTableMap::COL_DATE_FROM => $this->normalizeDate((string) ($data['dateFrom'] ?? '')),
-			MissingRegistryTableMap::COL_DATE_TO => $this->normalizeDate((string) ($data['dateTo'] ?? '')),
+			MissingRegistryTableMap::COL_DATE_FROM => $dateFrom instanceof \DateTimeImmutable ? $dateFrom->format('Y-m-d') : null,
+			MissingRegistryTableMap::COL_DATE_TO => $dateTo instanceof \DateTimeImmutable ? $dateTo->format('Y-m-d') : null,
 			MissingRegistryTableMap::COL_TYPE_PN => !empty($data['typePn']) ? 1 : 0,
 			MissingRegistryTableMap::COL_TYPE_OCR => !empty($data['typeOcr']) ? 1 : 0,
 			MissingRegistryTableMap::COL_TYPE_LEKAR => !empty($data['typeLekar']) ? 1 : 0,
@@ -94,8 +96,8 @@ class MissingRegistryRepository extends BaseRepository
 			'id' => (int) $row->id,
 			'formKey' => 'r' . (int) $row->id,
 			'userId' => (int) ($row->{MissingRegistryTableMap::COL_USER_ID} ?? 0),
-			'dateFrom' => $this->formatDate((string) ($row->{MissingRegistryTableMap::COL_DATE_FROM} ?? '')),
-			'dateTo' => $this->formatDate((string) ($row->{MissingRegistryTableMap::COL_DATE_TO} ?? '')),
+			'dateFrom' => $this->dateService->tryCreateFromDb((string) ($row->{MissingRegistryTableMap::COL_DATE_FROM} ?? '')),
+			'dateTo' => $this->dateService->tryCreateFromDb((string) ($row->{MissingRegistryTableMap::COL_DATE_TO} ?? '')),
 			'typePn' => (bool) $row->{MissingRegistryTableMap::COL_TYPE_PN},
 			'typeOcr' => (bool) $row->{MissingRegistryTableMap::COL_TYPE_OCR},
 			'typeLekar' => (bool) $row->{MissingRegistryTableMap::COL_TYPE_LEKAR},
@@ -107,32 +109,4 @@ class MissingRegistryRepository extends BaseRepository
 		];
 	}
 
-	private function formatDate(string $date): string
-	{
-		if ($date === '' || $date === '0000-00-00' || $date === '-0001-11-30 00:00:00') {
-			return '';
-		}
-
-		$parts = explode('-', substr($date, 0, 10));
-		if (count($parts) !== 3) {
-			return '';
-		}
-
-		return $parts[2] . '.' . $parts[1] . '.' . $parts[0];
-	}
-
-	private function normalizeDate(string $date): ?string
-	{
-		$date = trim($date);
-		if ($date === '') {
-			return null;
-		}
-
-		$parts = explode('.', $date);
-		if (count($parts) !== 3) {
-			return null;
-		}
-
-		return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
-	}
 }

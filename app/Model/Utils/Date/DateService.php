@@ -52,6 +52,42 @@ class DateService
 		}
 	}
 
+	public function tryCreateFromDb(?string $value): ?DateTimeImmutable
+	{
+		if ($value === null) {
+			return null;
+		}
+		$value = trim($value);
+		if ($value === '') {
+			return null;
+		}
+		$datePart = substr($value, 0, 10);
+		if ($datePart === '0000-00-00' || str_starts_with($datePart, '-0001')) {
+			return null;
+		}
+		$dt = DateTimeImmutable::createFromFormat('!Y-m-d', $datePart);
+		if ($dt === false) {
+			$dt = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $value);
+		}
+		return $dt === false ? null : $dt;
+	}
+
+	public function tryCreateFromUserInput(?string $value): ?DateTimeImmutable
+	{
+		if ($value === null) {
+			return null;
+		}
+		$value = trim($value);
+		if ($value === '') {
+			return null;
+		}
+		$dt = DateTimeImmutable::createFromFormat('!d.m.Y', $value);
+		if ($dt === false) {
+			return null;
+		}
+		return $dt->format('d.m.Y') === $value ? $dt : null;
+	}
+
 	public function createDateTimeImmutableFromYearMonth(int $year, ?int $month = null): DateTimeImmutable
 	{
 		$month = $month ?? 1; // Default to January if no month is provided

@@ -7,6 +7,7 @@ use App\Model\DataProvider\Directory\StorageDirProvider;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Form\Factory\BaseFormFactory;
 use App\Model\Repository\FileRepository;
+use App\Model\Utils\Date\DateService;
 use Nette\Application\UI\Control;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\Multiplier;
@@ -41,6 +42,7 @@ class FamilyDocumentsControl extends Control
 		private readonly DirectoryProvider $directoryProvider,
 		private readonly StorageDirProvider $storageDirProvider,
 		private readonly User $user,
+		private readonly DateService $dateService,
 	) {
 	}
 
@@ -122,11 +124,11 @@ class FamilyDocumentsControl extends Control
 				->setDefaultValue((string) $document['notice'])
 				->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');
 			$form->addText('validFrom', 'Platnosť od')
-				->setDefaultValue((string) $document['validFrom'])
+				->setDefaultValue($document['validFrom'] instanceof \DateTimeImmutable ? $document['validFrom']->format('d.m.Y') : '')
 				->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
 				->setHtmlAttribute('autocomplete', 'off');
 			$form->addText('validTo', 'Platnosť do')
-				->setDefaultValue((string) $document['validTo'])
+				->setDefaultValue($document['validTo'] instanceof \DateTimeImmutable ? $document['validTo']->format('d.m.Y') : '')
 				->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
 				->setHtmlAttribute('autocomplete', 'off');
 			$form->addSelect('status', 'Status', $this->fileRepository->findStatusOptions())
@@ -141,8 +143,8 @@ class FamilyDocumentsControl extends Control
 
 				$this->fileRepository->updateDocument((int) $values->id, [
 					'notice' => (string) $values->notice,
-					'validFrom' => (string) $values->validFrom,
-					'validTo' => (string) $values->validTo,
+					'validFrom' => $this->dateService->tryCreateFromUserInput((string) $values->validFrom),
+					'validTo' => $this->dateService->tryCreateFromUserInput((string) $values->validTo),
 					'status' => (int) $values->status,
 				]);
 

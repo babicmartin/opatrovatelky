@@ -77,6 +77,7 @@ Before making changes, read only the references needed for the page:
 - Add `{varType ...}` declarations for Latte template variables.
 - Every admin presenter template must set `{block pageTitle}...{/block}` so the layout `<h1>` is not empty.
 - Use `StorageDirProvider` and configured parameters for file paths. Do not hardcode upload/export paths in new code.
+- Store migrated uploads and documents in the configured private storage outside `www`, using `StorageDirProvider::getPrivateDocuments()` and domain subdirectories such as `partners/{id}`. The only exception is an image intentionally rendered by public HTML URLs, such as babysitter and user profile photos; those may remain under public `www/img/...`.
 - Convert old `$_GET` filters to typed presenter action parameters.
 - Preserve legacy kebab-case URL parameter names exactly when they exist. In particular, the alphabet filter must use `first-letter` in generated URLs, not camelCase variants such as `firstLetter`.
 - Convert old inline AJAX helpers to Nette forms or `handle*()` signals.

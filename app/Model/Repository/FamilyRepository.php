@@ -68,8 +68,8 @@ class FamilyRepository extends BaseRepository
 			'state' => (int) ($row->{FamilyTableMap::COL_STATE} ?? 0),
 			'phone' => (string) ($row->{FamilyTableMap::COL_PHONE} ?? ''),
 			'personEmail' => (string) ($row->{FamilyTableMap::COL_PERSON_EMAIL} ?? ''),
-			'dateStart' => self::formatDate((string) ($row->{FamilyTableMap::COL_DATE_START} ?? '')),
-			'dateTo' => self::formatDate((string) ($row->{FamilyTableMap::COL_DATE_TO} ?? '')),
+			'dateStart' => $this->dateService->tryCreateFromDb((string) ($row->{FamilyTableMap::COL_DATE_START} ?? '')),
+			'dateTo' => $this->dateService->tryCreateFromDb((string) ($row->{FamilyTableMap::COL_DATE_TO} ?? '')),
 			'status' => (int) ($row->{FamilyTableMap::COL_STATUS} ?? 0),
 			'personName' => (string) ($row->{FamilyTableMap::COL_PERSON_NAME} ?? ''),
 			'personSurname' => (string) ($row->{FamilyTableMap::COL_PERSON_SURNAME} ?? ''),
@@ -125,8 +125,8 @@ class FamilyRepository extends BaseRepository
 			FamilyTableMap::COL_USER_ID => $form->userId,
 			FamilyTableMap::COL_STATUS => $form->status,
 			FamilyTableMap::COL_PHONE => $form->phone,
-			FamilyTableMap::COL_DATE_START => $this->normalizeDate($form->dateStart),
-			FamilyTableMap::COL_DATE_TO => $this->normalizeDate($form->dateTo),
+			FamilyTableMap::COL_DATE_START => $form->dateStart?->format('Y-m-d'),
+			FamilyTableMap::COL_DATE_TO => $form->dateTo?->format('Y-m-d'),
 			FamilyTableMap::COL_ORDER_STATUS => $form->orderStatus,
 			FamilyTableMap::COL_CONTRACT_STATUS => $form->contractStatus,
 			FamilyTableMap::COL_WORK_STATUS_STAFF => $form->workStatusStaff,
@@ -478,12 +478,12 @@ class FamilyRepository extends BaseRepository
 		";
 
 		return array_map(
-			static fn (Row $row): array => [
+			fn (Row $row): array => [
 				'id' => (int) $row->id,
 				'familyId' => (int) ($row->family_id ?? 0),
 				'babysitterId' => (int) ($row->babysitter_id ?? 0),
-				'dateFrom' => self::formatDate((string) ($row->date_from ?? '')),
-				'dateTo' => self::formatDate((string) ($row->date_to ?? '')),
+				'dateFrom' => $this->dateService->tryCreateFromDb((string) ($row->date_from ?? '')),
+				'dateTo' => $this->dateService->tryCreateFromDb((string) ($row->date_to ?? '')),
 				'status' => (string) ($row->status ?? ''),
 				'statusColor' => (string) ($row->status_color ?? ''),
 				'familyName' => trim((string) ($row->family_name ?? '') . ' ' . (string) ($row->family_surname ?? '')),
@@ -749,32 +749,4 @@ class FamilyRepository extends BaseRepository
 		return $options;
 	}
 
-	private static function formatDate(string $date): string
-	{
-		if ($date === '' || $date === '0000-00-00' || $date === '-0001-11-30 00:00:00') {
-			return '';
-		}
-
-		$parts = explode('-', substr($date, 0, 10));
-		if (count($parts) !== 3) {
-			return '';
-		}
-
-		return $parts[2] . '.' . $parts[1] . '.' . $parts[0];
-	}
-
-	private function normalizeDate(string $date): ?string
-	{
-		$date = trim($date);
-		if ($date === '') {
-			return null;
-		}
-
-		$parts = explode('.', $date);
-		if (count($parts) !== 3) {
-			return null;
-		}
-
-		return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
-	}
 }

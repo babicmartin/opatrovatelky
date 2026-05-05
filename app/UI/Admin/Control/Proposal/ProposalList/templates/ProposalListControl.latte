@@ -35,8 +35,8 @@
 				<tbody>
 					<tr n:foreach="$rows as $proposal">
 						<td class="tcenter">{include statusBadge, $proposal['status'], $proposal['statusColor']}</td>
-						<td class="tcenter">{$proposal['dateProposalSended']}</td>
-						<td class="tcenter">{$proposal['dateStartingWork']}</td>
+						<td class="tcenter">{$proposal['dateProposalSended']|date:'j.n.Y'}</td>
+						<td class="tcenter">{$proposal['dateStartingWork']|date:'j.n.Y'}</td>
 						<td class="tcenter">
 							<a n:if="$proposal['familyId'] > 0" href="{plink :Admin:Family:update, id: $proposal['familyId']}" class="filterLink">{$proposal['familyName']}</a>
 							<span n:if="$proposal['familyId'] <= 0">{$proposal['familyName']}</span>

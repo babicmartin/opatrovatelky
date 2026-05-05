@@ -8,7 +8,7 @@ final readonly class BabysitterAddressForm
 		public int $id,
 		public string $name,
 		public string $surname,
-		public string $birthday,
+		public ?\DateTimeImmutable $birthday,
 		public int $pohlavie,
 		public int $country,
 		public string $city,

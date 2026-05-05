@@ -5,6 +5,7 @@ namespace App\UI\Admin\Form\Babysitter\BabysitterAddress;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Form\DTO\Admin\Babysitter\BabysitterAddress\BabysitterAddressForm;
 use App\Model\Form\Factory\BaseFormFactory;
+use App\Model\Utils\Date\DateService;
 use Nette\Application\UI\Form;
 use Nette\Security\User;
 use Nette\Utils\ArrayHash;
@@ -14,6 +15,7 @@ final readonly class BabysitterAddressFormFactory
 	public function __construct(
 		private BaseFormFactory $baseFormFactory,
 		private User $user,
+		private DateService $dateService,
 	) {
 	}
 
@@ -53,7 +55,7 @@ final readonly class BabysitterAddressFormFactory
 				->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');
 		}
 		$form->addText('birthday', 'Dátum narodenia')
-			->setDefaultValue((string) $babysitter['birthday'])
+			->setDefaultValue($babysitter['birthday'] instanceof \DateTimeImmutable ? $babysitter['birthday']->format('d.m.Y') : '')
 			->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
 			->setHtmlAttribute('autocomplete', 'off');
 		$form->addSelect('pohlavie', 'Pohlavie', $genderOptions)
@@ -81,7 +83,7 @@ final readonly class BabysitterAddressFormFactory
 				(int) $values->id,
 				(string) $values->name,
 				(string) $values->surname,
-				(string) $values->birthday,
+				$this->dateService->tryCreateFromUserInput((string) $values->birthday),
 				(int) $values->pohlavie,
 				(int) $values->country,
 				(string) $values->city,

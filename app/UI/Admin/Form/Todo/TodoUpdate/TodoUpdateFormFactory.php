@@ -6,6 +6,7 @@ use App\Model\Enum\Acl\Resource;
 use App\Model\Form\DTO\Admin\Todo\TodoUpdate\TodoUpdateForm;
 use App\Model\Form\Factory\BaseFormFactory;
 use App\Model\Repository\TodoClientRepository;
+use App\Model\Utils\Date\DateService;
 use Nette\Application\ForbiddenRequestException;
 use Nette\Application\UI\Form;
 use Nette\Security\User;
@@ -17,6 +18,7 @@ final readonly class TodoUpdateFormFactory
 		private BaseFormFactory $baseFormFactory,
 		private TodoClientRepository $todoClientRepository,
 		private User $user,
+		private DateService $dateService,
 	) {
 	}
 
@@ -60,11 +62,11 @@ final readonly class TodoUpdateFormFactory
 			->setDefaultValue((int) $todo['todoToUser2'])
 			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
 		$form->addText('todoCreated', 'Dátum vytvorenia')
-			->setDefaultValue((string) $todo['todoCreated'])
+			->setDefaultValue($todo['todoCreated'] instanceof \DateTimeImmutable ? $todo['todoCreated']->format('d.m.Y') : '')
 			->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
 			->setHtmlAttribute('autocomplete', 'off');
 		$form->addText('todoDeadline', 'Deadline spracovania')
-			->setDefaultValue((string) $todo['todoDeadline'])
+			->setDefaultValue($todo['todoDeadline'] instanceof \DateTimeImmutable ? $todo['todoDeadline']->format('d.m.Y') : '')
 			->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
 			->setHtmlAttribute('autocomplete', 'off');
 		$form->addSelect('status', 'Status', $statusOptions)
@@ -94,8 +96,8 @@ final readonly class TodoUpdateFormFactory
 				(int) $values->todoFromUser,
 				(int) $values->todoToUser1,
 				(int) $values->todoToUser2,
-				(string) $values->todoCreated,
-				(string) $values->todoDeadline,
+				$this->dateService->tryCreateFromUserInput((string) $values->todoCreated),
+				$this->dateService->tryCreateFromUserInput((string) $values->todoDeadline),
 				(int) $values->status,
 				(string) $values->title,
 				(string) $values->description,

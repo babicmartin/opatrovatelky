@@ -8,8 +8,8 @@ class ProposalUpdateForm
 		public readonly int $id,
 		public readonly int $status,
 		public readonly int $babysitterId,
-		public readonly string $dateStartingWork,
-		public readonly string $dateProposalSended,
+		public readonly ?\DateTimeImmutable $dateStartingWork,
+		public readonly ?\DateTimeImmutable $dateProposalSended,
 		public readonly string $notice,
 	) {
 	}

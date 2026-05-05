@@ -40,8 +40,8 @@
 									{/if}
 								</a>
 							</td>
-							<td class="tcenter">{$turnus['dateFrom']}</td>
-							<td class="tcenter">{$turnus['dateTo']}</td>
+							<td class="tcenter">{$turnus['dateFrom']|date:'j.n.Y'}</td>
+							<td class="tcenter">{$turnus['dateTo']|date:'j.n.Y'}</td>
 							<td class="tcenter">
 								<a href="{plink :Admin:Family:update, id: $turnus['familyId']}" class="filterLink">{$turnus['familyName']}</a>
 							</td>

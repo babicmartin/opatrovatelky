@@ -45,15 +45,15 @@ class FileRepository extends BaseRepository
 		";
 
 		return array_map(
-			static fn (Row $row): array => [
+			fn (Row $row): array => [
 				'id' => (int) $row->id,
 				'dir' => (string) ($row->dir ?? $path),
 				'name' => (string) ($row->name ?? ''),
 				'type' => (string) ($row->type ?? 'file'),
-				'upload' => self::formatUpload((string) ($row->upload ?? '')),
+				'upload' => $this->formatUpload((string) ($row->upload ?? '')),
 				'notice' => (string) ($row->notice ?? ''),
-				'validFrom' => self::formatDate((string) ($row->valid_from ?? '')),
-				'validTo' => self::formatDate((string) ($row->valid_to ?? '')),
+				'validFrom' => $this->dateService->tryCreateFromDb((string) ($row->valid_from ?? '')),
+				'validTo' => $this->dateService->tryCreateFromDb((string) ($row->valid_to ?? '')),
 				'status' => (int) ($row->status_id ?? 0),
 				'userId' => (int) ($row->user_id ?? 0),
 				'userAcronym' => (string) ($row->user_acronym ?? ''),
@@ -90,14 +90,14 @@ class FileRepository extends BaseRepository
 	}
 
 	/**
-	 * @param array{notice:string,validFrom:string,validTo:string,status:int} $values
+	 * @param array{notice:string,validFrom:?\DateTimeImmutable,validTo:?\DateTimeImmutable,status:int} $values
 	 */
 	public function updateDocument(int $id, array $values): void
 	{
 		$this->update($id, [
 			FileTableMap::COL_NOTICE => $values['notice'],
-			FileTableMap::COL_VALID_FROM => $this->normalizeDate($values['validFrom']),
-			FileTableMap::COL_VALID_TO => $this->normalizeDate($values['validTo']),
+			FileTableMap::COL_VALID_FROM => $values['validFrom']?->format('Y-m-d'),
+			FileTableMap::COL_VALID_TO => $values['validTo']?->format('Y-m-d'),
 			FileTableMap::COL_STATUS => $values['status'],
 		]);
 	}
@@ -125,44 +125,13 @@ class FileRepository extends BaseRepository
 		return $options;
 	}
 
-	private static function formatUpload(string $dateTime): string
+	private function formatUpload(string $dateTime): string
 	{
-		if ($dateTime === '') {
+		$dt = $this->dateService->tryCreateFromDb($dateTime);
+		if ($dt === null) {
 			return 'Nahraté';
 		}
 
-		$date = substr($dateTime, 0, 10);
-		$time = substr($dateTime, 11, 5);
-
-		return 'Nahraté ' . self::formatDate($date) . ($time !== '' ? ' o ' . $time : '');
-	}
-
-	private static function formatDate(string $date): string
-	{
-		if ($date === '' || $date === '0000-00-00' || $date === '-0001-11-30 00:00:00') {
-			return '';
-		}
-
-		$parts = explode('-', substr($date, 0, 10));
-		if (count($parts) !== 3) {
-			return '';
-		}
-
-		return $parts[2] . '.' . $parts[1] . '.' . $parts[0];
-	}
-
-	private function normalizeDate(string $date): ?string
-	{
-		$date = trim($date);
-		if ($date === '') {
-			return null;
-		}
-
-		$parts = explode('.', $date);
-		if (count($parts) !== 3) {
-			return null;
-		}
-
-		return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
+		return 'Nahraté ' . $dt->format('d.m.Y') . ' o ' . $dt->format('H:i');
 	}
 }

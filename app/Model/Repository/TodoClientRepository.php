@@ -235,8 +235,8 @@ class TodoClientRepository extends BaseRepository
 			'todoFromUser' => (int) ($row->{TodoClientTableMap::COL_TODO_FROM_USER} ?? 0),
 			'todoToUser1' => (int) ($row->{TodoClientTableMap::COL_TODO_TO_USER_1} ?? 0),
 			'todoToUser2' => (int) ($row->{TodoClientTableMap::COL_TODO_TO_USER_2} ?? 0),
-			'todoCreated' => self::formatDate((string) ($row->{TodoClientTableMap::COL_TODO_CREATED} ?? '')),
-			'todoDeadline' => self::formatDate((string) ($row->{TodoClientTableMap::COL_TODO_DEADLINE} ?? '')),
+			'todoCreated' => $this->dateService->tryCreateFromDb((string) ($row->{TodoClientTableMap::COL_TODO_CREATED} ?? '')),
+			'todoDeadline' => $this->dateService->tryCreateFromDb((string) ($row->{TodoClientTableMap::COL_TODO_DEADLINE} ?? '')),
 			'title' => (string) ($row->{TodoClientTableMap::COL_TITLE} ?? ''),
 			'description' => (string) ($row->{TodoClientTableMap::COL_DESCRIPTION} ?? ''),
 			'answer' => (string) ($row->{TodoClientTableMap::COL_ANSWER} ?? ''),
@@ -252,8 +252,8 @@ class TodoClientRepository extends BaseRepository
 			TodoClientTableMap::COL_TODO_FROM_USER => $form->todoFromUser,
 			TodoClientTableMap::COL_TODO_TO_USER_1 => $form->todoToUser1,
 			TodoClientTableMap::COL_TODO_TO_USER_2 => $form->todoToUser2,
-			TodoClientTableMap::COL_TODO_CREATED => $this->normalizeDate($form->todoCreated),
-			TodoClientTableMap::COL_TODO_DEADLINE => $this->normalizeDate($form->todoDeadline),
+			TodoClientTableMap::COL_TODO_CREATED => $form->todoCreated?->format('Y-m-d'),
+			TodoClientTableMap::COL_TODO_DEADLINE => $form->todoDeadline?->format('Y-m-d'),
 			TodoClientTableMap::COL_STATUS => $form->status,
 			TodoClientTableMap::COL_TITLE => $form->title,
 			TodoClientTableMap::COL_DESCRIPTION => $form->description,
@@ -375,7 +375,7 @@ class TodoClientRepository extends BaseRepository
 	private function mapRows(array $rows): array
 	{
 		return array_map(
-			static fn (Row $row): array => [
+			fn (Row $row): array => [
 				'id' => (int) $row->id,
 				'title' => (string) ($row->title ?? ''),
 				'familyId' => (int) ($row->family_id ?? 0),
@@ -393,42 +393,13 @@ class TodoClientRepository extends BaseRepository
 				'toUser2Id' => (int) ($row->to_user_2_id ?? 0),
 				'toUser2Acronym' => (string) ($row->to_user_2_acronym ?? ''),
 				'toUser2Color' => (string) ($row->to_user_2_color ?? ''),
-				'createdDate' => self::formatDate((string) ($row->created_date ?? '')),
-				'deadlineDate' => self::formatDate((string) ($row->deadline_date ?? '')),
+				'createdDate' => $this->dateService->tryCreateFromDb((string) ($row->created_date ?? '')),
+				'deadlineDate' => $this->dateService->tryCreateFromDb((string) ($row->deadline_date ?? '')),
 				'statusId' => (int) ($row->status_id ?? 0),
 				'statusLabel' => (string) ($row->status_label ?? ''),
 				'statusColor' => (string) ($row->status_color ?? ''),
 			],
 			$rows,
 		);
-	}
-
-	private static function formatDate(string $date): string
-	{
-		if ($date === '' || $date === '0000-00-00' || $date === '-0001-11-30 00:00:00') {
-			return '';
-		}
-
-		$parts = explode('-', substr($date, 0, 10));
-		if (count($parts) !== 3) {
-			return '';
-		}
-
-		return $parts[2] . '.' . $parts[1] . '.' . $parts[0];
-	}
-
-	private function normalizeDate(string $date): ?string
-	{
-		$date = trim($date);
-		if ($date === '') {
-			return null;
-		}
-
-		$parts = explode('.', $date);
-		if (count($parts) !== 3) {
-			return null;
-		}
-
-		return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
 	}
 }

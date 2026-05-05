@@ -1,6 +1,21 @@
 {varType ?int $status}
 {varType ?int $country}
+{varType array $countries}
+{varType array $statuses}
+{varType string $filterTitle}
+{varType bool $canManagePartner}
+
+{block pageTitle}Zoznam partnerov{/block}
 
 {block content}
-	{* TODO: migrate legacy partneri list page. Active filters: status={$status}, country={$country}. *}
+	{if $canManagePartner}
+		<a href="{link create!}" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;">Pridať nového partnera</a>
+	{/if}
+
+	<div n:if="$filterTitle !== ''" class="overflow">
+		<div class="filterTitle">{$filterTitle}</div>
+		<a href="{plink :Admin:Partner:default}" class="btn btn-sm btn-danger filterCancel">Zrušíť filter</a>
+	</div>
+
+	{control partnerList}
 {/block}

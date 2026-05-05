@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Model\Repository;
 
 use App\Model\Factory\BaseFactory;
+use App\Model\Utils\Date\DateService;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
@@ -13,6 +14,7 @@ abstract class BaseRepository
 {
     public function __construct(
         protected Explorer $database,
+        protected DateService $dateService,
     ) {
     }
 

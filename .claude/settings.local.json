@@ -42,7 +42,11 @@
       "Read(//c/Users/marti/.claude/**)",
       "Bash(\"C:/wamp64/bin/php/php8.5.0/php.exe\" vendor/bin/phpstan analyse app --level 8 --memory-limit=512M)",
       "Bash(grep -c \"tracy-section--error\\\\|tracy-bs-error\\\\|Tracy\\\\\\\\\\\\\\\\BlueScreen\\\\|Fatal error\\\\|Parse error\" /tmp/todo-default.html)",
-      "Bash(grep -c \"tracy-section--error\\\\|tracy-bs-error\\\\|Tracy\\\\\\\\\\\\\\\\BlueScreen\\\\|Fatal error\\\\|Parse error\" /tmp/todo-closed.html)"
+      "Bash(grep -c \"tracy-section--error\\\\|tracy-bs-error\\\\|Tracy\\\\\\\\\\\\\\\\BlueScreen\\\\|Fatal error\\\\|Parse error\" /tmp/todo-closed.html)",
+      "Bash(xargs cat *)",
+      "mcp__nette-inspector__tracy_get_last_exception",
+      "mcp__nette-inspector__tracy_get_warnings",
+      "mcp__nette-inspector__di_get_service"
     ]
   },
   "enabledMcpjsonServers": [

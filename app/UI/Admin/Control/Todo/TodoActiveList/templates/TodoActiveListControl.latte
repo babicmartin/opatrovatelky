@@ -53,8 +53,8 @@
 						{if $row['toUser1Id'] > 0}{include userAcronym, $row['toUser1Acronym'], $row['toUser1Color']}{/if}
 						{if $row['toUser2Id'] > 0}, {include userAcronym, $row['toUser2Acronym'], $row['toUser2Color']}{/if}
 					</td>
-					<td class="tcenter">{$row['createdDate']}</td>
-					<td class="tcenter">{$row['deadlineDate']}</td>
+					<td class="tcenter">{$row['createdDate']|date:'j.n.Y'}</td>
+					<td class="tcenter">{$row['deadlineDate']|date:'j.n.Y'}</td>
 					<td class="tcenter">
 						<a href="{plink :Admin:Todo:default, status: $row['statusId']}" class="filterLink">
 							{include statusBadge, $row['statusLabel'], $row['statusColor']}

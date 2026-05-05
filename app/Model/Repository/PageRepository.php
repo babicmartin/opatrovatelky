@@ -6,6 +6,7 @@ use App\Model\Entity\PageEntity;
 use App\Model\Factory\BaseFactory;
 use App\Model\Factory\PageFactory;
 use App\Model\Table\PageTableMap;
+use App\Model\Utils\Date\DateService;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
@@ -14,9 +15,10 @@ class PageRepository extends BaseRepository
 {
 	public function __construct(
 		Explorer $database,
+		DateService $dateService,
 		private readonly PageFactory $pageFactory,
 	) {
-		parent::__construct($database);
+		parent::__construct($database, $dateService);
 	}
 
 	protected function getTableName(): string

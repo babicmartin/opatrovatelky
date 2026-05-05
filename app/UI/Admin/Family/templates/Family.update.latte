@@ -54,8 +54,8 @@
 								<tbody>
 									<tr n:foreach="$turnusRows as $turnus">
 										<td class="tcenter"><span n:if="$turnus['status'] !== ''" class="badge" style="background-color:{$turnus['statusColor']|noescape}">{$turnus['status']}</span></td>
-										<td class="tcenter">{$turnus['dateFrom']}</td>
-										<td class="tcenter">{$turnus['dateTo']}</td>
+										<td class="tcenter">{$turnus['dateFrom']|date:'j.n.Y'}</td>
+										<td class="tcenter">{$turnus['dateTo']|date:'j.n.Y'}</td>
 										<td class="tcenter">
 											<a href="{plink :Admin:Family:update, id: $turnus['familyId']}" class="filterLink">{if (int) $family['type'] === 1}{$turnus['familyName']}{else}{$turnus['familyProjectNumber']}{/if}</a>
 										</td>
@@ -143,8 +143,8 @@
 								<tbody>
 									<tr n:foreach="$proposalRows as $proposal">
 										<td class="tcenter"><span n:if="$proposal['status'] !== ''" class="badge" style="background-color:{$proposal['statusColor']|noescape}">{$proposal['status']}</span></td>
-										<td class="tcenter">{$proposal['dateProposalSended']}</td>
-										<td class="tcenter">{$proposal['dateStartingWork']}</td>
+										<td class="tcenter">{$proposal['dateProposalSended']|date:'j.n.Y'}</td>
+										<td class="tcenter">{$proposal['dateStartingWork']|date:'j.n.Y'}</td>
 										<td class="tcenter">
 											<a n:if="$canOpenBabysitter && $proposal['babysitterId'] > 0" href="{plink :Admin:Babysitter:update, id: $proposal['babysitterId']}" class="filterLink">{$proposal['babysitterName']}</a>
 											<span n:if="!$canOpenBabysitter || $proposal['babysitterId'] <= 0">{$proposal['babysitterName']}</span>

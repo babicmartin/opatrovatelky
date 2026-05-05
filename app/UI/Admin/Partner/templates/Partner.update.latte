@@ -1,5 +1,103 @@
 {varType int $id}
+{varType array $partner}
+{varType bool $canManagePartner}
+{varType bool $canOpenFamily}
+{varType array $familyRows}
+
+{block pageTitle}Partner{/block}
 
 {block content}
-	{* TODO: migrate legacy partneri detail page. *}
+	{if $canManagePartner}
+		<div class="row">
+			<div class="col-lg-6">
+				{form partnerUpdateForm}
+					<div class="row">
+						<div class="col-lg-6">
+							<div class="divone">
+								<div class="mb10">{label name class => 'inputLabel' /}{input name}</div>
+								<div class="mb10">{label street class => 'inputLabel' /}{input street}</div>
+								<div class="mb10">{label streetNumber class => 'inputLabel' /}{input streetNumber}</div>
+								<div class="mb10">{label psc class => 'inputLabel' /}{input psc}</div>
+								<div class="mb10">{label city class => 'inputLabel' /}{input city}</div>
+								<div class="mb10">{label state class => 'inputLabel' /}{input state}</div>
+								<div class="mb10">{label dateStart class => 'inputLabel' /}{input dateStart}</div>
+							</div>
+						</div>
+
+						<div class="col-lg-6">
+							<div class="divone">
+								<div class="mb10">{label personSurname class => 'inputLabel' /}{input personSurname}</div>
+								<div class="mb10">{label personName class => 'inputLabel' /}{input personName}</div>
+								<div class="mb10">{label ico class => 'inputLabel' /}{input ico}</div>
+								<div class="mb10">{label icDph class => 'inputLabel' /}{input icDph}</div>
+								<div class="mb10">{label web class => 'inputLabel' /}{input web}</div>
+								<div class="mb10">{label phone class => 'inputLabel' /}{input phone}</div>
+								<div class="mb10">{label email class => 'inputLabel' /}{input email}</div>
+								<div class="mb10">{label status class => 'inputLabel' /}{input status}</div>
+								<div class="mb10">{label notice class => 'inputLabel' /}{input notice}</div>
+								{input save}
+							</div>
+						</div>
+					</div>
+				{/form}
+			</div>
+
+			<div class="col-lg-6">
+				{control partnerDocuments}
+				<div class="space10">&nbsp;</div>
+				{include familyShortTable}
+			</div>
+		</div>
+	{/if}
+{/block}
+
+{define statusBadge, string $label, string $color}
+	<span n:if="$label !== ''" class="badge" style="background-color:{$color|noescape}">{$label}</span>
+{/define}
+
+{define countryImage, string $image}
+	<span class="header-avatar1">
+		<img n:if="$image !== ''" src="{$basePath}/img/country/{$image}" alt="img" style="height:20px; width:auto;" class="">
+		<img n:if="$image === ''" src="{$basePath}/img/empty.jpg" alt="img" style="width:20px; height:20px" class="">
+	</span>
+{/define}
+
+{define familyShortTable}
+	<div n:if="$familyRows !== []" class="tableone">
+		<div class="tableone-header">
+			<h3 class="tableone-title">Zoznam rodín</h3>
+		</div>
+		<div class="table-responsive">
+			<table class="table table-striped card-table table-vcenter text-nowrap">
+				<thead>
+					<tr class="thead">
+						<th class="tcenter w50"></th>
+						<th class="tcenter">Meno</th>
+						<th class="tcenter">Krajina</th>
+						<th class="tcenter w90">Status</th>
+						<th class="tcenter">Možnosti</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr n:foreach="$familyRows as $row">
+						<td class="tcenter">{$iterator->counter}.</td>
+						<td>
+							<a n:if="$canOpenFamily" href="{plink :Admin:Family:update, id: $row['id']}" class="titleLink">{$row['surname']} {$row['name']}</a>
+							<span n:if="!$canOpenFamily">{$row['surname']} {$row['name']}</span>
+						</td>
+						<td class="tcenter">{include countryImage, $row['countryImage']}</td>
+						<td class="tcenter">
+							<a n:if="$canOpenFamily" href="{plink :Admin:Family:update, id: $row['id']}" class="filterLink">{include statusBadge, $row['statusLabel'], $row['statusColor']}</a>
+							<span n:if="!$canOpenFamily">{include statusBadge, $row['statusLabel'], $row['statusColor']}</span>
+						</td>
+						<td class="tcenter"><a n:if="$canOpenFamily" href="{plink :Admin:Family:update, id: $row['id']}" class="btn btn-success btn-sm">Upraviť</a></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+{/define}
+
+{block scripts}
+	<script src="{$basePath}/js/autosaveForm.js"></script>
 {/block}

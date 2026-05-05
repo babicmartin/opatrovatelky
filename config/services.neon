@@ -13,6 +13,6 @@ search:
 services:
 	- App\Router\RouterFactory::createRouter
 	- App\Model\DataProvider\Directory\DirectoryProvider(appDir: %appDir%, tempDir: %tempDir%, vendorDir: %vendorDir%, rootDir: %rootDir%, logDir: %rootDir%/log)
-	- App\Model\DataProvider\Directory\StorageDirProvider(userImages: %storageDir.userImages%, userImagesEmpty: %storageDir.userImagesEmpty%, countryImages: %storageDir.countryImages%, documents: %storageDir.documents%, documentTypeImages: %storageDir.documentTypeImages%)
+	- App\Model\DataProvider\Directory\StorageDirProvider(userImages: %storageDir.userImages%, userImagesEmpty: %storageDir.userImagesEmpty%, countryImages: %storageDir.countryImages%, documents: %storageDir.documents%, privateDocuments: %storageDir.privateDocuments%, documentTypeImages: %storageDir.documentTypeImages%)
 	- App\Model\DataProvider\UrlProvider\UrlProvider(appName: %url.appName%)
 	- App\Model\Utils\Validator\ImageValidator

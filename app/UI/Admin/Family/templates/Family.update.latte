@@ -33,35 +33,44 @@
 				</div>
 
 				<div class="col-xl-8 col-md-12">
-					<div style="border:1px solid #E2C2DA; padding:10px;">
+					<div class="divone">
 						<h3 style="font-size:18px; margin:0 0 15px;">{if (int) $family['type'] === 1}Evidencia opatrovania{else}Evidencia pracovných turnusov{/if}</h3>
 
 						<a href="{link createTurnus!, familyId: $id}" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;">Vytvoriť novú evidenciu</a>
 
-						{if count($turnusRows) > 0}
-							<div class="table-responsive">
-								<table class="table table-striped card-table table-vcenter text-nowrap">
-									<thead>
-										<tr class="thead">
-											<th class="tcenter">Od</th>
-											<th class="tcenter">Do</th>
-											<th class="tcenter">Status</th>
-											<th class="tcenter">Možnosti</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr n:foreach="$turnusRows as $turnus">
-											<td class="tcenter">{$turnus['dateFrom']}</td>
-											<td class="tcenter">{$turnus['dateTo']}</td>
-											<td class="tcenter"><span n:if="$turnus['status'] !== ''" class="badge" style="background-color:{$turnus['statusColor']|noescape}">{$turnus['status']}</span></td>
-											<td class="tcenter">
-												<a n:if="$canOpenTurnus" href="{plink :Admin:Turnus:update, id: $turnus['id']}" class="btn btn-success btn-sm">&gt;</a>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						{/if}
+						<div class="table-responsive">
+							<table class="table table-striped card-table table-vcenter text-nowrap">
+								<thead>
+									<tr class="thead">
+										<th class="tcenter">Status</th>
+										<th class="tcenter w90">Od</th>
+										<th class="tcenter w90">Do</th>
+										<th class="tcenter">{if (int) $family['type'] === 1}Rodina{else}Projekt DE{/if}</th>
+										<th class="tcenter">{if (int) $family['type'] === 1}Opatrovateľka{else}Pracovník{/if}</th>
+										<th n:if="(int) $family['type'] === 2" class="tcenter">Pozícia</th>
+										<th class="tcenter">Možnosti</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr n:foreach="$turnusRows as $turnus">
+										<td class="tcenter"><span n:if="$turnus['status'] !== ''" class="badge" style="background-color:{$turnus['statusColor']|noescape}">{$turnus['status']}</span></td>
+										<td class="tcenter">{$turnus['dateFrom']}</td>
+										<td class="tcenter">{$turnus['dateTo']}</td>
+										<td class="tcenter">
+											<a href="{plink :Admin:Family:update, id: $turnus['familyId']}" class="filterLink">{if (int) $family['type'] === 1}{$turnus['familyName']}{else}{$turnus['familyProjectNumber']}{/if}</a>
+										</td>
+										<td class="tcenter">
+											<a n:if="$canOpenBabysitter && $turnus['babysitterId'] > 0" href="{plink :Admin:Babysitter:update, id: $turnus['babysitterId']}" class="filterLink">{$turnus['babysitterName']}</a>
+											<span n:if="!$canOpenBabysitter || $turnus['babysitterId'] <= 0">{$turnus['babysitterName']}</span>
+										</td>
+										<td n:if="(int) $family['type'] === 2" class="tcenter">{$turnus['workPosition']}</td>
+										<td class="tcenter">
+											<a n:if="$canOpenTurnus" href="{plink :Admin:Turnus:update, id: $turnus['id']}" class="btn btn-success btn-sm">&gt;</a>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -70,41 +79,45 @@
 				<div class="col-xl-2 col-md-12">
 					{include shortInfo}
 				</div>
-				{form familyAddressForm}
-					<div class="col-xl-2 col-md-12">
-						<div style="border:1px solid #E2C2DA; padding:10px;">
-							<div n:if="(int) $family['type'] === 2" class="mb10">{label companyName class => 'inputLabel' /}{input companyName}</div>
-							<div class="mb10">{label name class => 'inputLabel' /}{input name}</div>
-							<div class="mb10">{label surname class => 'inputLabel' /}{input surname}</div>
-							<div class="mb10">{label street class => 'inputLabel' /}{input street}</div>
+				<div class="col-xl-10">
+					{form familyAddressForm}
+						<div class="row">
+							<div class="col-xl-3 col-md-12">
+								<div class="divone">
+									<div n:if="(int) $family['type'] === 2" class="mb10">{label companyName class => 'inputLabel' /}{input companyName}</div>
+									<div class="mb10">{label name class => 'inputLabel' /}{input name}</div>
+									<div class="mb10">{label surname class => 'inputLabel' /}{input surname}</div>
+									<div class="mb10">{label street class => 'inputLabel' /}{input street}</div>
+								</div>
+							</div>
+							<div class="col-xl-3 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label streetNumber class => 'inputLabel' /}{input streetNumber}</div>
+									<div class="mb10">{label psc class => 'inputLabel' /}{input psc}</div>
+									<div class="mb10">{label city class => 'inputLabel' /}{input city}</div>
+								</div>
+							</div>
+							<div class="col-xl-3 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label billing class => 'inputLabel' /}{input billing}</div>
+									<div n:if="(int) $family['type'] === 2" class="mb10">{label employer class => 'inputLabel' /}{input employer}</div>
+									<div n:if="(int) $family['type'] === 2" class="mb10">{label accommodationAddress class => 'inputLabel' /}{input accommodationAddress}</div>
+									<div class="mb10">{label notice class => 'inputLabel' /}{input notice}</div>
+								</div>
+							</div>
+							<div class="col-xl-3 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label personSurname class => 'inputLabel' /}{input personSurname}</div>
+									<div class="mb10">{label personName class => 'inputLabel' /}{input personName}</div>
+									<div class="mb10">{label personPhone class => 'inputLabel' /}{input personPhone}</div>
+									<div class="mb10">{label personEmail class => 'inputLabel' /}{input personEmail}</div>
+									<div class="mb10">{label patientPhone class => 'inputLabel' /}{input patientPhone}</div>
+									{input save}
+								</div>
+							</div>
 						</div>
-					</div>
-					<div class="col-xl-2 col-md-12">
-						<div style="border:1px solid #E2C2DA; padding:10px;">
-							<div class="mb10">{label streetNumber class => 'inputLabel' /}{input streetNumber}</div>
-							<div class="mb10">{label psc class => 'inputLabel' /}{input psc}</div>
-							<div class="mb10">{label city class => 'inputLabel' /}{input city}</div>
-						</div>
-					</div>
-					<div class="col-xl-3 col-md-12">
-						<div style="border:1px solid #E2C2DA; padding:10px;">
-							<div class="mb10">{label billing class => 'inputLabel' /}{input billing}</div>
-							<div n:if="(int) $family['type'] === 2" class="mb10">{label employer class => 'inputLabel' /}{input employer}</div>
-							<div n:if="(int) $family['type'] === 2" class="mb10">{label accommodationAddress class => 'inputLabel' /}{input accommodationAddress}</div>
-							<div class="mb10">{label notice class => 'inputLabel' /}{input notice}</div>
-						</div>
-					</div>
-					<div class="col-xl-3 col-md-12">
-						<div style="border:1px solid #E2C2DA; padding:10px;">
-							<div class="mb10">{label personSurname class => 'inputLabel' /}{input personSurname}</div>
-							<div class="mb10">{label personName class => 'inputLabel' /}{input personName}</div>
-							<div class="mb10">{label personPhone class => 'inputLabel' /}{input personPhone}</div>
-							<div class="mb10">{label personEmail class => 'inputLabel' /}{input personEmail}</div>
-							<div class="mb10">{label patientPhone class => 'inputLabel' /}{input patientPhone}</div>
-							{input save}
-						</div>
-					</div>
-				{/form}
+					{/form}
+				</div>
 			</div>
 		{elseif $activeTab === 'proposals'}
 			<div class="row">
@@ -112,10 +125,10 @@
 					{include shortInfo}
 				</div>
 				<div class="col-xl-10 col-md-12">
-					<div style="border:1px solid #E2C2DA; padding:10px;">
+					<div class="divone">
 						<h3 style="font-size:18px; margin:0 0 15px;">Návrhy opatrovateliek</h3>
 						<a href="{link createProposal!, familyId: $id}" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;">Vytvoriť nový návrh</a>
-						<div n:if="count($proposalRows) > 0" class="table-responsive">
+						<div class="table-responsive">
 							<table class="table table-striped card-table table-vcenter text-nowrap">
 								<thead>
 									<tr class="thead">
@@ -168,24 +181,32 @@
 {/block}
 
 {define shortInfo}
-	<div style="border:1px solid #E2C2DA; padding:10px;">
+	<div class="divone">
+		<div class="mb10">
+			<div class="inputLabel">Meno</div>
+			<input type="text" class="form-control" disabled value="{$family['name']} {$family['surname']}">
+		</div>
+		<div class="mb10">
+			<div class="inputLabel">Číslo klienta</div>
+			<input type="text" class="form-control updateInput" disabled value="{$family['clientNumber']}">
+		</div>
 		{form familyShortInfoForm}
-			<div class="mb10">{label displayName class => 'inputLabel' /}{input displayName}</div>
-			<div class="mb10">{label clientNumber class => 'inputLabel' /}{input clientNumber}</div>
 			<div n:if="(int) $family['type'] === 2" class="mb10">{label deProjectNumber class => 'inputLabel' /}{input deProjectNumber}</div>
 			<div class="mb10">{label state class => 'inputLabel' /}{input state}</div>
 			{input save}
 		{/form}
 	</div>
 
-	<div n:if="$canDeleteFamily" style="border:1px solid #E2C2DA; padding:10px; margin-top:20px;">
+	<div n:if="$canDeleteFamily" class="divone" style="margin-top:20px;">
 		<h3 style="font-size:18px; margin:0 0 15px;">Vymazať rodinu</h3>
-		<a href="{link delete!, familyId: $id}" class="btn btn-danger btn-sm">Vymazať</a>
+		<a href="{link delete!, familyId: $id}" title="Odstrániť" onclick="return confirm('Naozaj chcete vymazať túto rodinu?');">
+			<img src="{$basePath}/img/icons/x.png" style="height:30px; cursor:pointer;" alt="Odstrániť">
+		</a>
 	</div>
 {/define}
 
 {define infoForm}
-	<div style="border:1px solid #E2C2DA; padding:10px;">
+	<div class="divone">
 		{form familyInfoForm}
 			<div class="mb10">{label type class => 'inputLabel' /}{input type}</div>
 			<div class="mb10">{label partnerId class => 'inputLabel' /}{input partnerId}</div>

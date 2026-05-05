@@ -2,14 +2,12 @@
 {varType array $documents}
 {varType array $statusOptions}
 {varType string $typeImageBasePath}
-{varType bool $canManageFamily}
+{varType bool $canManageBabysitter}
 {varType int $maxFileSize}
 
-{if $canManageFamily}
+{if $canManageBabysitter}
 	<div class="divone" style="margin-bottom:20px;">
-		{if $title !== ''}
-			<h3 style="font-size:18px; margin:0 0 15px;">{$title}</h3>
-		{/if}
+		<h3 n:if="$title !== ''" style="font-size:18px; margin:0 0 15px;">{$title}</h3>
 		{foreach $documents as $document}
 			<div class="overflow space20">
 				<div style="width:60px;">

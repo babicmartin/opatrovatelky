@@ -9,6 +9,7 @@ final readonly class StorageDirProvider
 		private string $userImagesEmpty,
 		private string $countryImages,
 		private string $documents,
+		private string $privateDocuments,
 		private string $documentTypeImages,
 	) {
 	}
@@ -31,6 +32,11 @@ final readonly class StorageDirProvider
 	public function getDocuments(): string
 	{
 		return $this->documents;
+	}
+
+	public function getPrivateDocuments(): string
+	{
+		return $this->privateDocuments;
 	}
 
 	public function getDocumentTypeImages(): string

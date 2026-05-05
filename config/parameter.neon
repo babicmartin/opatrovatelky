@@ -4,6 +4,7 @@ parameters:
         userImagesEmpty: img/users/empty.jpg
         countryImages: img/country
         documents: documents
+        privateDocuments: private/documents
         documentTypeImages: img/type
     url:
         appName: 4MS

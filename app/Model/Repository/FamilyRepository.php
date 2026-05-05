@@ -8,7 +8,9 @@ use App\Model\Form\DTO\Admin\Family\FamilyShortInfo\FamilyShortInfoForm;
 use App\Model\Table\CountryTableMap;
 use App\Model\Table\FamilyTableMap;
 use App\Model\Table\PartnerTableMap;
+use App\Model\Table\OpatrovatelkaTableMap;
 use App\Model\Table\SelectFamilyProjectTableMap;
+use App\Model\Table\SelectWorkPositionTableMap;
 use App\Model\Table\SelectWorkStatusStaffTableMap;
 use App\Model\Table\StatusDocumentTableMap;
 use App\Model\Table\StatusFamilyTableMap;
@@ -452,10 +454,21 @@ class FamilyRepository extends BaseRepository
 				$t." . TurnusTableMap::COL_DATE_FROM . " AS date_from,
 				$t." . TurnusTableMap::COL_DATE_TO . " AS date_to,
 				$t." . TurnusTableMap::COL_STATUS . " AS status_id,
+				$t." . TurnusTableMap::COL_FAMILY_ID . " AS family_id,
+				$t." . TurnusTableMap::COL_BABYSITTER_ID . " AS babysitter_id,
 				$st." . StatusTurnusTableMap::COL_STATUS . " AS status,
-				$st." . StatusTurnusTableMap::COL_COLOR . " AS status_color
+				$st." . StatusTurnusTableMap::COL_COLOR . " AS status_color,
+				" . FamilyTableMap::TABLE_NAME . "." . FamilyTableMap::COL_NAME . " AS family_name,
+				" . FamilyTableMap::TABLE_NAME . "." . FamilyTableMap::COL_SURNAME . " AS family_surname,
+				" . FamilyTableMap::TABLE_NAME . "." . FamilyTableMap::COL_DE_PROJECT_NUMBER . " AS family_project_number,
+				" . OpatrovatelkaTableMap::TABLE_NAME . "." . OpatrovatelkaTableMap::COL_NAME . " AS babysitter_name,
+				" . OpatrovatelkaTableMap::TABLE_NAME . "." . OpatrovatelkaTableMap::COL_SURNAME . " AS babysitter_surname,
+				" . SelectWorkPositionTableMap::TABLE_NAME . "." . SelectWorkPositionTableMap::COL_POSITION . " AS work_position
 			FROM $t
 			LEFT JOIN $st ON $st." . StatusTurnusTableMap::COL_ID . " = $t." . TurnusTableMap::COL_STATUS . "
+			LEFT JOIN " . FamilyTableMap::TABLE_NAME . " ON " . FamilyTableMap::TABLE_NAME . "." . FamilyTableMap::COL_ID . " = $t." . TurnusTableMap::COL_FAMILY_ID . "
+			LEFT JOIN " . OpatrovatelkaTableMap::TABLE_NAME . " ON " . OpatrovatelkaTableMap::TABLE_NAME . "." . OpatrovatelkaTableMap::COL_ID . " = $t." . TurnusTableMap::COL_BABYSITTER_ID . "
+			LEFT JOIN " . SelectWorkPositionTableMap::TABLE_NAME . " ON " . SelectWorkPositionTableMap::TABLE_NAME . "." . SelectWorkPositionTableMap::COL_ID . " = $t." . TurnusTableMap::COL_WORK_POSITION_ID . "
 			WHERE $t." . TurnusTableMap::COL_FAMILY_ID . " = ?
 				AND $t." . TurnusTableMap::COL_DELETED . " = 0
 			ORDER BY
@@ -467,10 +480,16 @@ class FamilyRepository extends BaseRepository
 		return array_map(
 			static fn (Row $row): array => [
 				'id' => (int) $row->id,
+				'familyId' => (int) ($row->family_id ?? 0),
+				'babysitterId' => (int) ($row->babysitter_id ?? 0),
 				'dateFrom' => self::formatDate((string) ($row->date_from ?? '')),
 				'dateTo' => self::formatDate((string) ($row->date_to ?? '')),
 				'status' => (string) ($row->status ?? ''),
 				'statusColor' => (string) ($row->status_color ?? ''),
+				'familyName' => trim((string) ($row->family_name ?? '') . ' ' . (string) ($row->family_surname ?? '')),
+				'familyProjectNumber' => (string) ($row->family_project_number ?? ''),
+				'babysitterName' => trim((string) ($row->babysitter_name ?? '') . ' ' . (string) ($row->babysitter_surname ?? '')),
+				'workPosition' => (string) ($row->work_position ?? ''),
 			],
 			$this->database->query($sql, $familyId)->fetchAll(),
 		);

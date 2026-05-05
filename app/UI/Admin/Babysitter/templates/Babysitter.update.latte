@@ -1,4 +1,296 @@
+{varType int $id}
+{varType array $babysitter}
+{varType string $activeTab}
+{varType string $pageTitleText}
+{varType bool $canManageBabysitter}
+{varType bool $canOpenFamily}
+{varType bool $canOpenTurnus}
+{varType array $turnusRows}
+{varType string $pdfPath}
+
+{block pageTitle}{$pageTitleText}{/block}
+
 {block content}
-	{varType int $id}
-	{* TODO: migrate legacy opatrovatelky-update page for ID {$id}. *}
+	{if $canManageBabysitter}
+		<a href="{plink :Admin:Babysitter:update, id: $id, tab: 'main'}" class="btn btn-sm btn-success">Úvod</a>
+		<a href="{plink :Admin:Babysitter:update, id: $id, tab: 'info'}" class="btn btn-sm btn-success">Základné informácie</a>
+		<a href="{plink :Admin:Babysitter:update, id: $id, tab: 'education'}" class="btn btn-sm btn-success">Vzdelanie</a>
+		<a href="{plink :Admin:Babysitter:update, id: $id, tab: 'profil'}" class="btn btn-sm btn-success">Profil</a>
+		<a n:if="(int) $babysitter['type'] === 2" href="{plink :Admin:Babysitter:update, id: $id, tab: 'work-profile'}" class="btn btn-sm btn-success">Odborné zameranie</a>
+		<a href="{plink :Admin:Babysitter:update, id: $id, tab: 'documents'}" class="btn btn-sm btn-success">Dokumenty</a>
+		<a n:if="(int) $babysitter['type'] === 1" href="{plink :Admin:Babysitter:update, id: $id, tab: 'pdf'}" class="btn btn-sm btn-success">PDF</a>
+
+		<div class="space20">&nbsp;</div>
+
+		{if $activeTab === 'main'}
+			<div class="row">
+				<div class="col-xl-2 col-md-12">
+					{include shortInfo}
+				</div>
+				<div class="col-xl-2 col-md-12">
+					{include mainForm}
+				</div>
+				<div class="col-xl-8 col-md-12">
+					<div class="divone">
+						<h3 style="font-size:18px; margin:0 0 15px;">Evidencia opatrovania</h3>
+						<a href="{link createTurnus!, babysitterId: $id}" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;">Vytvoriť novú evidenciu</a>
+
+						<div class="table-responsive">
+							<table class="table table-striped card-table table-vcenter text-nowrap">
+								<thead>
+									<tr class="thead">
+										<th class="tcenter">Status</th>
+										<th class="tcenter w90">Od</th>
+										<th class="tcenter w90">Do</th>
+										<th class="tcenter">{if (int) $babysitter['type'] === 1}Rodina{else}Projekt DE{/if}</th>
+										<th class="tcenter">{if (int) $babysitter['type'] === 1}Opatrovateľka{else}Pracovník{/if}</th>
+										<th n:if="(int) $babysitter['type'] === 2" class="tcenter">Pozícia</th>
+										<th class="tcenter">Možnosti</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr n:foreach="$turnusRows as $turnus">
+										<td class="tcenter"><span n:if="$turnus['status'] !== ''" class="badge" style="background-color:{$turnus['statusColor']|noescape}">{$turnus['status']}</span></td>
+										<td class="tcenter">{$turnus['dateFrom']}</td>
+										<td class="tcenter">{$turnus['dateTo']}</td>
+										<td class="tcenter">
+											<a n:if="$canOpenFamily && $turnus['familyId'] > 0" href="{plink :Admin:Family:update, id: $turnus['familyId']}" class="filterLink">{if (int) $babysitter['type'] === 1}{$turnus['familyName']}{else}{$turnus['familyProjectNumber']}{/if}</a>
+											<span n:if="!$canOpenFamily || $turnus['familyId'] <= 0">{if (int) $babysitter['type'] === 1}{$turnus['familyName']}{else}{$turnus['familyProjectNumber']}{/if}</span>
+										</td>
+										<td class="tcenter">{$turnus['babysitterName']}</td>
+										<td n:if="(int) $babysitter['type'] === 2" class="tcenter">{$turnus['workPosition']}</td>
+										<td class="tcenter">
+											<a n:if="$canOpenTurnus" href="{plink :Admin:Turnus:update, id: $turnus['id']}" class="btn btn-success btn-sm">&gt;</a>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		{elseif $activeTab === 'info'}
+			<div class="row">
+				<div class="col-xl-2 d-none d-xl-block">
+					<div class="divone">
+						{include profileImage}
+						<div style="font-weight:bold; font-size:16px; margin-top:20px;">Upraviť obrázok</div>
+						<div style="font-size:12px; margin-bottom:10px;">Iba obrázky typu .png, .jpg</div>
+						{form babysitterImageForm}
+							<ul class="alert alert-danger" n:ifcontent>
+								<li n:foreach="$form->ownErrors as $error">{$error}</li>
+							</ul>
+							<div class="mb10">
+								{input image}
+								<div class="text-danger fs-12" n:ifcontent>{inputError image}</div>
+							</div>
+							{input save}
+						{/form}
+					</div>
+				</div>
+				<div class="col-xl-10">
+					{form babysitterAddressForm}
+						<div class="row">
+							<div class="col-xl-3 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label name class => 'inputLabel' /}{input name}</div>
+									<div class="mb10">{label surname class => 'inputLabel' /}{input surname}</div>
+									<div class="mb10">{label birthday class => 'inputLabel' /}{input birthday}</div>
+									<div class="mb10">{label pohlavie class => 'inputLabel' /}{input pohlavie}</div>
+									<div class="mb10">{label country class => 'inputLabel' /}{input country}</div>
+								</div>
+							</div>
+							<div class="col-xl-3 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label city class => 'inputLabel' /}{input city}</div>
+									<div class="mb10">{label street class => 'inputLabel' /}{input street}</div>
+									<div class="mb10">{label postalCode class => 'inputLabel' /}{input postalCode}</div>
+									<div class="mb10">{label phone class => 'inputLabel' /}{input phone}</div>
+									<div class="mb10">{label phone2 class => 'inputLabel' /}{input phone2}</div>
+									<div class="mb10">{label email class => 'inputLabel' /}{input email}</div>
+								</div>
+							</div>
+							<div class="col-xl-3 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label height class => 'inputLabel' /}{input height}</div>
+									<div class="mb10">{label weight class => 'inputLabel' /}{input weight}</div>
+									<div class="mb10">{label about class => 'inputLabel' /}{input about}</div>
+								</div>
+							</div>
+							<div class="col-xl-3 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label requirements class => 'inputLabel' /}{input requirements}</div>
+									<div class="mb10">{label contactPersonName class => 'inputLabel' /}{input contactPersonName}</div>
+									<div class="mb10">{label contactPersonPhone class => 'inputLabel' /}{input contactPersonPhone}</div>
+									{input save}
+								</div>
+							</div>
+						</div>
+					{/form}
+				</div>
+			</div>
+		{elseif $activeTab === 'education'}
+			<div class="row">
+				<div class="col-xl-3 d-none d-xl-block">{include shortInfo}</div>
+				<div class="col-xl-9">
+					{form babysitterEducationForm}
+						<div class="row">
+							<div class="col-xl-4 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label education class => 'inputLabel' /}{input education}</div>
+									<div class="mb10">{label drivingLicence class => 'inputLabel' /}{input drivingLicence}</div>
+									<div class="mb10">{label readyDrive class => 'inputLabel' /}{input readyDrive}</div>
+								</div>
+							</div>
+							<div class="col-xl-4 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label languageSkills class => 'inputLabel' /}{input languageSkills}</div>
+									<div class="mb10">{label languageSkillsOther class => 'inputLabel' /}{input languageSkillsOther}</div>
+								</div>
+							</div>
+							<div class="col-xl-4 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label course class => 'inputLabel' /}{input course}</div>
+									<div class="mb10">{label courseDetail class => 'inputLabel' /}{input courseDetail}</div>
+									{input save}
+								</div>
+							</div>
+						</div>
+					{/form}
+				</div>
+			</div>
+		{elseif $activeTab === 'profil'}
+			<div class="row">
+				<div class="col-xl-2 d-none d-xl-block">{include shortInfo}</div>
+				<div class="col-xl-10">
+					{form babysitterProfileForm}
+						<div class="row">
+							<div class="col-xl-2 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label smoker class => 'inputLabel' /}{input smoker}</div>
+									<div class="mb10">{label allergy class => 'inputLabel' /}{input allergy}</div>
+									<div class="mb10">{label allergyDetail class => 'inputLabel' /}{input allergyDetail}</div>
+									<div class="mb10">{label howLongWork class => 'inputLabel' /}{input howLongWork}</div>
+									<div class="mb10">{label howLongWorkGerman class => 'inputLabel' /}{input howLongWorkGerman}</div>
+								</div>
+							</div>
+							<div class="col-xl-2 col-md-12">
+								<div class="divone">
+									<div n:if="(int) $babysitter['type'] === 1" class="mb10">{label dailyCare class => 'inputLabel' /}{input dailyCare}</div>
+									<div n:if="(int) $babysitter['type'] === 1" class="mb10">{label hourlyCare class => 'inputLabel' /}{input hourlyCare}</div>
+									<div n:if="(int) $babysitter['type'] === 2" class="mb10">{label accommodationType class => 'inputLabel' /}{input accommodationType}</div>
+									<div class="mb10">{label timeScale class => 'inputLabel' /}{input timeScale}</div>
+									<div class="mb10">{label workPlace class => 'inputLabel' /}{input workPlace}</div>
+								</div>
+							</div>
+							<div class="col-xl-5 col-md-12">
+								<div class="divone">
+									<div n:if="(int) $babysitter['type'] === 2" class="mb10">{label jobPositionInterest class => 'inputLabel' /}{input jobPositionInterest}</div>
+									<div class="mb10">{label workDescription class => 'inputLabel' /}{input workDescription}</div>
+									<div class="mb10">{label generalActivities class => 'inputLabel' /}{input generalActivities}</div>
+									<div class="mb10">{label ratingAgency class => 'inputLabel' /}{input ratingAgency}</div>
+								</div>
+							</div>
+							<div class="col-xl-3 col-md-12">
+								<div class="divone">
+									<div n:if="(int) $babysitter['type'] === 2" class="mb10">{label workShoes class => 'inputLabel' /}{input workShoes}</div>
+									<div n:if="(int) $babysitter['type'] === 2" class="mb10">{label shoeSize class => 'inputLabel' /}{input shoeSize}</div>
+									<div n:if="(int) $babysitter['type'] === 2" class="mb10">{label germanTaxId class => 'inputLabel' /}{input germanTaxId}</div>
+									<div n:if="(int) $babysitter['type'] === 1" class="mb10">{label diseaseIds class => 'inputLabel' /}{input diseaseIds}</div>
+									{input save}
+								</div>
+							</div>
+						</div>
+					{/form}
+				</div>
+			</div>
+		{elseif $activeTab === 'work-profile'}
+			<div class="row">
+				<div class="col-xl-2 d-none d-xl-block">{include shortInfo}</div>
+				<div class="col-xl-10">
+					{form babysitterWorkProfileForm}
+						<div class="row">
+							<div class="col-xl-6 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label qualificationIds class => 'inputLabel' /}{input qualificationIds}</div>
+								</div>
+							</div>
+							<div class="col-xl-6 col-md-12">
+								<div class="divone">
+									<div class="mb10">{label preferenceIds class => 'inputLabel' /}{input preferenceIds}</div>
+									{input save}
+								</div>
+							</div>
+						</div>
+					{/form}
+				</div>
+			</div>
+		{elseif $activeTab === 'documents'}
+			<div class="row">
+				<div class="col-xl-2 d-none d-xl-block">{include shortInfo}</div>
+				<div class="col-xl-6 col-md-12">{control babysitterDocuments}</div>
+			</div>
+		{elseif $activeTab === 'pdf'}
+			<div class="row">
+				<div class="col-xl-2 d-none d-xl-block">{include shortInfo}</div>
+				<div class="col-xl-2 col-md-12">
+					<div class="divone">
+						{form babysitterPdfForm}
+							<div class="mb10">{label profilShowContact class => 'inputLabel' /}{input profilShowContact}</div>
+							{input save}
+						{/form}
+					</div>
+				</div>
+				<div class="col-xl-8 col-md-12">
+					<div class="divone">
+						<h3 style="font-size:18px; margin:0 0 15px;">Pdf</h3>
+						{* TODO: Migrate legacy PDF generation from old/template/pages/babysitters/pdfOutput.php into a Nette service/action. *}
+						<a href="{$basePath}/{$pdfPath}" target="_blank"><img src="{$basePath}/img/icons/pdf.png" style="margin:20px; height:100px;" alt="PDF"></a>
+					</div>
+				</div>
+			</div>
+		{/if}
+	{/if}
+{/block}
+
+{define shortInfo}
+	<div class="divone">
+		<div class="mb10">
+			<div class="inputLabel">Meno</div>
+			<input type="text" class="form-control" disabled value="{$babysitter['name']} {$babysitter['surname']}">
+		</div>
+		<div class="mb10">
+			<div class="inputLabel">Číslo klienta</div>
+			<input type="text" class="form-control updateInput" disabled value="{$babysitter['clientNumber']}">
+		</div>
+		{include profileImage}
+	</div>
+{/define}
+
+{define profileImage}
+	<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">Profilový obrázok</div>
+	{if $babysitter['image'] !== ''}
+		<img src="{$basePath}/img/users/{$babysitter['image']}" style="width:120px;" alt="">
+	{else}
+		<img src="{$basePath}/img/users/empty.jpg" style="width:120px;" alt="">
+	{/if}
+{/define}
+
+{define mainForm}
+	<div class="divone">
+		{form babysitterMainForm}
+			<div class="mb10">{label type class => 'inputLabel' /}{input type}</div>
+			<div class="mb10">{label agencyId class => 'inputLabel' /}{input agencyId}</div>
+			<div class="mb10">{label workingStatus class => 'inputLabel' /}{input workingStatus}</div>
+			<div class="mb10">{label status class => 'inputLabel' /}{input status}</div>
+			<div class="mb10">{label firstContactUserId class => 'inputLabel' /}{input firstContactUserId}</div>
+			<div class="mb10">{label blacklist class => 'inputLabel' /}{input blacklist}</div>
+			<div class="mb10">{label notice class => 'inputLabel' /}{input notice}</div>
+			{input save}
+		{/form}
+	</div>
+{/define}
+
+{block scripts}
+	<script src="{$basePath}/js/autosaveForm.js"></script>
 {/block}

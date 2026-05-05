@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\UI\Admin\Control\Family\FamilyDocuments;
+namespace App\UI\Admin\Control\Babysitter\BabysitterDocuments;
 
 use App\Model\DataProvider\Directory\DirectoryProvider;
 use App\Model\DataProvider\Directory\StorageDirProvider;
@@ -18,7 +18,7 @@ use Nette\Utils\FileSystem;
 use Nette\Utils\Random;
 use Nette\Utils\Strings;
 
-class FamilyDocumentsControl extends Control
+class BabysitterDocumentsControl extends Control
 {
 	private const int MAX_FILE_SIZE = 20_971_520;
 	private const array ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docs', 'docx'];
@@ -29,11 +29,11 @@ class FamilyDocumentsControl extends Control
 		'application/octet-stream',
 	];
 
-	private int $familyId = 0;
+	private int $babysitterId = 0;
 
-	private string $dir = '';
+	private string $dir = 'babysitters';
 
-	private string $title = '';
+	private string $title = 'Dokumenty';
 
 	public function __construct(
 		private readonly FileRepository $fileRepository,
@@ -44,40 +44,37 @@ class FamilyDocumentsControl extends Control
 	) {
 	}
 
-	public function setContext(int $familyId, string $dir, string $title): static
+	public function setContext(int $babysitterId): static
 	{
-		$this->familyId = $familyId;
-		$this->dir = $dir;
-		$this->title = $title;
+		$this->babysitterId = $babysitterId;
 
 		return $this;
 	}
 
 	public function render(): void
 	{
-		if (!$this->user->isAllowed(Resource::FAMILY->value)) {
+		if (!$this->user->isAllowed(Resource::BABYSITTER->value)) {
 			$this->getPresenter()->error('Prístup zamietnutý', 403);
 		}
 
 		$template = $this->getTemplate();
-		$template->setFile(__DIR__ . '/templates/FamilyDocumentsControl.latte');
+		$template->setFile(__DIR__ . '/templates/BabysitterDocumentsControl.latte');
 		$template->title = $this->title;
-		$template->documents = $this->fileRepository->findDocuments($this->dir, $this->familyId);
+		$template->documents = $this->fileRepository->findDocuments($this->dir, $this->babysitterId);
 		$template->statusOptions = $this->fileRepository->findStatusOptions();
 		$template->typeImageBasePath = $this->storageDirProvider->getDocumentTypeImages();
-		$template->canManageFamily = $this->user->isAllowed(Resource::FAMILY->value);
-		$template->allowedExtensions = self::ALLOWED_EXTENSIONS;
+		$template->canManageBabysitter = $this->user->isAllowed(Resource::BABYSITTER->value);
 		$template->maxFileSize = self::MAX_FILE_SIZE;
 		$template->render();
 	}
 
 	public function handleDownload(int $id): void
 	{
-		if (!$this->user->isAllowed(Resource::FAMILY->value)) {
+		if (!$this->user->isAllowed(Resource::BABYSITTER->value)) {
 			$this->getPresenter()->error('Prístup zamietnutý', 403);
 		}
 
-		$document = $this->fileRepository->findDocument($this->dir, $this->familyId, $id);
+		$document = $this->fileRepository->findDocument($this->dir, $this->babysitterId, $id);
 		if ($document === null) {
 			$this->getPresenter()->error('Dokument neexistuje.', 404);
 		}
@@ -92,7 +89,7 @@ class FamilyDocumentsControl extends Control
 
 	public function handleDelete(int $id): void
 	{
-		if (!$this->user->isAllowed(Resource::FAMILY->value)) {
+		if (!$this->user->isAllowed(Resource::BABYSITTER->value)) {
 			$this->getPresenter()->error('Prístup zamietnutý', 403);
 		}
 
@@ -105,18 +102,18 @@ class FamilyDocumentsControl extends Control
 	 */
 	protected function createComponentDocumentForm(): Multiplier
 	{
-		if (!$this->user->isAllowed(Resource::FAMILY->value)) {
+		if (!$this->user->isAllowed(Resource::BABYSITTER->value)) {
 			$this->getPresenter()->error('Prístup zamietnutý', 403);
 		}
 
 		return new Multiplier(function (string $id): Form {
-			$document = $this->fileRepository->findDocument($this->dir, $this->familyId, (int) $id);
+			$document = $this->fileRepository->findDocument($this->dir, $this->babysitterId, (int) $id);
 			if ($document === null) {
 				$this->getPresenter()->error('Dokument neexistuje.', 404);
 			}
 
 			$form = $this->baseFormFactory->create();
-			$form->getElementPrototype()->setAttribute('class', 'family-document-form js-autosave-form');
+			$form->getElementPrototype()->setAttribute('class', 'babysitter-document-form js-autosave-form');
 			$form->addHidden('id', (string) $document['id']);
 			$form->addText('notice', $document['upload'])
 				->setDefaultValue((string) $document['notice'])
@@ -135,7 +132,7 @@ class FamilyDocumentsControl extends Control
 			$form->addSubmit('save', 'Uložiť')->setHtmlAttribute('class', 'd-none');
 
 			$form->onSuccess[] = function (Form $form, ArrayHash $values): void {
-				if (!$this->user->isAllowed(Resource::FAMILY->value)) {
+				if (!$this->user->isAllowed(Resource::BABYSITTER->value)) {
 					$this->getPresenter()->error('Prístup zamietnutý', 403);
 				}
 
@@ -159,7 +156,7 @@ class FamilyDocumentsControl extends Control
 
 	protected function createComponentUploadForm(): Form
 	{
-		if (!$this->user->isAllowed(Resource::FAMILY->value)) {
+		if (!$this->user->isAllowed(Resource::BABYSITTER->value)) {
 			$this->getPresenter()->error('Prístup zamietnutý', 403);
 		}
 
@@ -172,7 +169,7 @@ class FamilyDocumentsControl extends Control
 			->setHtmlAttribute('class', 'd-none js-upload-submit');
 
 		$form->onSuccess[] = function (Form $form, ArrayHash $values): void {
-			if (!$this->user->isAllowed(Resource::FAMILY->value)) {
+			if (!$this->user->isAllowed(Resource::BABYSITTER->value)) {
 				$this->getPresenter()->error('Prístup zamietnutý', 403);
 			}
 
@@ -199,20 +196,14 @@ class FamilyDocumentsControl extends Control
 				return;
 			}
 
-			$type = $extension;
-			if ($type === 'doc' || $type === 'docx') {
-				$type = 'docs';
-			}
+			$type = $extension === 'doc' || $extension === 'docx' ? 'docs' : $extension;
 			$name = Strings::webalize(pathinfo($upload->getSanitizedName(), PATHINFO_FILENAME));
-			if ($name === '') {
-				$name = 'document';
-			}
-			$fileName = $name . '-' . Random::generate(8) . '.' . $extension;
+			$fileName = ($name !== '' ? $name : 'document') . '-' . Random::generate(8) . '.' . $extension;
 			$targetDir = $this->getPrivateDocumentDir();
 
 			FileSystem::createDir($targetDir);
 			$upload->move($targetDir . '/' . $fileName);
-			$this->fileRepository->insertDocument($this->dir, $this->familyId, $fileName, $type, (int) $this->user->getId());
+			$this->fileRepository->insertDocument($this->dir, $this->babysitterId, $fileName, $type, (int) $this->user->getId());
 			$this->redirect('this');
 		};
 
@@ -221,6 +212,6 @@ class FamilyDocumentsControl extends Control
 
 	private function getPrivateDocumentDir(): string
 	{
-		return $this->directoryProvider->getRootDir() . '/' . $this->storageDirProvider->getPrivateDocuments() . '/' . $this->dir . '/' . $this->familyId;
+		return $this->directoryProvider->getRootDir() . '/' . $this->storageDirProvider->getPrivateDocuments() . '/' . $this->dir . '/' . $this->babysitterId;
 	}
 }

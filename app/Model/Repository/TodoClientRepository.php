@@ -2,6 +2,7 @@
 
 namespace App\Model\Repository;
 
+use App\Model\Form\DTO\Admin\Todo\TodoUpdate\TodoUpdateForm;
 use App\Model\Table\FamilyTableMap;
 use App\Model\Table\OpatrovatelkaTableMap;
 use App\Model\Table\StatusTodoTableMap;
@@ -210,6 +211,149 @@ class TodoClientRepository extends BaseRepository
 		return null;
 	}
 
+	/**
+	 * @return array<string, mixed>|null
+	 */
+	public function findUpdateRowForUser(int $id, ?int $userId, bool $canViewAll): ?array
+	{
+		$row = $this->getItemForUser($id, $userId, $canViewAll);
+		if ($row === null) {
+			return null;
+		}
+
+		$familyId = (int) ($row->{TodoClientTableMap::COL_FAMILY_ID} ?? 0);
+		$babysitterId = (int) ($row->{TodoClientTableMap::COL_BABYSITTER_ID} ?? 0);
+		$family = $familyId > 0 ? $this->database->table(FamilyTableMap::TABLE_NAME)->get($familyId) : null;
+		$babysitter = $babysitterId > 0 ? $this->database->table(OpatrovatelkaTableMap::TABLE_NAME)->get($babysitterId) : null;
+
+		return [
+			'id' => (int) $row->{TodoClientTableMap::COL_ID},
+			'familyId' => $familyId,
+			'familyName' => $family === null ? '' : trim((string) $family->{FamilyTableMap::COL_NAME} . ' ' . (string) $family->{FamilyTableMap::COL_SURNAME} . ' ' . (string) $family->{FamilyTableMap::COL_CLIENT_NUMBER}),
+			'babysitterId' => $babysitterId,
+			'babysitterName' => $babysitter === null ? '' : trim((string) $babysitter->{OpatrovatelkaTableMap::COL_NAME} . ' ' . (string) $babysitter->{OpatrovatelkaTableMap::COL_SURNAME} . ' ' . (string) $babysitter->{OpatrovatelkaTableMap::COL_CLIENT_NUMBER}),
+			'todoFromUser' => (int) ($row->{TodoClientTableMap::COL_TODO_FROM_USER} ?? 0),
+			'todoToUser1' => (int) ($row->{TodoClientTableMap::COL_TODO_TO_USER_1} ?? 0),
+			'todoToUser2' => (int) ($row->{TodoClientTableMap::COL_TODO_TO_USER_2} ?? 0),
+			'todoCreated' => self::formatDate((string) ($row->{TodoClientTableMap::COL_TODO_CREATED} ?? '')),
+			'todoDeadline' => self::formatDate((string) ($row->{TodoClientTableMap::COL_TODO_DEADLINE} ?? '')),
+			'title' => (string) ($row->{TodoClientTableMap::COL_TITLE} ?? ''),
+			'description' => (string) ($row->{TodoClientTableMap::COL_DESCRIPTION} ?? ''),
+			'answer' => (string) ($row->{TodoClientTableMap::COL_ANSWER} ?? ''),
+			'status' => (int) ($row->{TodoClientTableMap::COL_STATUS} ?? 0),
+		];
+	}
+
+	public function updateFromForm(TodoUpdateForm $form): int
+	{
+		return $this->update($form->id, [
+			TodoClientTableMap::COL_FAMILY_ID => $form->familyId,
+			TodoClientTableMap::COL_BABYSITTER_ID => $form->babysitterId,
+			TodoClientTableMap::COL_TODO_FROM_USER => $form->todoFromUser,
+			TodoClientTableMap::COL_TODO_TO_USER_1 => $form->todoToUser1,
+			TodoClientTableMap::COL_TODO_TO_USER_2 => $form->todoToUser2,
+			TodoClientTableMap::COL_TODO_CREATED => $this->normalizeDate($form->todoCreated),
+			TodoClientTableMap::COL_TODO_DEADLINE => $this->normalizeDate($form->todoDeadline),
+			TodoClientTableMap::COL_STATUS => $form->status,
+			TodoClientTableMap::COL_TITLE => $form->title,
+			TodoClientTableMap::COL_DESCRIPTION => $form->description,
+			TodoClientTableMap::COL_ANSWER => $form->answer,
+		]);
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	public function findFamilyOptions(int $selectedId = 0): array
+	{
+		$options = [0 => '---'];
+		$rows = $this->database->table(FamilyTableMap::TABLE_NAME)
+			->where(FamilyTableMap::COL_ACTIVE, 1)
+			->order(FamilyTableMap::COL_SURNAME . ' ASC, ' . FamilyTableMap::COL_NAME . ' ASC');
+
+		foreach ($rows as $row) {
+			$options[(int) $row->{FamilyTableMap::COL_ID}] = trim((string) $row->{FamilyTableMap::COL_SURNAME} . ' ' . (string) $row->{FamilyTableMap::COL_NAME} . ' ' . (string) $row->{FamilyTableMap::COL_CLIENT_NUMBER});
+		}
+
+		if ($selectedId > 0 && !isset($options[$selectedId])) {
+			$row = $this->database->table(FamilyTableMap::TABLE_NAME)->get($selectedId);
+			if ($row !== null) {
+				$options[$selectedId] = trim((string) $row->{FamilyTableMap::COL_SURNAME} . ' ' . (string) $row->{FamilyTableMap::COL_NAME} . ' ' . (string) $row->{FamilyTableMap::COL_CLIENT_NUMBER});
+			}
+		}
+
+		return $options;
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	public function findBabysitterOptions(int $selectedId = 0): array
+	{
+		$options = [0 => '---'];
+		$rows = $this->database->table(OpatrovatelkaTableMap::TABLE_NAME)
+			->where(OpatrovatelkaTableMap::COL_ACTIVE, 1)
+			->order(OpatrovatelkaTableMap::COL_SURNAME . ' ASC, ' . OpatrovatelkaTableMap::COL_NAME . ' ASC');
+
+		foreach ($rows as $row) {
+			$options[(int) $row->{OpatrovatelkaTableMap::COL_ID}] = trim((string) $row->{OpatrovatelkaTableMap::COL_SURNAME} . ' ' . (string) $row->{OpatrovatelkaTableMap::COL_NAME} . ' ' . (string) $row->{OpatrovatelkaTableMap::COL_CLIENT_NUMBER});
+		}
+
+		if ($selectedId > 0 && !isset($options[$selectedId])) {
+			$row = $this->database->table(OpatrovatelkaTableMap::TABLE_NAME)->get($selectedId);
+			if ($row !== null) {
+				$options[$selectedId] = trim((string) $row->{OpatrovatelkaTableMap::COL_SURNAME} . ' ' . (string) $row->{OpatrovatelkaTableMap::COL_NAME} . ' ' . (string) $row->{OpatrovatelkaTableMap::COL_CLIENT_NUMBER});
+			}
+		}
+
+		return $options;
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	public function findStatusOptions(): array
+	{
+		$options = [0 => '---'];
+		$rows = $this->database->table(StatusTodoTableMap::TABLE_NAME)
+			->order(StatusTodoTableMap::COL_STATUS . ' ASC');
+
+		foreach ($rows as $row) {
+			$options[(int) $row->{StatusTodoTableMap::COL_ID}] = (string) $row->{StatusTodoTableMap::COL_STATUS};
+		}
+
+		return $options;
+	}
+
+	/**
+	 * @param list<int> $selectedIds
+	 * @return array<int, string>
+	 */
+	public function findUserOptions(array $selectedIds = []): array
+	{
+		$options = [0 => '---'];
+		$rows = $this->database->table(UserTableMap::TABLE_NAME)
+			->where(UserTableMap::COL_PERMISSION . ' < ?', 10)
+			->order(UserTableMap::COL_SECOND_NAME . ' ASC');
+
+		foreach ($rows as $row) {
+			$options[(int) $row->{UserTableMap::COL_ID}] = trim((string) $row->{UserTableMap::COL_NAME} . ' ' . (string) $row->{UserTableMap::COL_SECOND_NAME});
+		}
+
+		foreach ($selectedIds as $selectedId) {
+			if ($selectedId <= 0 || isset($options[$selectedId])) {
+				continue;
+			}
+
+			$row = $this->database->table(UserTableMap::TABLE_NAME)->get($selectedId);
+			if ($row !== null) {
+				$options[$selectedId] = trim((string) $row->{UserTableMap::COL_NAME} . ' ' . (string) $row->{UserTableMap::COL_SECOND_NAME});
+			}
+		}
+
+		return $options;
+	}
+
 	public function createEmptyTodo(int $createdByUserId): int
 	{
 		$row = $this->insert([
@@ -271,5 +415,20 @@ class TodoClientRepository extends BaseRepository
 		}
 
 		return $parts[2] . '.' . $parts[1] . '.' . $parts[0];
+	}
+
+	private function normalizeDate(string $date): ?string
+	{
+		$date = trim($date);
+		if ($date === '') {
+			return null;
+		}
+
+		$parts = explode('.', $date);
+		if (count($parts) !== 3) {
+			return null;
+		}
+
+		return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
 	}
 }

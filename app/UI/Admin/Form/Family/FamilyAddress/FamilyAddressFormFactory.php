@@ -28,7 +28,9 @@ final readonly class FamilyAddressFormFactory
 		}
 
 		$form = $this->baseFormFactory->create();
-		$form->getElementPrototype()->setAttribute('class', 'family-address-form js-autosave-form');
+		$form->getElementPrototype()
+			->setAttribute('class', 'family-address-form js-autosave-form')
+			->setAttribute('style', 'display:contents;');
 
 		$form->addHidden('id', (string) $family['id']);
 		foreach ([

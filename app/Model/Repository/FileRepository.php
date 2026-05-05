@@ -63,6 +63,20 @@ class FileRepository extends BaseRepository
 		);
 	}
 
+	/**
+	 * @return array<string, mixed>|null
+	 */
+	public function findDocument(string $dir, int $ownerId, int $id): ?array
+	{
+		foreach ($this->findDocuments($dir, $ownerId) as $document) {
+			if ((int) $document['id'] === $id) {
+				return $document;
+			}
+		}
+
+		return null;
+	}
+
 	public function insertDocument(string $dir, int $ownerId, string $name, string $type, int $userId): void
 	{
 		$this->insert([

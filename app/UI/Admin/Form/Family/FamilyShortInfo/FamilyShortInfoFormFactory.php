@@ -32,14 +32,6 @@ final readonly class FamilyShortInfoFormFactory
 		$form->getElementPrototype()->setAttribute('class', 'family-short-info-form js-autosave-form');
 
 		$form->addHidden('id', (string) $family['id']);
-		$form->addText('displayName', 'Meno')
-			->setDefaultValue(trim((string) $family['name'] . ' ' . (string) $family['surname']))
-			->setDisabled()
-			->setHtmlAttribute('class', 'form-control');
-		$form->addText('clientNumber', 'Číslo klienta')
-			->setDefaultValue((string) $family['clientNumber'])
-			->setDisabled()
-			->setHtmlAttribute('class', 'form-control updateInput');
 		$form->addText('deProjectNumber', 'Číslo DE projektu')
 			->setDefaultValue((string) $family['deProjectNumber'])
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');

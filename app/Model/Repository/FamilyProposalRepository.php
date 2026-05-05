@@ -13,6 +13,8 @@ use Nette\Database\Row;
 
 class FamilyProposalRepository extends BaseRepository
 {
+	private const int TYPE_BABYSITTER = 1;
+
 	protected function getTableName(): string
 	{
 		return FamilyProposalTableMap::TABLE_NAME;
@@ -191,16 +193,19 @@ class FamilyProposalRepository extends BaseRepository
 		$options = [0 => '---'];
 		$rows = $this->database->table(OpatrovatelkaTableMap::TABLE_NAME)
 			->where(OpatrovatelkaTableMap::COL_ACTIVE, 1)
+			->where(OpatrovatelkaTableMap::COL_TYPE, self::TYPE_BABYSITTER)
+			->where(OpatrovatelkaTableMap::COL_POHLAVIE . ' > ?', 0)
+			->where(OpatrovatelkaTableMap::COL_COUNTRY . ' > ?', 0)
 			->order(OpatrovatelkaTableMap::COL_SURNAME . ' ASC, ' . OpatrovatelkaTableMap::COL_NAME . ' ASC');
 
 		foreach ($rows as $row) {
-			$options[(int) $row->{OpatrovatelkaTableMap::COL_ID}] = trim((string) $row->{OpatrovatelkaTableMap::COL_SURNAME} . ' ' . (string) $row->{OpatrovatelkaTableMap::COL_NAME});
+			$options[(int) $row->{OpatrovatelkaTableMap::COL_ID}] = $this->formatBabysitterOption($row);
 		}
 
 		if ($selectedId > 0 && !isset($options[$selectedId])) {
 			$row = $this->database->table(OpatrovatelkaTableMap::TABLE_NAME)->get($selectedId);
 			if ($row !== null) {
-				$options[$selectedId] = trim((string) $row->{OpatrovatelkaTableMap::COL_SURNAME} . ' ' . (string) $row->{OpatrovatelkaTableMap::COL_NAME});
+				$options[$selectedId] = $this->formatBabysitterOption($row);
 			}
 		}
 
@@ -256,5 +261,14 @@ class FamilyProposalRepository extends BaseRepository
 		}
 
 		return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
+	}
+
+	private function formatBabysitterOption(\Nette\Database\Table\ActiveRow $row): string
+	{
+		return trim((string) $row->{OpatrovatelkaTableMap::COL_SURNAME}
+			. ' '
+			. (string) $row->{OpatrovatelkaTableMap::COL_NAME}
+			. ' '
+			. (string) $row->{OpatrovatelkaTableMap::COL_CLIENT_NUMBER});
 	}
 }

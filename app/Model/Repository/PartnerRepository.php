@@ -82,7 +82,9 @@ class PartnerRepository extends BaseRepository
 			$where[] = "$p." . PartnerTableMap::COL_STATE . ' = ?';
 			$params[] = $countryId;
 			$order = "$p." . PartnerTableMap::COL_NAME . ' ASC';
-		} elseif ($statusId !== null) {
+		}
+
+		if ($statusId !== null) {
 			$where[] = "$p." . PartnerTableMap::COL_STATUS . ' = ?';
 			$params[] = $statusId;
 		}

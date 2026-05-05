@@ -11,6 +11,7 @@ final readonly class StorageDirProvider
 		private string $documents,
 		private string $privateDocuments,
 		private string $documentTypeImages,
+		private string $babysitterPdf,
 	) {
 	}
 
@@ -42,5 +43,10 @@ final readonly class StorageDirProvider
 	public function getDocumentTypeImages(): string
 	{
 		return $this->documentTypeImages;
+	}
+
+	public function getBabysitterPdf(): string
+	{
+		return $this->babysitterPdf;
 	}
 }

@@ -36,6 +36,8 @@ class BabysitterRepository extends BaseRepository
 {
 	private const int TYPE_BABYSITTER = 1;
 
+	private const int TYPE_WORKER = 2;
+
 	protected function getTableName(): string
 	{
 		return OpatrovatelkaTableMap::TABLE_NAME;
@@ -53,6 +55,29 @@ class BabysitterRepository extends BaseRepository
 		}
 
 		return (int) $row->{OpatrovatelkaTableMap::COL_ID};
+	}
+
+	public function createEmptyWorker(): int
+	{
+		$row = $this->insert([
+			OpatrovatelkaTableMap::COL_TYPE => self::TYPE_WORKER,
+			OpatrovatelkaTableMap::COL_ACTIVE => 1,
+		]);
+
+		if (!$row instanceof \Nette\Database\Table\ActiveRow) {
+			throw new \RuntimeException('Worker row was not created.');
+		}
+
+		return (int) $row->{OpatrovatelkaTableMap::COL_ID};
+	}
+
+	public function countActiveWorkers(): int
+	{
+		return $this->database->table(OpatrovatelkaTableMap::TABLE_NAME)
+			->where(OpatrovatelkaTableMap::COL_ACTIVE, 1)
+			->where(OpatrovatelkaTableMap::COL_TYPE, self::TYPE_WORKER)
+			->where(OpatrovatelkaTableMap::COL_STATUS, 1)
+			->count('*');
 	}
 
 	/**
@@ -146,6 +171,83 @@ class BabysitterRepository extends BaseRepository
 		int &$pageCount,
 	): array
 	{
+		return $this->findRowsByType(
+			self::TYPE_BABYSITTER,
+			$page,
+			$itemsPerPage,
+			$countryId,
+			$languageSkillId,
+			$workingStatusId,
+			$genderId,
+			$driverLicence,
+			$smokerTypeId,
+			$agencyId,
+			$statusId,
+			$firstLetter,
+			$pageCount,
+		);
+	}
+
+	/**
+	 * @return list<array{id:int,clientNumber:string,name:string,surname:string,birthday:?\DateTimeImmutable,age:?int,
+	 *     pohlavieId:int,pohlavieLabel:string,countryId:int,countryImage:string,
+	 *     agencyId:int,agencyName:string,statusId:int,statusLabel:string,statusColor:string,
+	 *     image:string}>
+	 */
+	public function findWorkerRows(
+		int $page,
+		int $itemsPerPage,
+		?int $countryId,
+		?int $languageSkillId,
+		?int $workingStatusId,
+		?int $genderId,
+		?int $driverLicence,
+		?int $smokerTypeId,
+		?int $agencyId,
+		?int $statusId,
+		?string $firstLetter,
+		int &$pageCount,
+	): array
+	{
+		return $this->findRowsByType(
+			self::TYPE_WORKER,
+			$page,
+			$itemsPerPage,
+			$countryId,
+			$languageSkillId,
+			$workingStatusId,
+			$genderId,
+			$driverLicence,
+			$smokerTypeId,
+			$agencyId,
+			$statusId,
+			$firstLetter,
+			$pageCount,
+		);
+	}
+
+	/**
+	 * @return list<array{id:int,clientNumber:string,name:string,surname:string,birthday:?\DateTimeImmutable,age:?int,
+	 *     pohlavieId:int,pohlavieLabel:string,countryId:int,countryImage:string,
+	 *     agencyId:int,agencyName:string,statusId:int,statusLabel:string,statusColor:string,
+	 *     image:string}>
+	 */
+	private function findRowsByType(
+		int $type,
+		int $page,
+		int $itemsPerPage,
+		?int $countryId,
+		?int $languageSkillId,
+		?int $workingStatusId,
+		?int $genderId,
+		?int $driverLicence,
+		?int $smokerTypeId,
+		?int $agencyId,
+		?int $statusId,
+		?string $firstLetter,
+		int &$pageCount,
+	): array
+	{
 		$o = OpatrovatelkaTableMap::TABLE_NAME;
 		$c = CountryTableMap::TABLE_NAME;
 		$a = AgencyTableMap::TABLE_NAME;
@@ -156,7 +258,7 @@ class BabysitterRepository extends BaseRepository
 			"$o." . OpatrovatelkaTableMap::COL_ACTIVE . ' = ?',
 			"$o." . OpatrovatelkaTableMap::COL_TYPE . ' = ?',
 		];
-		$params = [1, self::TYPE_BABYSITTER];
+		$params = [1, $type];
 
 		if ($countryId !== null) {
 			$where[] = "$o." . OpatrovatelkaTableMap::COL_COUNTRY . ' = ?';

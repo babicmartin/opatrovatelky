@@ -40,7 +40,6 @@ class PartnerPresenter extends AdminPresenter
 		$this->template->country = $country;
 		$this->template->countries = $this->partnerRepository->findCountryOptions();
 		$this->template->statuses = $this->partnerRepository->findStatusOptions();
-		$this->template->filterTitle = $this->createFilterTitle($status, $country);
 		$this->template->canManagePartner = $this->getUser()->isAllowed(Resource::PARTNER->value);
 	}
 
@@ -121,26 +120,5 @@ class PartnerPresenter extends AdminPresenter
 		}
 
 		$this->redirect('this');
-	}
-
-	private function createFilterTitle(?int $status, ?int $country): string
-	{
-		if ($country !== null && $country > 0) {
-			foreach ($this->partnerRepository->findCountryOptions() as $row) {
-				if ($row['id'] === $country) {
-					return 'Filter: ' . $row['name'];
-				}
-			}
-		}
-
-		if ($status !== null && $status > 0) {
-			foreach ($this->partnerRepository->findStatusOptions() as $row) {
-				if ($row['id'] === $status) {
-					return 'Filter: ' . $row['status'];
-				}
-			}
-		}
-
-		return '';
 	}
 }

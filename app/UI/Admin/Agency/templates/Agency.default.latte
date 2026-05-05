@@ -1,6 +1,52 @@
 {varType ?int $status}
 {varType ?int $country}
+{varType array $countries}
+{varType array $statuses}
+{varType bool $canManageAgency}
+
+{block pageTitle}Zoznam agentúr{/block}
 
 {block content}
-	{* TODO: migrate legacy agencies list page. Active filters: status={$status}, country={$country}. *}
+	{if $canManageAgency}
+		<a href="{link create!}" class="btn btn-success btn-sm" style="margin:0 0 20px 0;">Pridať novú agentúru</a>
+	{/if}
+
+	<div class="row mt-2 mb-4" style="border:1px solid #E2C2DA; background:#E2C2DA; padding:5px 10px 10px;">
+		<div class="col-md-12">
+			<div class="d-inline-block me-4">
+				<div class="fw-bold">Krajina:</div>
+				<select name="filter-country" id="filter-country" class="form-control filter-agency">
+					<option value="">---</option>
+					<option n:foreach="$countries as $filterCountry" value="{$filterCountry['id']}" n:attr="selected: $country === $filterCountry['id']">{$filterCountry['name']}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block">
+				<div class="fw-bold">Status:</div>
+				<select name="filter-status" id="filter-status" class="form-control filter-agency">
+					<option value="">---</option>
+					<option n:foreach="$statuses as $filterStatus" value="{$filterStatus['id']}" n:attr="selected: $status === $filterStatus['id']">{$filterStatus['status']}</option>
+				</select>
+			</div>
+		</div>
+	</div>
+
+	{control agencyList}
+{/block}
+
+{block scripts}
+	<script>
+		document.querySelectorAll('.filter-agency').forEach(select => {
+			select.addEventListener('change', () => {
+				const params = new URLSearchParams();
+				const country = document.getElementById('filter-country').value;
+				const status = document.getElementById('filter-status').value;
+
+				if (country) params.set('country', country);
+				if (status) params.set('status', status);
+
+				window.location.href = params.toString() ? '?' + params.toString() : window.location.pathname;
+			});
+		});
+	</script>
 {/block}

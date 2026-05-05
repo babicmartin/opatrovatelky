@@ -38,6 +38,7 @@ class MenuControl extends Control
 			'agencies' => ':Admin:Agency:default',
 			'turnus' => ':Admin:Turnus:default',
 			'projekty' => ':Admin:Project:default',
+			'pracovnici' => ':Admin:Worker:default',
 			'proposal' => ':Admin:Proposal:default',
 			'proposal-records' => ':Admin:Proposal:default',
 			'stats' => ':Admin:Stats:default',

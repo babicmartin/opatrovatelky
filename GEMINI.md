@@ -18,6 +18,10 @@
   - `app/UI/Admin/Control`: Reusable components (neon configuration used).
   - `app/UI/Admin/Form`: Shared forms.
 
+- **Utils:**
+  - `app/Model/Utils`: Object-oriented wrappers for common tasks (Array, Date, String, Validator, etc.).
+  - Prefer using these services over raw PHP functions or static `Nette\Utils` calls for better testability and consistency.
+
 ## Documentation
 - Detailed overview: [.claude/memory/project_overview.md](.claude/memory/project_overview.md)
 - Migration map: [.claude/memory/reference_old_web_map.md](.claude/memory/reference_old_web_map.md)

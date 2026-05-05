@@ -15,3 +15,42 @@ li.nav-item {margin-right:20px;}
 	border-color: transparent;
 	color: #6c757d;
 }
+
+.pdf-loader-modal .modal-content {
+	border: none;
+	border-radius: 14px;
+	box-shadow: 0 18px 50px rgba(138, 32, 98, 0.22);
+}
+.pdf-loader-modal .modal-body { padding: 32px 28px 26px; }
+.pdf-loader-ring { display: inline-block; margin-bottom: 16px; line-height: 0; }
+.pdf-loader-ring svg { display: block; margin: 0 auto; }
+.pdf-loader-track { stroke: #f1e3eb; }
+.pdf-loader-progress {
+	stroke: #8A2062;
+	stroke-dasharray: 326.7;
+	stroke-dashoffset: 326.7;
+	transition: stroke 0.35s ease;
+}
+.pdf-loader-percent {
+	fill: #8A2062;
+	font: 600 24px/1 "Bahnschrift Condensed", "Segoe UI", system-ui, sans-serif;
+	transition: fill 0.3s ease, opacity 0.3s ease;
+}
+.pdf-loader-check {
+	stroke: #198754;
+	stroke-dasharray: 90;
+	stroke-dashoffset: 90;
+	transition: stroke-dashoffset 0.45s ease 0.1s;
+}
+.pdf-loader-ring[data-state="success"] .pdf-loader-progress { stroke: #198754; }
+.pdf-loader-ring[data-state="success"] .pdf-loader-percent { opacity: 0; }
+.pdf-loader-ring[data-state="success"] .pdf-loader-check { stroke-dashoffset: 0; }
+.pdf-loader-ring[data-state="error"] .pdf-loader-progress { stroke: #dc3545; }
+.pdf-loader-ring[data-state="error"] .pdf-loader-percent { fill: #dc3545; }
+.pdf-loader-status {
+	font-size: 15px;
+	font-weight: 500;
+	color: #4a4a4a;
+	letter-spacing: 0.2px;
+}
+.pdf-loader-ring[data-state="error"] ~ .pdf-loader-status { color: #dc3545; }

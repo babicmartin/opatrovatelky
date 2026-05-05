@@ -29,7 +29,11 @@ includes:
     - control/familyDocuments.neon
     - control/babysitterList.neon
     - control/babysitterDocuments.neon
+    - control/workerList.neon
+    - control/projectList.neon
     - control/partnerList.neon
     - control/partnerDocuments.neon
+    - control/agencyList.neon
+    - control/agencyDocuments.neon
     - control/todoActiveList.neon
     - control/todoClosedList.neon

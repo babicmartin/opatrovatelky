@@ -6,5 +6,6 @@ parameters:
         documents: documents
         privateDocuments: private/documents
         documentTypeImages: img/type
+        babysitterPdf: private/export/babysitter/pdf
     url:
         appName: 4MS

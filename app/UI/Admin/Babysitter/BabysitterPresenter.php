@@ -13,6 +13,7 @@ use App\Model\Form\DTO\Admin\Babysitter\BabysitterProfile\BabysitterProfileForm;
 use App\Model\Form\DTO\Admin\Babysitter\BabysitterWorkProfile\BabysitterWorkProfileForm;
 use App\Model\Form\Factory\BaseFormFactory;
 use App\Model\Repository\BabysitterRepository;
+use App\Model\Service\Pdf\BabysitterPdfService;
 use App\Model\Utils\Validator\ImageValidator;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Babysitter\BabysitterDocuments\BabysitterDocumentsControl;
@@ -25,6 +26,7 @@ use App\UI\Admin\Form\Babysitter\BabysitterMain\BabysitterMainFormFactory;
 use App\UI\Admin\Form\Babysitter\BabysitterPdf\BabysitterPdfFormFactory;
 use App\UI\Admin\Form\Babysitter\BabysitterProfile\BabysitterProfileFormFactory;
 use App\UI\Admin\Form\Babysitter\BabysitterWorkProfile\BabysitterWorkProfileFormFactory;
+use Nette\Application\Responses\FileResponse;
 use Nette\Application\UI\Form;
 use Nette\Http\FileUpload;
 use Nette\Utils\ArrayHash;
@@ -56,6 +58,7 @@ class BabysitterPresenter extends AdminPresenter
 		private readonly DirectoryProvider $directoryProvider,
 		private readonly StorageDirProvider $storageDirProvider,
 		private readonly ImageValidator $imageValidator,
+		private readonly BabysitterPdfService $babysitterPdfService,
 	) {
 		parent::__construct();
 	}
@@ -138,7 +141,8 @@ class BabysitterPresenter extends AdminPresenter
 		$this->template->canOpenFamily = $this->getUser()->isAllowed(Resource::FAMILY->value);
 		$this->template->canOpenTurnus = $this->getUser()->isAllowed(Resource::TURNUS->value);
 		$this->template->turnusRows = $this->activeTab === 'main' ? $this->babysitterRepository->findTurnusRowsForBabysitter($id) : [];
-		$this->template->pdfPath = 'export/opatrovatelky/pdf/' . $id . '.pdf';
+		$this->template->pdfExists = $this->babysitterPdfService->exists($id);
+		$this->template->pdfGeneratedAt = $this->babysitterPdfService->getGeneratedAt($id);
 	}
 
 	public function handleCreate(): void
@@ -159,6 +163,53 @@ class BabysitterPresenter extends AdminPresenter
 
 		$id = $this->babysitterRepository->createTurnusForBabysitter($babysitterId, (int) $this->getUser()->getId());
 		$this->redirect(':Admin:Turnus:update', $id);
+	}
+
+	public function handleGeneratePdf(int $id): void
+	{
+		$this->assertCanManage();
+
+		$babysitter = $this->babysitterRepository->findUpdateRow($id);
+		if ($babysitter === null) {
+			if ($this->isAjax()) {
+				$this->sendJson(['success' => false, 'message' => 'Opatrovateľka neexistuje.']);
+			}
+			$this->error('Opatrovateľka neexistuje.', 404);
+		}
+		if ((int) $babysitter['type'] !== 1) {
+			if ($this->isAjax()) {
+				$this->sendJson(['success' => false, 'message' => 'PDF je dostupné iba pre opatrovateľky.']);
+			}
+			$this->error('PDF je dostupné iba pre opatrovateľky.', 403);
+		}
+
+		try {
+			$this->babysitterPdfService->generate($id);
+		} catch (\Throwable $e) {
+			if ($this->isAjax()) {
+				$this->sendJson(['success' => false, 'message' => 'PDF sa nepodarilo vygenerovať.']);
+			}
+			throw $e;
+		}
+
+		if ($this->isAjax()) {
+			$this->sendJson(['success' => true]);
+		}
+
+		$this->flashMessage('PDF bolo vygenerované.', 'success');
+		$this->redirect('update', ['id' => $id, 'tab' => 'pdf']);
+	}
+
+	public function handleDownloadPdf(int $id): void
+	{
+		$this->assertCanManage();
+
+		$path = $this->babysitterPdfService->getAbsolutePath($id);
+		if (!is_file($path)) {
+			$this->error('PDF ešte nebolo vygenerované.', 404);
+		}
+
+		$this->sendResponse(new FileResponse($path, 'babysitter-' . $id . '.pdf', 'application/pdf'));
 	}
 
 	protected function createComponentBabysitterMainForm(): Form

@@ -25,6 +25,10 @@ final class RouterFactory
             ->addRoute('missing-registry[/<action>[/<id>]]', 'MissingRegistry:default')
             ->addRoute('user-management[/<action>[/<id>]]', 'UserManagement:default')
             ->addRoute('proposal[/<action>[/<id>]]', 'Proposal:default')
+            ->addRoute('family[/<action>[/<id>]]', 'Family:default')
+            ->addRoute('babysitter[/<action>[/<id>]]', 'Babysitter:default')
+            ->addRoute('worker[/<action>[/<id>]]', 'Worker:default')
+            ->addRoute('project[/<action>[/<id>]]', 'Project:default')
             ->addRoute('<presenter>[/<action>[/<id>]]', 'Home:default')
             ->addRoute('', 'Home:default');
 

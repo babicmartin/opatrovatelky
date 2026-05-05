@@ -31,7 +31,7 @@
 				<tr n:foreach="$rows as $row">
 					<td class="tcenter">{$iterator->counter}.</td>
 					<td class="w300 text-wrap"><a href="{plink :Admin:Partner:update, id: $row['id']}" class="titleLink">{$row['name']}</a></td>
-					<td class="tcenter"><a href="{plink :Admin:Partner:default, country: $row['countryId']}">{include countryImage, $row['countryImage']}</a></td>
+					<td class="tcenter">{include countryImage, $row['countryImage']}</td>
 					<td class="tcenter text-wrap">
 						<div>
 							<a n:if="$row['web'] !== ''" href="{$row['websiteUrl']}" class="filterLink" target="_blank">{$row['web']}</a>
@@ -41,7 +41,7 @@
 							<a n:if="$row['email'] !== ''" href="mailto:{$row['email']}" class="filterLink">{$row['email']}</a>
 						</div>
 					</td>
-					<td class="tcenter"><a href="{plink :Admin:Partner:default, status: $row['statusId']}" class="filterLink">{include statusBadge, $row['statusLabel'], $row['statusColor']}</a></td>
+					<td class="tcenter">{include statusBadge, $row['statusLabel'], $row['statusColor']}</td>
 					<td class="tcenter"><a href="{plink :Admin:Partner:update, id: $row['id']}" class="btn btn-success btn-sm">Upraviť</a></td>
 				</tr>
 			</tbody>

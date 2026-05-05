@@ -1,0 +1,293 @@
+{varType App\Model\DTO\Pdf\BabysitterPdfData $data}
+{varType array $babysitter}
+{varType array $translation}
+{varType string $wwwDir}
+{varType string $imagesDir}
+{varType string $profileImageHtml}
+
+{var $language = 'german'}
+{var $birthday = $babysitter['birthday'] instanceof DateTimeImmutable ? $babysitter['birthday']->format('d. m. Y') : ''}
+{var $showContact = (int) $babysitter['profilShowContact'] === 1}
+
+{define sidebarBlock1}
+	{var $birthday = $babysitter['birthday'] instanceof DateTimeImmutable ? $babysitter['birthday']->format('d. m. Y') : ''}
+	{var $showContact = (int) $babysitter['profilShowContact'] === 1}
+
+	<div class="pdfOverflow">
+		<div class="pdfBlock1Box1">&nbsp;</div>
+		<div class="pdfBlock1Box2">
+			<div class="pdfBlock1Box2Text1">{$translation[1]['german']|noescape}</div>
+			<div class="pdfBlock1Box2Text2">{$birthday}</div>
+		</div>
+	</div>
+
+	<div class="pdfOverflow pt10">
+		<div class="pdfBlock1Box1">
+			<div class="pdfBlock1Icon"><img src="{$imagesDir}/ikona-dom.png" class="pdfBlock1Icon"></div>
+		</div>
+		<div class="pdfBlock1Box2">
+			<div class="pdfBlock1Box2Text1">{$translation[2]['german']|noescape}</div>
+			<div class="pdfBlock1Box2Text2">{$babysitter['city']}</div>
+			<div class="pdfBlock1Box2Text2">{$babysitter['street']}</div>
+			{if (int) $babysitter['country'] > 0}
+				<div class="pdfBlock1Box2Text2">{$data->countryName}</div>
+			{/if}
+		</div>
+	</div>
+
+	{if $showContact}
+		<div class="pdfOverflow pt10">
+			<div class="pdfBlock1Box1">
+				<div class="pdfBlock1Icon"><img src="{$imagesDir}/ikona-mobil.png" class="pdfBlock1Icon"></div>
+			</div>
+			<div class="pdfBlock1Box2">
+				<div class="pdfBlock1Box2Text1">{$translation[3]['german']|noescape}</div>
+				{if $babysitter['phone'] !== ''}
+					<div class="pdfBlock1Box2Text2">{$babysitter['phone']}</div>
+				{/if}
+				{if $babysitter['contactPersonPhone'] !== ''}
+					<div class="pdfBlock1Box2Text2" style="font-family: Bahnschrift Condensed;">{$babysitter['contactPersonPhone']}</div>
+				{/if}
+			</div>
+		</div>
+
+		<div class="pdfOverflow pt10">
+			<div class="pdfBlock1Box1">
+				<div><img src="{$imagesDir}/ikona-mail.png" class="pdfBlock1Icon" style="margin-top:-5px;"></div>
+			</div>
+			<div class="pdfBlock1Box2">
+				<div class="pdfBlock1Box2Text1">{$translation[4]['german']|noescape}</div>
+				{if $babysitter['email'] !== ''}
+					<div class="pdfBlock1Box2Text2">{$babysitter['email']}</div>
+				{/if}
+			</div>
+		</div>
+	{/if}
+
+	<div class="pdfOverflow pt10">
+		<div class="pdfBlock1Box1">
+			<div><img src="{$imagesDir}/ikona-narodnost.png" class="pdfBlock1Icon"></div>
+		</div>
+		<div class="pdfBlock1Box2">
+			<div class="pdfBlock1Box2Text1">{$translation[5]['german']|noescape}</div>
+			{if (int) $babysitter['country'] > 0}
+				<div class="pdfBlock1Box2Text2">{$data->countryName}</div>
+			{/if}
+		</div>
+	</div>
+
+	<div class="pdfOverflow pt10">
+		<div class="pdfBlock1Box1">
+			<div><img src="{$imagesDir}/ikona-vyska.png" class="pdfBlock1Icon"></div>
+		</div>
+		<div class="pdfBlock1Box2">
+			<div class="pdfBlock1Box2Text1">{$translation[6]['german']|noescape}</div>
+			<div class="pdfBlock1Box2Text2">
+				{if (int) $babysitter['height'] > 0}{$babysitter['height']} cm{/if}
+				{if (int) $babysitter['weight'] > 0} / {$babysitter['weight']} kg{/if}
+			</div>
+		</div>
+	</div>
+
+	<div class="pdfOverflow pt10">
+		<div class="pdfBlock1Box1">
+			<div><img src="{$imagesDir}/ikona-fajcenie.png" class="pdfBlock1Icon"></div>
+		</div>
+		<div class="pdfBlock1Box2">
+			<div class="pdfBlock1Box2Text1">{$translation[7]['german']|noescape}</div>
+			<div class="pdfBlock1Box2Text2">{$data->smokerGerman}</div>
+		</div>
+	</div>
+
+	<div class="pdfOverflow pt10">
+		<div class="pdfBlock1Box1">
+			<div><img src="{$imagesDir}/ikona-alergie.png" class="pdfBlock1Icon"></div>
+		</div>
+		<div class="pdfBlock1Box2">
+			<div class="pdfBlock1Box2Text1">{$translation[8]['german']|noescape}</div>
+			<div class="pdfBlock1Box2Text2">
+				{if $babysitter['allergyDetail'] !== ''}{$babysitter['allergyDetail']|breaklines}{else}{$data->allergyGerman}{/if}
+			</div>
+		</div>
+	</div>
+{/define}
+
+{define sidebarLeft2}
+	<div class="pdfOverflow pt5">
+		<div class="pdfBlock1Box1" style="height:20px;">&nbsp;</div>
+		<div class="pdfBlock1Box2" style="height:20px;">
+			<div class="pdfBlock1Box2Text1">{$translation[9]['german']|noescape}</div>
+		</div>
+	</div>
+
+	<div class="pdfOverflow">
+		<div class="pdfBlock1Box1">
+			<div><img src="{$imagesDir}/ikona-jazyk.png" class="pdfBlock1Icon"></div>
+		</div>
+		<div class="pdfBlock1Box2">
+			<div class="pdfBlock1Box2Text1">
+				{for $i = 1; $i <= $data->languageStars; $i++}<img src="{$imagesDir}/star.png" style="width:25px; float:left; margin-left:2px;">{/for}
+				{if $data->languageStars < 6}{for $i = 1; $i <= 6 - $data->languageStars; $i++}<img src="{$imagesDir}/star-empty.png" style="width:25px; float:left; margin-left:2px;">{/for}{/if}
+			</div>
+			<div class="pdfBlock1Box2Text3">{$data->languageGerman}</div>
+		</div>
+	</div>
+
+	<div class="pdfOverflow pt10" style="padding-bottom:10px;">
+		<div class="pdfBlock1Box1"></div>
+		<div class="pdfBlock1Box2">
+			<div class="pdfBlock1Box2Text1">{$translation[11]['german']|noescape}</div>
+			<div class="pdfBlock1Box2Text2">{$babysitter['languageSkillsOther']}</div>
+		</div>
+	</div>
+{/define}
+
+{define mainPartTitle1, string $icon, string $title, string $width}
+	<div style="text-align:right; width:500px; float:right;">
+		{if $icon === ''}
+			<div style="float:right; width:{$width}; line-height:50px; color:#8a2061; font-size:24px; letter-spacing:-1px;">{$title|noescape}</div>
+		{else}
+			<div style="float:right; width:{$width}; line-height:50px; color:#8a2061; font-size:24px; letter-spacing:-1px;">{$title|noescape}</div><div><img src="{$imagesDir}/{$icon}.png" style="width:50px; font-weight:bold;"></div>
+		{/if}
+	</div>
+{/define}
+
+{define mainPartBoxPage1, string $icon, string $title, string $text}
+	<div class="pdfOverflowMain pt10">
+		<div class="pdfBlock1Box3">
+			<div><img alt="icon" src="{$imagesDir}/{$icon}.png" class="pdfBlock1Icon"></div>
+		</div>
+		<div class="pdfBlock1Box4">
+			<div class="pdfBlock1Box2Text5">{$title|noescape}</div>
+			<div class="pdfBlock1Box2Text4">{$text|breaklines}</div>
+		</div>
+	</div>
+{/define}
+
+{define mainPartBoxPage2, string $icon, string $title1, string $text1, string $title2, string $text2}
+	<div class="pdfOverflowMain pt10">
+		<div class="pdfBlock1Box3">
+			<div><img alt="icon" src="{$imagesDir}/{$icon}.png" class="pdfBlock1Icon"></div>
+		</div>
+		<div class="pdfBlock1Box5">
+			<div class="pdfBlock1Box2Text5">{$title1|noescape}</div>
+			<div class="pdfBlock1Box2Text6">{$text1|breaklines}</div>
+		</div>
+		<div class="pdfBlock1Box5">
+			<div class="pdfBlock1Box2Text5">{$title2|noescape}</div>
+			<div class="pdfBlock1Box2Text6">{$text2|breaklines}</div>
+		</div>
+	</div>
+{/define}
+
+{define mainPartDisease}
+	<div class="pdfBlockDisease">
+		{foreach $data->diseases as $disease}
+			{if in_array($disease['id'], $data->selectedDiseaseIds, true)}
+				<div class="pdfBlock1Box5 pdfBlockText8"><img src="{$imagesDir}/ikona-check.png" style="height:20px; margin-right:3px; vertical-align:text-bottom;">{$disease['german']}</div>
+			{else}
+				<div class="pdfBlock1Box5 pdfBlockText7">{$disease['german']}</div>
+			{/if}
+		{/foreach}
+	</div>
+{/define}
+
+{define agencyRating, string $icon, string $title, string $text}
+	<div class="pdfOverflowMain pt10">
+		<div class="pdfBlock1Box3" style="width:70px;">
+			<div><img alt="icon" src="{$imagesDir}/{$icon}.png" class="pdfBlock1Icon"></div>
+		</div>
+		<div class="pdfBlock1Box4" style="margin:left:20px;">
+			<div style="line-height:30px; color:#8a2061; font-size:24px; letter-spacing:-1px;">{$title|noescape}</div>
+			<div class=""><img src="{$imagesDir}/hodnotenie-5x5.png" style="height:60px; margin-top:-10px;"></div>
+			<div class="pdfBlock1Box2Text4">{$text|breaklines}</div>
+		</div>
+	</div>
+{/define}
+
+<div class="pdfMain" style="margin-bottom:0px;">
+
+	{* Page 1 header *}
+	<div class="pdfHeader1">
+		<div class="pdfOverflow">
+			<div style="float:left; width:300px;">
+				<div style="padding-top:48px; width:180px; height:180px; margin-left:72px;">
+					<div style="width:180px; height:180px; text-align:center;">{$profileImageHtml|noescape}</div>
+				</div>
+			</div>
+			<div style="float:left; width:420px; margin-left:50px;">
+				<div style="padding-top:78px; padding-left:3px; margin-bottom:0; line-height:20px; float:none; font-size:18pt;  color:#191719">{$babysitter['name']}</div>
+				<div style="float:none; padding-top:-10px;  font-size:38pt; color:#8A2061; font-weight:normal; letter-spacing:-3px;">{$babysitter['surname']}</div>
+				<div style="float:none; padding-top:2px; padding-right:20px; font-size:10.5pt; color:#F0E3EB; font-weight:normal;">{$babysitter['about']}</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="pdfLeftBlock1Overflow">
+
+		<div class="pdfLeftBlock1 pt5">
+			{include sidebarBlock1}
+		</div>
+
+		<div class="pdfLeftBlock2">
+			{include sidebarLeft2}
+		</div>
+
+		<div style="float:right; width:500px; height:800px;  margin-right:20px; font-family: Roboto;">
+			{include mainPartTitle1, icon: 'ikona-vzdelanie1', title: $translation[12]['german'], width: '290px'}
+			{include mainPartBoxPage1, icon: 'ikona-vzdelanie', title: $translation[13]['german'], text: $data->educationGerman}
+			{include mainPartBoxPage1, icon: 'ikona-certifikat', title: $translation[14]['german'], text: (string) $babysitter['courseDetail']}
+			{include mainPartBoxPage2, icon: 'ikona-auto', title1: $translation[15]['german'], text1: $data->driverLicenceGerman, title2: $translation[16]['german'], text2: $data->readyDriveGerman}
+			{include mainPartBoxPage2, icon: 'ikona-opatrovatelka', title1: $translation[17]['german'], text1: (string) $babysitter['howLongWork'], title2: $translation[18]['german'], text2: (string) $babysitter['howLongWorkGerman']}
+			{include mainPartTitle1, icon: 'ikona-skusnosti-choroby', title: $translation[19]['german'], width: '420px'}
+			{include mainPartDisease}
+		</div>
+		<div style="clear:both;"></div>
+	</div>
+
+	<pagebreak></pagebreak>
+
+	{* Page 2 header *}
+	<div class="pdfHeader2">
+		<div class="pdfOverflow">
+			<div style="float:left; width:300px;">
+				<div style="padding-top:48px; width:180px; height:180px; margin-left:72px;"></div>
+			</div>
+			<div style="float:left; width:420px; margin-left:50px;">
+				<div style="padding-top:78px; padding-left:3px; margin-bottom:0; line-height:20px; float:none; font-size:18pt;  color:#191719">{$babysitter['name']}</div>
+				<div style="float:none; padding-top:-10px;  font-size:38pt; color:#8A2061; font-weight:normal; letter-spacing:-3px;">{$babysitter['surname']}</div>
+				<div style="float:none; padding-top:2px; padding-right:20px; font-size:11pt; color:#F0E3EB; font-weight:normal;">{$babysitter['about']}</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="pdfLeftBlock1Overflow">
+
+		<div class="pdfLeftBlock1 pt5">
+			{include sidebarBlock1}
+		</div>
+
+		<div class="pdfLeftBlock2">
+			{include sidebarLeft2}
+		</div>
+
+		<div style="float:right; width:500px; height:600px;  margin-right:20px; font-family: Roboto;">
+			{var $care24 = (int) $babysitter['dailyCare'] === 1 ? 'Ja' : 'Nein'}
+			{var $careHour = (int) $babysitter['hourlyCare'] === 1 ? 'Ja' : 'Nein'}
+			<div style="height:600px;">
+				{include mainPartTitle1, icon: '', title: $translation[20]['german'], width: '420px'}
+				{include mainPartBoxPage2, icon: 'ikona-24hod-starostlivost', title1: $translation[22]['german'], text1: $care24, title2: '', text2: ''}
+				{include mainPartBoxPage2, icon: 'ikona-hodinova-starostlivost', title1: $translation[23]['german'], text1: $careHour, title2: $translation[24]['german'], text2: (string) $babysitter['timeScale']}
+				{include mainPartBoxPage1, icon: 'ikona-miesto-vykonu-prace', title: $translation[25]['german'], text: (string) $babysitter['workPlace']}
+				{include mainPartBoxPage1, icon: 'ikona-cinnosti-pri-poskytovanej-osobe', title: $translation[26]['german'], text: (string) $babysitter['workDescription']}
+				{include mainPartBoxPage1, icon: 'ikona-vseobecne-cinnosti', title: $translation[27]['german'], text: (string) $babysitter['generalActivities']}
+			</div>
+		</div>
+
+		<div style="margin-top:15px; margin-left:20px; height:200px; float:right; background:#e6e7e8; border-radius:20px 0 0 20px; width:500px;">
+			{include agencyRating, icon: 'ikona-hodnotenie-agentury', title: $translation[28]['german'], text: (string) $babysitter['ratingAgency']}
+		</div>
+
+		<div style="clear:both;"></div>
+	</div>
+</div>

@@ -42,6 +42,19 @@ class FamilyRepository extends BaseRepository
 		return (int) $row->{FamilyTableMap::COL_ID};
 	}
 
+	public function createEmptyProject(): int
+	{
+		$row = $this->insert([
+			FamilyTableMap::COL_TYPE => self::TYPE_PROJECT,
+		]);
+
+		if (!$row instanceof \Nette\Database\Table\ActiveRow) {
+			throw new \RuntimeException('Project row was not created.');
+		}
+
+		return (int) $row->{FamilyTableMap::COL_ID};
+	}
+
 	/**
 	 * @return array<string, mixed>|null
 	 */
@@ -223,6 +236,43 @@ class FamilyRepository extends BaseRepository
 		int &$pageCount,
 	): array
 	{
+		return $this->findRowsByType(self::TYPE_FAMILY, $page, $itemsPerPage, $countryId, $statusId, $partnerId, $firstLetter, $city, $userId, $pageCount);
+	}
+
+	/**
+	 * @return list<array{id:int,clientNumber:string,name:string,surname:string,countryId:int,countryImage:string,personEmail:string,partnerId:int,partnerName:string,userId:int,userAcronym:string,userColor:string,statusId:int,statusLabel:string,statusColor:string}>
+	 */
+	public function findProjectRows(
+		int $page,
+		int $itemsPerPage,
+		?int $countryId,
+		?int $statusId,
+		?int $partnerId,
+		?string $firstLetter,
+		?string $city,
+		?int $userId,
+		int &$pageCount,
+	): array
+	{
+		return $this->findRowsByType(self::TYPE_PROJECT, $page, $itemsPerPage, $countryId, $statusId, $partnerId, $firstLetter, $city, $userId, $pageCount);
+	}
+
+	/**
+	 * @return list<array{id:int,clientNumber:string,name:string,surname:string,countryId:int,countryImage:string,personEmail:string,partnerId:int,partnerName:string,userId:int,userAcronym:string,userColor:string,statusId:int,statusLabel:string,statusColor:string}>
+	 */
+	private function findRowsByType(
+		int $type,
+		int $page,
+		int $itemsPerPage,
+		?int $countryId,
+		?int $statusId,
+		?int $partnerId,
+		?string $firstLetter,
+		?string $city,
+		?int $userId,
+		int &$pageCount,
+	): array
+	{
 		$f = FamilyTableMap::TABLE_NAME;
 		$c = CountryTableMap::TABLE_NAME;
 		$p = PartnerTableMap::TABLE_NAME;
@@ -233,7 +283,7 @@ class FamilyRepository extends BaseRepository
 			"$f." . FamilyTableMap::COL_TYPE . ' = ?',
 			"$f." . FamilyTableMap::COL_DELETED . ' = ?',
 		];
-		$params = [self::TYPE_FAMILY, 0];
+		$params = [$type, 0];
 
 		if ($countryId !== null) {
 			$where[] = "$f." . FamilyTableMap::COL_STATE . ' = ?';
@@ -500,9 +550,25 @@ class FamilyRepository extends BaseRepository
 	 */
 	public function findCityOptions(): array
 	{
+		return $this->findCityOptionsByType(self::TYPE_FAMILY);
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	public function findCityOptionsForProjects(): array
+	{
+		return $this->findCityOptionsByType(self::TYPE_PROJECT);
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	private function findCityOptionsByType(int $type): array
+	{
 		$rows = $this->database->table(FamilyTableMap::TABLE_NAME)
 			->select('DISTINCT(' . FamilyTableMap::COL_CITY . ') AS city')
-			->where(FamilyTableMap::COL_TYPE, self::TYPE_FAMILY)
+			->where(FamilyTableMap::COL_TYPE, $type)
 			->order(FamilyTableMap::COL_CITY . ' ASC')
 			->fetchAll();
 
@@ -517,6 +583,22 @@ class FamilyRepository extends BaseRepository
 	 */
 	public function findManagerCounts(): array
 	{
+		return $this->findManagerCountsByType(self::TYPE_FAMILY);
+	}
+
+	/**
+	 * @return list<array{id:int,name:string,secondName:string,count:int}>
+	 */
+	public function findProjectManagerCounts(): array
+	{
+		return $this->findManagerCountsByType(self::TYPE_PROJECT);
+	}
+
+	/**
+	 * @return list<array{id:int,name:string,secondName:string,count:int}>
+	 */
+	private function findManagerCountsByType(int $type): array
+	{
 		$rows = $this->database->table(UserTableMap::TABLE_NAME)
 			->where(UserTableMap::COL_PERMISSION . ' < ?', 10)
 			->order(UserTableMap::COL_NAME . ' ASC')
@@ -527,7 +609,7 @@ class FamilyRepository extends BaseRepository
 				'id' => (int) $row->{UserTableMap::COL_ID},
 				'name' => (string) ($row->{UserTableMap::COL_NAME} ?? ''),
 				'secondName' => (string) ($row->{UserTableMap::COL_SECOND_NAME} ?? ''),
-				'count' => $this->countManagedActiveFamilies((int) $row->{UserTableMap::COL_ID}),
+				'count' => $this->countManagedActiveByType((int) $row->{UserTableMap::COL_ID}, $type),
 			],
 			array_values($rows),
 		);
@@ -725,12 +807,12 @@ class FamilyRepository extends BaseRepository
 			->count('*');
 	}
 
-	private function countManagedActiveFamilies(int $userId): int
+	private function countManagedActiveByType(int $userId, int $type): int
 	{
 		return $this->database->table(FamilyTableMap::TABLE_NAME)
 			->where(FamilyTableMap::COL_USER_ID, $userId)
 			->where(FamilyTableMap::COL_STATUS, 1)
-			->where(FamilyTableMap::COL_TYPE, self::TYPE_FAMILY)
+			->where(FamilyTableMap::COL_TYPE, $type)
 			->count('*');
 	}
 

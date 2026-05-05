@@ -6,7 +6,8 @@
 {varType bool $canOpenFamily}
 {varType bool $canOpenTurnus}
 {varType array $turnusRows}
-{varType string $pdfPath}
+{varType bool $pdfExists}
+{varType ?\DateTimeImmutable $pdfGeneratedAt}
 
 {block pageTitle}{$pageTitleText}{/block}
 
@@ -244,8 +245,42 @@
 				<div class="col-xl-8 col-md-12">
 					<div class="divone">
 						<h3 style="font-size:18px; margin:0 0 15px;">Pdf</h3>
-						{* TODO: Migrate legacy PDF generation from old/template/pages/babysitters/pdfOutput.php into a Nette service/action. *}
-						<a href="{$basePath}/{$pdfPath}" target="_blank"><img src="{$basePath}/img/icons/pdf.png" style="margin:20px; height:100px;" alt="PDF"></a>
+						<a href="{link generatePdf!, id: $id}" id="pdfGenerateBtn" class="btn btn-success btn-sm">
+							<i class="fas fa-file-pdf" style="margin-right:6px;"></i>
+							{if $pdfExists}Aktualizovať PDF{else}Vygenerovať PDF{/if}
+						</a>
+						{if $pdfExists}
+							<div style="margin-top:20px;">
+								<a href="{link downloadPdf!, id: $id}" target="_blank">
+									<img src="{$basePath}/img/icons/pdf.png" style="margin:20px; height:100px;" alt="PDF">
+								</a>
+								<div class="text-muted" n:if="$pdfGeneratedAt !== null">
+									Naposledy vygenerované: {$pdfGeneratedAt|date:'d.m.Y H:i'}
+								</div>
+							</div>
+						{/if}
+					</div>
+				</div>
+			</div>
+
+			<div class="modal fade pdf-loader-modal" id="pdfLoaderModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered modal-sm">
+					<div class="modal-content">
+						<div class="modal-body text-center py-4">
+							<div class="pdf-loader-ring" data-state="loading">
+								<svg viewBox="0 0 120 120" width="120" height="120">
+									<circle class="pdf-loader-track" cx="60" cy="60" r="52" fill="none" stroke-width="8"/>
+									<circle class="pdf-loader-progress" cx="60" cy="60" r="52" fill="none" stroke-width="8" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+									<text class="pdf-loader-percent" x="60" y="68" text-anchor="middle">0%</text>
+									<path class="pdf-loader-check" d="M40 62 L54 76 L82 48" fill="none" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+								</svg>
+							</div>
+							<div class="pdf-loader-status"
+								data-status-loading="Generujem PDF..."
+								data-status-success="PDF vygenerované!"
+								data-status-error="Chyba pri generovaní PDF">Generujem PDF...</div>
+							<button type="button" class="btn btn-sm btn-outline-secondary pdf-loader-close mt-3" data-bs-dismiss="modal" hidden>Zavrieť</button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -293,4 +328,5 @@
 
 {block scripts}
 	<script src="{$basePath}/js/autosaveForm.js"></script>
+	<script src="{$basePath}/js/babysitterPdfLoader.js"></script>
 {/block}

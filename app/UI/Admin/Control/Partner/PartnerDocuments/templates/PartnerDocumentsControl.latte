@@ -1,0 +1,89 @@
+{varType string $title}
+{varType array $documents}
+{varType string $typeImageBasePath}
+{varType bool $canManagePartner}
+{varType int $maxFileSize}
+
+{if $canManagePartner}
+	<div class="divone" style="margin-bottom:20px;">
+		{if $title !== ''}
+			<h3 style="font-size:18px; margin:0 0 15px;">{$title}</h3>
+		{/if}
+		{foreach $documents as $document}
+			<div class="overflow space20">
+				<div style="width:60px;">
+					<a href="{link download!, id: $document['id']}" target="_blank">
+						<img src="{$basePath}/{$typeImageBasePath}/{$document['type']}.png" style="height:60px; float:left; margin-right:10px;" alt="">
+					</a>
+				</div>
+
+				{form "documentForm-$document[id]"}
+					<div style="margin-right:10px; float:left; width:25%;">
+						{label notice /}
+						{input notice}
+					</div>
+					<div style="margin-right:10px; float:left; width:15%;">
+						{label validFrom /}
+						{input validFrom}
+					</div>
+					<div style="margin-right:10px; float:left; width:15%;">
+						{label validTo /}
+						{input validTo}
+					</div>
+					<div style="margin-right:10px; float:left; width:15%;">
+						{label status /}
+						{input status}
+					</div>
+					{input save}
+				{/form}
+
+				<div style="margin-right:10px; float:left; width:10%; padding-top:8px;">
+					<div style="font-weight:bold; font-size:16px;">Nahral</div>
+					<span n:if="$document['userAcronym'] !== ''" class="badge" style="background-color:{$document['userColor']|noescape}">{$document['userAcronym']}</span>
+				</div>
+				<div style="margin-right:10px; float:right; width:5%; padding-top:25px;">
+					<a href="{link delete!, id: $document['id']}" title="Odstrániť" onclick="return confirm('Naozaj chcete vymazať tento dokument?');">
+						<img src="{$basePath}/img/icons/x.png" style="height:30px; cursor:pointer" alt="Odstrániť">
+					</a>
+				</div>
+			</div>
+		{/foreach}
+
+		<div id="error" class="space20" style="color:red; font-weight:bold;"></div>
+		<div>
+			{form uploadForm}
+				{input fileAll}
+				{input upload}
+			{/form}
+		</div>
+		<div class="space20"></div>
+	</div>
+
+	<script>
+		document.querySelectorAll('input[type="file"][name$="[fileAll]"], input[type="file"][name="fileAll"]').forEach(input => {
+			input.addEventListener('change', () => {
+				const allowed = ['pdf', 'doc', 'docs', 'docx'];
+				const maxSize = {$maxFileSize};
+				const error = document.getElementById('error');
+
+				for (const file of input.files) {
+					const extension = file.name.split('.').pop().toLowerCase();
+					if (!allowed.includes(extension)) {
+						error.innerHTML = 'Povolené sú iba tieto koncovky: <b>' + allowed.join(', ') + '</b>';
+						input.value = '';
+						return;
+					}
+
+					if (file.size > maxSize) {
+						error.innerHTML = 'Maximálna veľkosť súboru je: <b>20 MB</b>';
+						input.value = '';
+						return;
+					}
+				}
+
+				error.innerHTML = '';
+				input.closest('form').requestSubmit();
+			});
+		});
+	</script>
+{/if}

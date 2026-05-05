@@ -1,0 +1,65 @@
+{varType array $rows}
+
+{define statusBadge, string $label, string $color}
+	<span n:if="$label !== ''" class="badge" style="background-color:{$color|noescape}">{$label}</span>
+{/define}
+
+{define countryImage, string $image}
+	<span class="header-avatar1">
+		<img n:if="$image !== ''" src="{$basePath}/img/country/{$image}" alt="img" style="height:20px; width:auto;" class="">
+		<img n:if="$image === ''" src="{$basePath}/img/empty.jpg" alt="img" style="width:20px; height:20px" class="">
+	</span>
+{/define}
+
+<div n:if="$rows !== []" class="tableone">
+	<div class="tableone-header">
+		<h3 class="tableone-title">Zoznam partnerov</h3>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped card-table table-vcenter text-nowrap">
+			<thead>
+				<tr class="thead">
+					<th class="tcente w50"></th>
+					<th>Názov firmy</th>
+					<th class="tcenter w50">Krajina</th>
+					<th class="tcenter">Web/Telefón/Email</th>
+					<th class="tcenter w50">Status</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr n:foreach="$rows as $row">
+					<td class="tcenter">{$iterator->counter}.</td>
+					<td class="w300 text-wrap"><a href="{plink :Admin:Partner:update, id: $row['id']}" class="titleLink">{$row['name']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Partner:default, country: $row['countryId']}">{include countryImage, $row['countryImage']}</a></td>
+					<td class="tcenter text-wrap">
+						<div>
+							<a n:if="$row['web'] !== ''" href="{$row['websiteUrl']}" class="filterLink" target="_blank">{$row['web']}</a>
+						</div>
+						<div>{$row['phone']}</div>
+						<div>
+							<a n:if="$row['email'] !== ''" href="mailto:{$row['email']}" class="filterLink">{$row['email']}</a>
+						</div>
+					</td>
+					<td class="tcenter"><a href="{plink :Admin:Partner:default, status: $row['statusId']}" class="filterLink">{include statusBadge, $row['statusLabel'], $row['statusColor']}</a></td>
+					<td class="tcenter"><a href="{plink :Admin:Partner:update, id: $row['id']}" class="btn btn-success btn-sm">Upraviť</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div n:if="$rows === []" class="tableone">
+	<div class="tableone-header">
+		<h3 class="tableone-title">Zoznam partnerov</h3>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped card-table table-vcenter text-nowrap">
+			<tbody>
+				<tr>
+					<td class="tcenter">Žiadni partneri.</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

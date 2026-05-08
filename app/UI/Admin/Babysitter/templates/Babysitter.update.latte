@@ -33,7 +33,7 @@
 				</div>
 				<div class="col-xl-8 col-md-12">
 					<div class="divone">
-						<h3 style="font-size:18px; margin:0 0 15px;">Evidencia opatrovania</h3>
+						<h3 style="font-size:18px; margin:0 0 15px;">{if (int) $babysitter['type'] === 1}Evidencia opatrovania{else}Evidencia turnusov{/if}</h3>
 						<a href="{link createTurnus!, babysitterId: $id}" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;">Vytvoriť novú evidenciu</a>
 
 						<div class="table-responsive">
@@ -77,16 +77,18 @@
 						{include profileImage}
 						<div style="font-weight:bold; font-size:16px; margin-top:20px;">Upraviť obrázok</div>
 						<div style="font-size:12px; margin-bottom:10px;">Iba obrázky typu .png, .jpg</div>
-						{form babysitterImageForm}
-							<ul class="alert alert-danger" n:ifcontent>
-								<li n:foreach="$form->ownErrors as $error">{$error}</li>
-							</ul>
-							<div class="mb10">
-								{input image}
-								<div class="text-danger fs-12" n:ifcontent>{inputError image}</div>
-							</div>
-							{input save}
-						{/form}
+						<div class="js-babysitter-image-form-wrap">
+							{form babysitterImageForm}
+								<ul class="alert alert-danger" n:ifcontent>
+									<li n:foreach="$form->ownErrors as $error">{$error}</li>
+								</ul>
+								<div class="mb10">
+									{input image}
+									<div class="text-danger fs-12" n:ifcontent>{inputError image}</div>
+								</div>
+								{input save}
+							{/form}
+						</div>
 					</div>
 				</div>
 				<div class="col-xl-10">
@@ -305,9 +307,9 @@
 {define profileImage}
 	<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">Profilový obrázok</div>
 	{if $babysitter['image'] !== ''}
-		<img src="{$basePath}/img/users/{$babysitter['image']}" style="width:120px;" alt="">
+		<img src="{$basePath}/img/users/{$babysitter['image']}" class="rounded-circle" style="height:120px; width:auto;" alt="">
 	{else}
-		<img src="{$basePath}/img/users/empty.jpg" style="width:120px;" alt="">
+		<img src="{$basePath}/img/users/empty.jpg" class="rounded-circle" style="height:120px; width:120px;" alt="">
 	{/if}
 {/define}
 
@@ -329,4 +331,5 @@
 {block scripts}
 	<script src="{$basePath}/js/autosaveForm.js"></script>
 	<script src="{$basePath}/js/babysitterPdfLoader.js"></script>
+	<script src="{$basePath}/js/babysitterImageUpload.js"></script>
 {/block}

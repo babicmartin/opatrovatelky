@@ -1,0 +1,108 @@
+{varType array $rows}
+{varType App\Model\Utils\Paginator\Paginator $paginator}
+{varType int $finish}
+{varType ?int $statusId}
+{varType ?int $countryId}
+{varType ?int $agencyId}
+{varType int $order}
+{varType int $resultCount}
+{varType int $fromOrder}
+{varType int $toOrder}
+{varType int $fromOrderNext}
+{varType int $toOrderNext}
+{varType bool $canOpenFamily}
+{varType bool $canOpenBabysitter}
+{varType bool $canOpenTurnus}
+
+{define statusBadge, string $label, string $color}
+	<span n:if="$label !== ''" class="badge" style="background-color:{$color|noescape}">{$label}</span>
+{/define}
+
+{define countryFlag, string $image}
+	<span n:if="$image !== ''" class="header-avatar1">
+		<img src="{$basePath}/img/country/{$image}" alt="" style="height:16px; width:auto;" class="rectangle">
+	</span>
+{/define}
+
+{define userAcronym, string $acronym, string $color}
+	<span n:if="$acronym !== ''" class="badge" style="background-color:{$color|noescape}">{$acronym}</span>
+{/define}
+
+{define a1DocumentIcon, string $icon, string $label}
+	<ion-icon n:if="$icon !== ''" name="{$icon}" title="{$label}" alt="{$label}" aria-label="{$label}" style="color:#8A2062; font-size:26px;"></ion-icon>
+{/define}
+
+{define sortIcon, int $state}
+	{if $state === 1 || $state === 2}
+		<i class="fa fa-caret-down"></i>
+	{elseif $state === 3 || $state === 4}
+		<i class="fa fa-caret-up"></i>
+	{else}
+		<i class="fa fa-caret-right"></i>
+	{/if}
+{/define}
+
+<div class="tableone">
+	<div class="tableone-header">
+		<h3 class="tableone-title">Zoznam turnusov ({$resultCount})</h3>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped card-table table-vcenter text-nowrap">
+			<thead>
+				<tr class="thead">
+					<th class="tcenter">Status</th>
+					<th class="tcenter w90">
+						<a href="{plink :Admin:Turnus:default, order: $fromOrderNext, finish: $finish === 1 ? 1 : null, status: $statusId, country: $countryId, agency: $agencyId}" class="filterLinkBold">{include sortIcon, $fromOrder} Od</a>
+					</th>
+					<th class="tcenter w90">
+						<a href="{plink :Admin:Turnus:default, order: $toOrderNext, finish: $finish === 1 ? 1 : null, status: $statusId, country: $countryId, agency: $agencyId}" class="filterLinkBold">{include sortIcon, $toOrder} Do</a>
+					</th>
+					<th class="tcenter">Rodina</th>
+					<th class="tcenter">Opatrovateľka</th>
+					<th class="tcenter">Agentúra</th>
+					<th class="tcenter">Rieši</th>
+					<th class="tcenter">A1</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr n:foreach="$rows as $row" n:attr="data-bs-toggle: $row['isInvoiceUnpaid'] ? 'tooltip', data-bs-title: $row['isInvoiceUnpaid'] ? 'Neuhradená faktúra', style: $row['isInvoiceUnpaid'] ? 'background:#d6f2fa'">
+					<td class="tcenter">
+						<a href="{plink :Admin:Turnus:default, status: $row['statusId']}">
+							{include statusBadge, $row['status'], $row['statusColor']}
+						</a>
+					</td>
+					<td class="tcenter">{if $row['dateFrom'] !== null}{$row['dateFrom']|date:'j.n.Y'}{/if}</td>
+					<td class="tcenter">{if $row['dateTo'] !== null}{$row['dateTo']|date:'j.n.Y'}{/if}</td>
+					<td class="ps-4">
+						{if $canOpenFamily && $row['familyId'] > 0}
+							<a href="{plink :Admin:Family:update, id: $row['familyId']}" class="filterLink">
+								{include countryFlag, $row['countryImage']}
+								{$row['familyName']}
+							</a>
+						{else}
+							{include countryFlag, $row['countryImage']}
+							{$row['familyName']}
+						{/if}
+					</td>
+					<td class="tcenter">
+						<a n:if="$canOpenBabysitter && $row['babysitterId'] > 0" href="{plink :Admin:Babysitter:update, id: $row['babysitterId']}" class="filterLink">{$row['babysitterName']}</a>
+						<span n:if="!$canOpenBabysitter || $row['babysitterId'] <= 0">{$row['babysitterName']}</span>
+					</td>
+					<td class="tcenter">{$row['agencyName']}</td>
+					<td class="tcenter">{include userAcronym, $row['userAcronym'], $row['userColor']}</td>
+					<td class="tcenter">{include a1DocumentIcon, $row['statusA1Icon'], $row['statusA1']}</td>
+					<td class="tcenter">
+						<a n:if="$canOpenTurnus" href="{plink :Admin:Turnus:update, id: $row['id']}" class="btn btn-success btn-sm" style="margin:0 20px 0 10px;">Upraviť</a>
+					</td>
+				</tr>
+				<tr n:if="$rows === []">
+					<td colspan="9" class="tcenter">Žiadne turnusy.</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="space20"></div>
+{include '../../../../templates/components/paginator.latte', paginator: $paginator}

@@ -38,7 +38,7 @@
 						</div>
 						<div>{$row['phone']}</div>
 						<div>
-							<a n:if="$row['email'] !== ''" href="mailto:{$row['email']}" class="filterLink">{$row['email']}</a>
+							<a n:if="$row['email'] !== ''" href="mailto:{$row['email']}" class="filterLink">{$row['emailLabel']}</a>
 						</div>
 					</td>
 					<td class="tcenter">{include statusBadge, $row['statusLabel'], $row['statusColor']}</td>

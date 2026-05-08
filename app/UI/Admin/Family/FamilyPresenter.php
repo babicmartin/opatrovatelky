@@ -106,7 +106,15 @@ class FamilyPresenter extends AdminPresenter
 		$this->template->canOpenBabysitter = $this->getUser()->isAllowed(Resource::BABYSITTER->value);
 		$this->template->canOpenTurnus = $this->getUser()->isAllowed(Resource::TURNUS->value);
 		$this->template->canDeleteFamily = $this->familyRepository->canDeleteFamily($id);
-		$this->template->turnusRows = $this->activeTab === 'main' ? $this->familyRepository->findTurnusRowsForFamily($id) : [];
+		$turnusRows = $this->activeTab === 'main' ? $this->familyRepository->findTurnusRowsForFamily($id) : [];
+		$this->template->turnusRowsWithoutDate = array_values(array_filter(
+			$turnusRows,
+			static fn (array $turnus): bool => $turnus['dateFrom'] === null,
+		));
+		$this->template->turnusRowsWithDate = array_values(array_filter(
+			$turnusRows,
+			static fn (array $turnus): bool => $turnus['dateFrom'] !== null,
+		));
 		$this->template->proposalRows = $this->activeTab === 'proposals' ? $this->familyProposalRepository->findRowsByFamilyId($id) : [];
 	}
 
@@ -164,12 +172,16 @@ class FamilyPresenter extends AdminPresenter
 	protected function createComponentFamilyInfoForm(): Form
 	{
 		$family = $this->getFamily();
+		$userOptions = $this->familyRepository->findUserSelectOptions([
+			(int) $family['acquiredByUserId'],
+			(int) $family['userId'],
+		]);
 
 		return $this->familyInfoFormFactory->create(
 			$family,
 			$this->familyRepository->findFamilyTypeOptions(),
 			$this->familyRepository->findPartnerSelectOptions(),
-			$this->familyRepository->findUserSelectOptions(),
+			$userOptions,
 			$this->familyRepository->findStatusSelectOptions(),
 			$this->familyRepository->findDocumentStatusSelectOptions(),
 			$this->familyRepository->findWorkStatusStaffOptions(),

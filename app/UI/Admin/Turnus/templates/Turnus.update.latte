@@ -1,6 +1,271 @@
+{varType int $id}
+{varType array $turnus}
+{varType bool $showWorkPosition}
+{varType bool $canManageTurnus}
+{varType bool $canOpenFamily}
+{varType bool $canOpenBabysitter}
+
 {block pageTitle}Detail turnusu{/block}
 
 {block content}
-	{varType int $id}
-	{* TODO: migrate legacy turnus-update page for ID {$id}. *}
+	<a n:if="$canOpenFamily && $turnus['familyId'] > 0" href="{plink :Admin:Family:update, id: $turnus['familyId']}" class="btn btn-success btn-sm">Zobraziť detail rodiny</a>
+	<a n:if="$canOpenBabysitter && $turnus['babysitterId'] > 0" href="{plink :Admin:Babysitter:update, id: $turnus['babysitterId']}" class="btn btn-success btn-sm">Zobraziť detail opatrovateľky</a>
+
+	<div class="space20"></div>
+
+	{form turnusUpdateForm}
+		{input id}
+		{if !$showWorkPosition}
+			{input workPositionId}
+		{/if}
+
+		<div class="divoneDark">
+			<div class="row">
+				<div class="col-xl-2 col-md-12">
+					<div class="mb10">
+						<div class="inputLabel">{label status /}</div>
+						{input status}
+					</div>
+				</div>
+				<div class="col-xl-3 col-md-12">
+					<div class="mb10">
+						<div class="inputLabel">{label familyId /}</div>
+						{input familyId}
+					</div>
+				</div>
+				<div class="col-xl-3 col-md-12">
+					<div class="mb10">
+						<div class="inputLabel">{label babysitterId /}</div>
+						{input babysitterId}
+					</div>
+				</div>
+				<div class="col-xl-2 col-md-12">
+					<div class="mb10">
+						<div class="inputLabel">{label dateFrom /}</div>
+						{input dateFrom}
+					</div>
+				</div>
+				<div class="col-xl-2 col-md-12">
+					<div class="mb10">
+						<div class="inputLabel">{label dateTo /}</div>
+						{input dateTo}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="space20">&nbsp;</div>
+
+		<div class="row">
+			<div class="col-xl-2 col-md-12">
+				<div class="divone">
+					<div>
+						<div class="mb10">
+							<div class="inputLabel">Turnus vytvoril</div>
+							<input type="text" class="form-control" disabled value="{$turnus['userCreatedName']}">
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">Dátum vytvorenia</div>
+							{if $turnus['dateCreated'] !== null}
+								<input type="text" class="form-control" disabled value="{$turnus['dateCreated']|date:'d.m.Y'}">
+							{else}
+								<input type="text" class="form-control" disabled value="">
+							{/if}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label userId /}</div>
+							{input userId}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-2 col-md-12">
+				<div class="divone">
+					<div>
+						<div class="mb10">
+							<div class="inputLabel">{label agencyId /}</div>
+							{input agencyId}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label partnerId /}</div>
+							{input partnerId}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label workingStatus /}</div>
+							{input workingStatus}
+						</div>
+						<div n:if="$showWorkPosition" class="mb10">
+							<div class="inputLabel">{label workPositionId /}</div>
+							{input workPositionId}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-2 col-md-12">
+				<div class="divone">
+					<div>
+						<div class="mb10">
+							<div class="inputLabel">{label preinvoiceNumber /}</div>
+							{input preinvoiceNumber}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label invoiceNumber /}</div>
+							{input invoiceNumber}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label invoiceStatus /}</div>
+							{input invoiceStatus}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-2 col-md-12">
+				<div class="divone">
+					<div>
+						<div class="mb10">
+							<div class="inputLabel">{label fee /}</div>
+							{input fee}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label feeAg /}</div>
+							{input feeAg}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label feeBk /}</div>
+							{input feeBk}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label travelCostsArrival /}</div>
+							{input travelCostsArrival}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label travelCostsDeparture /}</div>
+							{input travelCostsDeparture}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label travelExpenses /}</div>
+							{input travelExpenses}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label bonus /}</div>
+							{input bonus}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label holiday /}</div>
+							{input holiday}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label sva /}</div>
+							{input sva}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-2 col-md-12">
+				<div class="divone">
+					<div>
+						<div class="mb10">
+							<div class="inputLabel">{label commissionComplet /}</div>
+							{input commissionComplet}
+						</div>
+						<div class="mb10">
+							<div class="row">
+								<div class="col-xl-6 col-md-12">
+									<div class="inputLabel">{label commissionPartners /}</div>
+									{input commissionPartners}
+								</div>
+								<div class="col-xl-6 col-md-12">
+									<div class="mb10">
+										<div class="inputLabel">{label paymentPeriodPartner /}</div>
+										{input paymentPeriodPartner}
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="mb10">
+							<div class="row">
+								<div class="col-xl-6 col-md-12">
+									<div class="inputLabel">{label commission4ms /}</div>
+									{input commission4ms}
+								</div>
+								<div class="col-xl-6 col-md-12">
+									<div class="mb10">
+										<div class="inputLabel">{label paymentPeriod /}</div>
+										{input paymentPeriod}
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label remainingPayment /}</div>
+							{input remainingPayment}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-2 col-md-12">
+				<div class="divone">
+					<div>
+						<div class="mb10">
+							<div class="inputLabel">{label notice /}</div>
+							{input notice}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label complaint /}</div>
+							{input complaint}
+						</div>
+						<div class="mb10">
+							<div class="inputLabel">{label complaintStatus /}</div>
+							{input complaintStatus}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		{input save}
+	{/form}
+
+	<div class="space20">&nbsp;</div>
+
+	<div class="row">
+		<div class="col-xl-8 col-md-12">
+			{control turnusDocuments}
+		</div>
+
+		<div class="col-xl-2 col-md-12">
+			<div class="divone">
+				<div>
+					{form turnusStatusA1Form}
+						{input id}
+						<div class="mb10">
+							<div class="inputLabel">{label statusA1 /}</div>
+							{input statusA1}
+						</div>
+						{input save}
+					{/form}
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xl-2 col-md-12">
+			<div class="divone">
+				<div>
+					<h3 style="font-size:18px; margin:0 0 15px;">Odstrániť turnus</h3>
+					<a n:if="$canManageTurnus" href="{link delete!, id: $id}" title="Odstrániť" onclick="return confirm('Naozaj chceš odstrániť turnus?');">
+						<img src="{$basePath}/img/icons/x.png" style="height:30px; cursor:pointer;" alt="Odstrániť">
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+{/block}
+
+{block scripts}
+	<script src="{$basePath}/js/autosaveForm.js"></script>
 {/block}

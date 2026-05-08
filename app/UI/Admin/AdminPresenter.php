@@ -38,7 +38,7 @@ abstract class AdminPresenter extends Presenter
 		$this->getSession()->start();
 
 
-		// TODO: uncomment after development
+		// TODO SECURITY: Development-only bypass. Re-enable before production deployment.
 		// if (!$this->getUser()->isLoggedIn() && $this->getName() !== 'Login:Login') {
 		// 	$this->redirect('@login');
 		// }

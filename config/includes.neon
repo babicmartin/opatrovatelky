@@ -21,6 +21,8 @@ includes:
     - control/projectOffcanvas.neon
     - control/homepageTurnusList.neon
     - control/unpaidInvoicesWidget.neon
+    - control/turnusList.neon
+    - control/turnusDocuments.neon
     - control/statsOverview.neon
     - control/missingRegistryList.neon
     - control/proposalList.neon

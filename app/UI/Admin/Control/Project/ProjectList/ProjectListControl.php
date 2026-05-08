@@ -25,7 +25,7 @@ class ProjectListControl extends Control
 
 	private ?int $userId = null;
 
-	private int $pageCount = 1;
+	private int $totalCount = 0;
 
 	/** @var list<array<string, mixed>>|null */
 	private ?array $rows = null;
@@ -67,6 +67,7 @@ class ProjectListControl extends Control
 		$template = $this->getTemplate();
 		$template->setFile(__DIR__ . '/templates/ProjectListControl.latte');
 		$template->rows = $this->getRows();
+		$template->resultCount = $this->totalCount;
 		$template->paginator = $this->createPaginator();
 		$template->render();
 	}
@@ -78,6 +79,7 @@ class ProjectListControl extends Control
 	{
 		if ($this->rows === null) {
 			$pageCount = 1;
+			$totalCount = 0;
 			$this->rows = $this->familyRepository->findProjectRows(
 				$this->page,
 				self::ITEMS_PER_PAGE,
@@ -88,8 +90,9 @@ class ProjectListControl extends Control
 				$this->city,
 				$this->userId,
 				$pageCount,
+				$totalCount,
 			);
-			$this->pageCount = max(1, $pageCount);
+			$this->totalCount = max(0, $totalCount);
 		}
 
 		return $this->rows;
@@ -99,9 +102,9 @@ class ProjectListControl extends Control
 	{
 		$this->getRows();
 
-		return $this->paginatorFactory->createFromPageCount(
+		return $this->paginatorFactory->create(
 			$this->page,
-			$this->pageCount,
+			$this->totalCount,
 			self::ITEMS_PER_PAGE,
 			'this',
 			array_filter(

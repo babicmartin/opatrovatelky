@@ -54,7 +54,10 @@ class BabysitterRepository extends BaseRepository
 			throw new \RuntimeException('Babysitter row was not created.');
 		}
 
-		return (int) $row->{OpatrovatelkaTableMap::COL_ID};
+		$id = (int) $row->{OpatrovatelkaTableMap::COL_ID};
+		$this->generateClientNumberIfMissing($id);
+
+		return $id;
 	}
 
 	public function createEmptyWorker(): int
@@ -68,7 +71,32 @@ class BabysitterRepository extends BaseRepository
 			throw new \RuntimeException('Worker row was not created.');
 		}
 
-		return (int) $row->{OpatrovatelkaTableMap::COL_ID};
+		$id = (int) $row->{OpatrovatelkaTableMap::COL_ID};
+		$this->generateClientNumberIfMissing($id);
+
+		return $id;
+	}
+
+	public function generateClientNumberIfMissing(int $id): void
+	{
+		$row = $this->getItem($id);
+		if ($row === null || (string) ($row->{OpatrovatelkaTableMap::COL_CLIENT_NUMBER} ?? '') !== '') {
+			return;
+		}
+
+		$prefix = 'OP' . date('y');
+		$index = 1;
+		do {
+			$clientNumber = $prefix . str_pad((string) $index, 3, '0', STR_PAD_LEFT);
+			$exists = $this->findAll()
+				->where(OpatrovatelkaTableMap::COL_CLIENT_NUMBER, $clientNumber)
+				->fetch() !== null;
+			$index++;
+		} while ($exists);
+
+		$this->update($id, [
+			OpatrovatelkaTableMap::COL_CLIENT_NUMBER => $clientNumber,
+		]);
 	}
 
 	public function countActiveWorkers(): int
@@ -169,6 +197,7 @@ class BabysitterRepository extends BaseRepository
 		?int $statusId,
 		?string $firstLetter,
 		int &$pageCount,
+		int &$totalCount,
 	): array
 	{
 		return $this->findRowsByType(
@@ -185,6 +214,7 @@ class BabysitterRepository extends BaseRepository
 			$statusId,
 			$firstLetter,
 			$pageCount,
+			$totalCount,
 		);
 	}
 
@@ -207,6 +237,7 @@ class BabysitterRepository extends BaseRepository
 		?int $statusId,
 		?string $firstLetter,
 		int &$pageCount,
+		int &$totalCount,
 	): array
 	{
 		return $this->findRowsByType(
@@ -223,6 +254,7 @@ class BabysitterRepository extends BaseRepository
 			$statusId,
 			$firstLetter,
 			$pageCount,
+			$totalCount,
 		);
 	}
 
@@ -246,6 +278,7 @@ class BabysitterRepository extends BaseRepository
 		?int $statusId,
 		?string $firstLetter,
 		int &$pageCount,
+		int &$totalCount,
 	): array
 	{
 		$o = OpatrovatelkaTableMap::TABLE_NAME;
@@ -673,26 +706,37 @@ class BabysitterRepository extends BaseRepository
 
 	public function updateProfileFromForm(BabysitterProfileForm $form): void
 	{
-		$this->update($form->id, [
+		$data = [
 			OpatrovatelkaTableMap::COL_SMOKER => $form->smoker,
 			OpatrovatelkaTableMap::COL_ALLERGY => $form->allergy,
 			OpatrovatelkaTableMap::COL_ALLERGY_DETAIL => $form->allergyDetail,
 			OpatrovatelkaTableMap::COL_HOW_LONG_WORK => $form->howLongWork,
 			OpatrovatelkaTableMap::COL_HOW_LONG_WORK_GERMAN => $form->howLongWorkGerman,
-			OpatrovatelkaTableMap::COL_DAILY_CARE => $form->dailyCare,
-			OpatrovatelkaTableMap::COL_HOURLY_CARE => $form->hourlyCare,
-			OpatrovatelkaTableMap::COL_ACCOMMODATION_TYPE => $form->accommodationType,
 			OpatrovatelkaTableMap::COL_TIME_SCALE => $form->timeScale,
 			OpatrovatelkaTableMap::COL_WORK_PLACE => $form->workPlace,
-			OpatrovatelkaTableMap::COL_JOB_POSITION_INTEREST => $form->jobPositionInterest,
 			OpatrovatelkaTableMap::COL_WORK_DESCRIPTION => $form->workDescription,
 			OpatrovatelkaTableMap::COL_GENERAL_ACTIVITIES => $form->generalActivities,
 			OpatrovatelkaTableMap::COL_RATING_AGENCY => $form->ratingAgency,
-			OpatrovatelkaTableMap::COL_WORK_SHOES => $form->workShoes,
-			OpatrovatelkaTableMap::COL_SHOE_SIZE => $form->shoeSize,
-			OpatrovatelkaTableMap::COL_GERMAN_TAX_ID => $form->germanTaxId,
-		]);
-		$this->replaceJunctionIds(BabysitterDiseaseTableMap::TABLE_NAME, BabysitterDiseaseTableMap::COL_BABYSITTER_ID, BabysitterDiseaseTableMap::COL_DISEASE_ID, $form->id, $form->diseaseIds);
+		];
+
+		if ($form->type === self::TYPE_BABYSITTER) {
+			$data[OpatrovatelkaTableMap::COL_DAILY_CARE] = $form->dailyCare;
+			$data[OpatrovatelkaTableMap::COL_HOURLY_CARE] = $form->hourlyCare;
+		}
+
+		if ($form->type === self::TYPE_WORKER) {
+			$data[OpatrovatelkaTableMap::COL_ACCOMMODATION_TYPE] = $form->accommodationType;
+			$data[OpatrovatelkaTableMap::COL_JOB_POSITION_INTEREST] = $form->jobPositionInterest;
+			$data[OpatrovatelkaTableMap::COL_WORK_SHOES] = $form->workShoes;
+			$data[OpatrovatelkaTableMap::COL_SHOE_SIZE] = $form->shoeSize;
+			$data[OpatrovatelkaTableMap::COL_GERMAN_TAX_ID] = $form->germanTaxId;
+		}
+
+		$this->update($form->id, $data);
+
+		if ($form->type === self::TYPE_BABYSITTER) {
+			$this->replaceJunctionIds(BabysitterDiseaseTableMap::TABLE_NAME, BabysitterDiseaseTableMap::COL_BABYSITTER_ID, BabysitterDiseaseTableMap::COL_DISEASE_ID, $form->id, $form->diseaseIds);
+		}
 	}
 
 	public function updatePdfFromForm(BabysitterPdfForm $form): void

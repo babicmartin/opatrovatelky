@@ -6,6 +6,8 @@ use App\Model\Enum\Acl\Resource;
 use App\Model\Form\DTO\Admin\Family\FamilyAddress\FamilyAddressForm;
 use App\Model\Form\Factory\BaseFormFactory;
 use Nette\Application\UI\Form;
+use Nette\Forms\Controls\BaseControl;
+use Nette\Forms\Form as NetteForm;
 use Nette\Security\User;
 use Nette\Utils\ArrayHash;
 
@@ -72,7 +74,7 @@ final readonly class FamilyAddressFormFactory
 
 			$onSuccess(new FamilyAddressForm(
 				(int) $values->id,
-				(string) $values->companyName,
+				$this->hasSubmittedControl($form, 'companyName') ? (string) $values->companyName : null,
 				(string) $values->name,
 				(string) $values->surname,
 				(string) $values->street,
@@ -80,8 +82,8 @@ final readonly class FamilyAddressFormFactory
 				(string) $values->psc,
 				(string) $values->city,
 				(string) $values->billing,
-				(string) $values->employer,
-				(string) $values->accommodationAddress,
+				$this->hasSubmittedControl($form, 'employer') ? (string) $values->employer : null,
+				$this->hasSubmittedControl($form, 'accommodationAddress') ? (string) $values->accommodationAddress : null,
 				(string) $values->notice,
 				(string) $values->personSurname,
 				(string) $values->personName,
@@ -92,5 +94,15 @@ final readonly class FamilyAddressFormFactory
 		};
 
 		return $form;
+	}
+
+	private function hasSubmittedControl(Form $form, string $name): bool
+	{
+		$control = $form->getComponent($name, false);
+		if (!$control instanceof BaseControl) {
+			return false;
+		}
+
+		return $form->getHttpData(NetteForm::DataText, $control->getHtmlName()) !== null;
 	}
 }

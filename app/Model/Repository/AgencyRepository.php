@@ -69,7 +69,7 @@ class AgencyRepository extends BaseRepository
 	}
 
 	/**
-	 * @return list<array{id:int,name:string,websiteUrl:string,web:string,phone:string,email:string,countryId:int,countryImage:string,statusId:int,statusLabel:string,statusColor:string}>
+	 * @return list<array{id:int,name:string,websiteUrl:string,web:string,phone:string,email:string,emailLabel:string,countryId:int,countryImage:string,statusId:int,statusLabel:string,statusColor:string}>
 	 */
 	public function findAgencyRows(?int $countryId, ?int $statusId): array
 	{
@@ -113,19 +113,24 @@ class AgencyRepository extends BaseRepository
 		";
 
 		return array_map(
-			fn (Row $row): array => [
+			function (Row $row): array {
+				$email = (string) ($row->email ?? '');
+
+				return [
 				'id' => (int) $row->id,
 				'name' => (string) ($row->name ?? ''),
 				'web' => (string) ($row->web ?? ''),
 				'websiteUrl' => $this->formatWebsiteUrl((string) ($row->web ?? '')),
 				'phone' => (string) ($row->phone ?? ''),
-				'email' => (string) ($row->email ?? ''),
+				'email' => $email,
+				'emailLabel' => strip_tags($email),
 				'countryId' => (int) ($row->country_id ?? 0),
 				'countryImage' => (string) ($row->country_image ?? ''),
 				'statusId' => (int) ($row->status_id ?? 0),
 				'statusLabel' => (string) ($row->status_label ?? ''),
 				'statusColor' => (string) ($row->status_color ?? ''),
-			],
+				];
+			},
 			$this->database->query($sql, ...$params)->fetchAll(),
 		);
 	}

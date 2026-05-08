@@ -16,10 +16,10 @@ final readonly class FamilyInfoForm
 		public ?\DateTimeImmutable $dateTo,
 		public int $orderStatus,
 		public int $contractStatus,
-		public int $workStatusStaff,
-		public string $projectDescription,
-		public string $projectPositions,
-		public string $projectAvailablePositions,
+		public ?int $workStatusStaff,
+		public ?string $projectDescription,
+		public ?string $projectPositions,
+		public ?string $projectAvailablePositions,
 	) {
 	}
 }

@@ -23,7 +23,8 @@ final class LoginPresenter extends AdminPresenter
 	public function actionLogout(): void
 	{
 		if ($this->getUser()->isLoggedIn()) {
-			$this->getUser()->logout();
+			$this->getUser()->logout(true);
+			$this->getSession()->regenerateId();
 		}
 
 		$this->redirect('@login');

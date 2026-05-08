@@ -5,18 +5,24 @@ namespace App\Model\Security;
 use App\Model\Enum\UserRole\UserRole;
 use App\Model\Table\UserTableMap;
 use Nette\Database\Explorer;
+use Nette\Database\Table\ActiveRow;
 use Nette\Security\AuthenticationException;
 use Nette\Security\Authenticator;
 use Nette\Security\IdentityHandler;
 use Nette\Security\IIdentity;
 use Nette\Security\Passwords;
 use Nette\Security\SimpleIdentity;
+use Psr\Log\LoggerInterface;
 
 final class AdminAuthenticator implements Authenticator, IdentityHandler
 {
+	private const string AUTHENTICATION_FAILED_MESSAGE = 'Prihlásenie sa nepodarilo.';
+	private const string INACTIVE_ACCOUNT_STATUS = 'inactive_account';
+
 	public function __construct(
 		private readonly Passwords $passwords,
 		private readonly Explorer $database,
+		private readonly LoggerInterface $logger,
 	)
 	{
 	}
@@ -48,6 +54,11 @@ final class AdminAuthenticator implements Authenticator, IdentityHandler
 			throw new AuthenticationException('Nesprávne heslo.');
 		}
 
+		if (!$this->isUserActive($user)) {
+			$this->logInactiveAccountRejection($user);
+			throw new AuthenticationException(self::AUTHENTICATION_FAILED_MESSAGE);
+		}
+
 		if (!str_starts_with($storedHash, '$argon2id$') || $this->passwords->needsRehash($storedHash)) {
 			$userId = $user->{UserTableMap::COL_ID};
 			if (!is_int($userId)) {
@@ -77,11 +88,30 @@ final class AdminAuthenticator implements Authenticator, IdentityHandler
             return null;
         }
 
+        if (!$this->isUserActive($user)) {
+            $this->logInactiveAccountRejection($user);
+            return null;
+        }
+
         // Tu sa znova vytvorí čerstvá identita s tvojím Enumom
         return $this->createIdentity($user);
     }
 
-	private function createIdentity(\Nette\Database\Table\ActiveRow $user): SimpleIdentity
+	private function isUserActive(ActiveRow $user): bool
+	{
+		return (int) $user->{UserTableMap::COL_ACTIVE} === 1;
+	}
+
+	private function logInactiveAccountRejection(ActiveRow $user): void
+	{
+		$this->logger->warning('Login rejected: inactive account.', [
+			'status' => self::INACTIVE_ACCOUNT_STATUS,
+			'userId' => (int) $user->{UserTableMap::COL_ID},
+			'email' => (string) $user->{UserTableMap::COL_EMAIL},
+		]);
+	}
+
+	private function createIdentity(ActiveRow $user): SimpleIdentity
 	{
 		$permissionValue = $user->{UserTableMap::COL_PERMISSION};
 		$permissionId = is_numeric($permissionValue) ? (int) $permissionValue : 0;

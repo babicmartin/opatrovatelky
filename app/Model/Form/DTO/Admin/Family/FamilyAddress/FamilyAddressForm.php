@@ -6,7 +6,7 @@ final readonly class FamilyAddressForm
 {
 	public function __construct(
 		public int $id,
-		public string $companyName,
+		public ?string $companyName,
 		public string $name,
 		public string $surname,
 		public string $street,
@@ -14,8 +14,8 @@ final readonly class FamilyAddressForm
 		public string $psc,
 		public string $city,
 		public string $billing,
-		public string $employer,
-		public string $accommodationAddress,
+		public ?string $employer,
+		public ?string $accommodationAddress,
 		public string $notice,
 		public string $personSurname,
 		public string $personName,

@@ -7,6 +7,8 @@ use App\Model\Form\DTO\Admin\Family\FamilyInfo\FamilyInfoForm;
 use App\Model\Form\Factory\BaseFormFactory;
 use App\Model\Utils\Date\DateService;
 use Nette\Application\UI\Form;
+use Nette\Forms\Controls\BaseControl;
+use Nette\Forms\Form as NetteForm;
 use Nette\Security\User;
 use Nette\Utils\ArrayHash;
 
@@ -44,7 +46,9 @@ final readonly class FamilyInfoFormFactory
 		}
 
 		$form = $this->baseFormFactory->create();
-		$form->getElementPrototype()->setAttribute('class', 'family-info-form js-autosave-form');
+		$form->getElementPrototype()
+			->setAttribute('class', 'family-info-form js-autosave-form')
+			->setAttribute('style', 'display:contents;');
 
 		$form->addHidden('id', (string) $family['id']);
 		$form->addSelect('type', 'Rodina / Projekt', $typeOptions)
@@ -110,13 +114,23 @@ final readonly class FamilyInfoFormFactory
 				$this->dateService->tryCreateFromUserInput((string) $values->dateTo),
 				(int) $values->orderStatus,
 				(int) $values->contractStatus,
-				(int) $values->workStatusStaff,
-				(string) $values->projectDescription,
-				(string) $values->projectPositions,
-				(string) $values->projectAvailablePositions,
+				$this->hasSubmittedControl($form, 'workStatusStaff') ? (int) $values->workStatusStaff : null,
+				$this->hasSubmittedControl($form, 'projectDescription') ? (string) $values->projectDescription : null,
+				$this->hasSubmittedControl($form, 'projectPositions') ? (string) $values->projectPositions : null,
+				$this->hasSubmittedControl($form, 'projectAvailablePositions') ? (string) $values->projectAvailablePositions : null,
 			));
 		};
 
 		return $form;
+	}
+
+	private function hasSubmittedControl(Form $form, string $name): bool
+	{
+		$control = $form->getComponent($name, false);
+		if (!$control instanceof BaseControl) {
+			return false;
+		}
+
+		return $form->getHttpData(NetteForm::DataText, $control->getHtmlName()) !== null;
 	}
 }

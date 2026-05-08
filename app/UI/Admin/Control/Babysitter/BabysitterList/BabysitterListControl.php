@@ -31,7 +31,7 @@ class BabysitterListControl extends Control
 
 	private ?string $firstLetter = null;
 
-	private int $pageCount = 1;
+	private int $totalCount = 0;
 
 	/** @var list<array<string, mixed>>|null */
 	private ?array $rows = null;
@@ -79,6 +79,7 @@ class BabysitterListControl extends Control
 		$template = $this->getTemplate();
 		$template->setFile(__DIR__ . '/templates/BabysitterListControl.latte');
 		$template->rows = $this->getRows();
+		$template->resultCount = $this->totalCount;
 		$template->paginator = $this->createPaginator();
 		$template->render();
 	}
@@ -90,6 +91,7 @@ class BabysitterListControl extends Control
 	{
 		if ($this->rows === null) {
 			$pageCount = 1;
+			$totalCount = 0;
 			$this->rows = $this->babysitterRepository->findBabysitterRows(
 				$this->page,
 				self::ITEMS_PER_PAGE,
@@ -103,8 +105,9 @@ class BabysitterListControl extends Control
 				$this->statusId,
 				$this->firstLetter,
 				$pageCount,
+				$totalCount,
 			);
-			$this->pageCount = max(1, $pageCount);
+			$this->totalCount = max(0, $totalCount);
 		}
 
 		return $this->rows;
@@ -114,9 +117,9 @@ class BabysitterListControl extends Control
 	{
 		$this->getRows();
 
-		return $this->paginatorFactory->createFromPageCount(
+		return $this->paginatorFactory->create(
 			$this->page,
-			$this->pageCount,
+			$this->totalCount,
 			self::ITEMS_PER_PAGE,
 			'this',
 			array_filter(

@@ -1,4 +1,5 @@
 {varType array $rows}
+{varType int $resultCount}
 {varType App\Model\Utils\Paginator\Paginator $paginator}
 
 {define statusBadge, string $label, string $color}
@@ -18,7 +19,7 @@
 
 <div n:if="$rows !== []" class="tableone">
 	<div class="tableone-header">
-		<h3 class="tableone-title">Zoznam rodín</h3>
+		<h3 class="tableone-title">Zoznam rodín ({$resultCount})</h3>
 	</div>
 	<div class="table-responsive">
 		<table class="table table-striped card-table table-vcenter text-nowrap">
@@ -52,7 +53,7 @@
 
 <div n:if="$rows === []" class="tableone">
 	<div class="tableone-header">
-		<h3 class="tableone-title">Zoznam rodín</h3>
+		<h3 class="tableone-title">Zoznam rodín ({$resultCount})</h3>
 	</div>
 	<div class="table-responsive">
 		<table class="table table-striped card-table table-vcenter text-nowrap">

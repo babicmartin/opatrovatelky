@@ -16,6 +16,44 @@ li.nav-item {margin-right:20px;}
 	color: #6c757d;
 }
 
+.admin-toolbar-icon {
+	align-items: center;
+	background: #fff;
+	border: 2px solid #8A2062;
+	border-radius: 50%;
+	color: #8A2062;
+	cursor: pointer;
+	display: inline-flex;
+	height: 46px;
+	justify-content: center;
+	line-height: 1;
+	margin-right: 10px;
+	padding: 0;
+	text-decoration: none;
+	vertical-align: middle;
+	width: 46px;
+}
+
+.admin-toolbar-icon:hover,
+.admin-toolbar-icon:focus {
+	color: #8A2062;
+	text-decoration: none;
+}
+
+.admin-toolbar-icon:focus-visible {
+	box-shadow: 0 0 0 3px rgba(138, 32, 98, 0.22);
+	outline: none;
+}
+
+.admin-toolbar-icon i,
+.admin-toolbar-icon .svg-inline--fa,
+.admin-toolbar-icon-symbol {
+	flex: 0 0 auto;
+	font-size: 24px;
+	height: 24px;
+	width: 24px;
+}
+
 .pdf-loader-modal .modal-content {
 	border: none;
 	border-radius: 14px;

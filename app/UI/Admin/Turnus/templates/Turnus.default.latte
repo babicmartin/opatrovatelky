@@ -1,6 +1,87 @@
+{varType ?int $page}
+{varType int $finish}
+{varType ?int $status}
+{varType ?int $country}
+{varType ?int $agency}
+{varType int $order}
+{varType string $listMode}
+{varType array $statuses}
+{varType array $countries}
+{varType array $agencies}
+{varType bool $canManageTurnus}
+
 {block pageTitle}Turnusy{/block}
 
 {block content}
-	{varType int|null $status}
-	{* TODO: migrate legacy turnus list page. *}
+	{if $canManageTurnus}
+		<a href="{link create!}" class="btn btn-success btn-sm" style="margin:0 0 20px 0;">Pridať nový turnus</a>
+	{/if}
+
+	<div class="row mt-2 mb-4" style="border:1px solid #E2C2DA; background:#E2C2DA; padding:5px 10px 10px;">
+		<div class="col-md-12">
+			<div class="d-inline-block me-4">
+				<div class="fw-bold">Typ turnusu:</div>
+				<select name="filter-turnus-mode" id="filter-turnus-mode" class="form-control filter-turnus">
+					<option value="current" n:attr="selected: $listMode === 'current'">Aktuálne turnusy</option>
+					<option value="finished" n:attr="selected: $listMode === 'finished'">Ukončené turnusy</option>
+					<option value="cancelled" n:attr="selected: $listMode === 'cancelled'">Stornované turnusy</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block me-4">
+				<div class="fw-bold">Krajina:</div>
+				<select name="filter-turnus-country" id="filter-turnus-country" class="form-control filter-turnus">
+					<option value="">---</option>
+					<option n:foreach="$countries as $countryId => $countryName" value="{$countryId}" n:attr="selected: $country === $countryId">{$countryName}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block me-4" style="max-width:150px;">
+				<div class="fw-bold">Agentúra</div>
+				<select name="filter-turnus-agency" id="filter-turnus-agency" class="form-control filter-turnus">
+					<option value="">---</option>
+					<option n:foreach="$agencies as $agencyId => $agencyName" value="{$agencyId}" n:attr="selected: $agency === $agencyId">{$agencyName}</option>
+				</select>
+			</div>
+
+			<div class="d-inline-block">
+				<div class="fw-bold">Status:</div>
+				<select name="filter-turnus-status" id="filter-turnus-status" class="form-control filter-turnus">
+					<option value="">---</option>
+					<option n:foreach="$statuses as $statusId => $statusLabel" value="{$statusId}" n:if="$statusId > 0" n:attr="selected: $status === $statusId">{$statusLabel}</option>
+				</select>
+			</div>
+		</div>
+	</div>
+
+	{control turnusList}
+{/block}
+
+{block scripts}
+	<script>
+		document.querySelectorAll('.filter-turnus').forEach(select => {
+			select.addEventListener('change', () => {
+				const params = new URLSearchParams();
+				const mode = document.getElementById('filter-turnus-mode').value;
+				const country = document.getElementById('filter-turnus-country').value;
+				const agency = document.getElementById('filter-turnus-agency').value;
+				const status = document.getElementById('filter-turnus-status').value;
+
+				if (mode === 'finished') {
+					params.set('finish', '1');
+				}
+
+				if (country) params.set('country', country);
+				if (agency) params.set('agency', agency);
+
+				if (mode === 'cancelled') {
+					params.set('status', '30');
+				} else if (status && !(select.id === 'filter-turnus-mode' && status === '30')) {
+					params.set('status', status);
+				}
+
+				window.location.href = params.toString() ? '?' + params.toString() : window.location.pathname;
+			});
+		});
+	</script>
 {/block}

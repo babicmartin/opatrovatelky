@@ -18,11 +18,16 @@ use App\Model\Table\StatusTurnusTableMap;
 use App\Model\Table\TurnusTableMap;
 use App\Model\Table\UserTableMap;
 use Nette\Database\Row;
+use Nette\Database\Table\ActiveRow;
 
 class FamilyRepository extends BaseRepository
 {
 	private const int TYPE_FAMILY = 1;
 	private const int TYPE_PROJECT = 2;
+	private const array UNPAID_INVOICE_STATUSES = [0, 1, 2, 4, 6];
+	private const array UNPAID_INVOICE_EXCLUDED_TURNUS_STATUSES = [0, 30];
+	private const array UNPAID_INVOICE_EXCLUDED_BABYSITTERS = [21, 22, 23, 107, 111, 358];
+	private const int GERMANY_COUNTRY_ID = 3;
 
 	protected function getTableName(): string
 	{
@@ -131,7 +136,7 @@ class FamilyRepository extends BaseRepository
 
 	public function updateInfoFromForm(FamilyInfoForm $form): void
 	{
-		$this->update($form->id, [
+		$data = [
 			FamilyTableMap::COL_TYPE => $form->type,
 			FamilyTableMap::COL_PARTNER_ID => $form->partnerId,
 			FamilyTableMap::COL_ACQUIRED_BY_USER_ID => $form->acquiredByUserId,
@@ -142,17 +147,30 @@ class FamilyRepository extends BaseRepository
 			FamilyTableMap::COL_DATE_TO => $form->dateTo?->format('Y-m-d'),
 			FamilyTableMap::COL_ORDER_STATUS => $form->orderStatus,
 			FamilyTableMap::COL_CONTRACT_STATUS => $form->contractStatus,
-			FamilyTableMap::COL_WORK_STATUS_STAFF => $form->workStatusStaff,
-			FamilyTableMap::COL_PROJECT_DESCRIPTION => $form->projectDescription,
-			FamilyTableMap::COL_PROJECT_POSITIONS => $form->projectPositions,
-			FamilyTableMap::COL_PROJECT_AVAILABLE_POSITIONS => $form->projectAvailablePositions,
-		]);
+		];
+
+		if ($form->workStatusStaff !== null) {
+			$data[FamilyTableMap::COL_WORK_STATUS_STAFF] = $form->workStatusStaff;
+		}
+
+		if ($form->projectDescription !== null) {
+			$data[FamilyTableMap::COL_PROJECT_DESCRIPTION] = $form->projectDescription;
+		}
+
+		if ($form->projectPositions !== null) {
+			$data[FamilyTableMap::COL_PROJECT_POSITIONS] = $form->projectPositions;
+		}
+
+		if ($form->projectAvailablePositions !== null) {
+			$data[FamilyTableMap::COL_PROJECT_AVAILABLE_POSITIONS] = $form->projectAvailablePositions;
+		}
+
+		$this->update($form->id, $data);
 	}
 
 	public function updateAddressFromForm(FamilyAddressForm $form): void
 	{
-		$this->update($form->id, [
-			FamilyTableMap::COL_COMPANY_NAME => $form->companyName,
+		$data = [
 			FamilyTableMap::COL_NAME => $form->name,
 			FamilyTableMap::COL_SURNAME => $form->surname,
 			FamilyTableMap::COL_STREET => $form->street,
@@ -160,23 +178,40 @@ class FamilyRepository extends BaseRepository
 			FamilyTableMap::COL_PSC => $form->psc,
 			FamilyTableMap::COL_CITY => $form->city,
 			FamilyTableMap::COL_BILLING => $form->billing,
-			FamilyTableMap::COL_EMPLOYER => $form->employer,
-			FamilyTableMap::COL_ACCOMMODATION_ADDRESS => $form->accommodationAddress,
 			FamilyTableMap::COL_NOTICE => $form->notice,
 			FamilyTableMap::COL_PERSON_SURNAME => $form->personSurname,
 			FamilyTableMap::COL_PERSON_NAME => $form->personName,
 			FamilyTableMap::COL_PERSON_PHONE => $form->personPhone,
 			FamilyTableMap::COL_PERSON_EMAIL => $form->personEmail,
 			FamilyTableMap::COL_PATIENT_PHONE => $form->patientPhone,
-		]);
+		];
+
+		if ($form->companyName !== null) {
+			$data[FamilyTableMap::COL_COMPANY_NAME] = $form->companyName;
+		}
+
+		if ($form->employer !== null) {
+			$data[FamilyTableMap::COL_EMPLOYER] = $form->employer;
+		}
+
+		if ($form->accommodationAddress !== null) {
+			$data[FamilyTableMap::COL_ACCOMMODATION_ADDRESS] = $form->accommodationAddress;
+		}
+
+		$this->update($form->id, $data);
 	}
 
 	public function updateShortInfoFromForm(FamilyShortInfoForm $form): void
 	{
-		$this->update($form->id, [
-			FamilyTableMap::COL_DE_PROJECT_NUMBER => $form->deProjectNumber,
+		$data = [
 			FamilyTableMap::COL_STATE => $form->state,
-		]);
+		];
+
+		if ($form->deProjectNumber !== null) {
+			$data[FamilyTableMap::COL_DE_PROJECT_NUMBER] = $form->deProjectNumber;
+		}
+
+		$this->update($form->id, $data);
 	}
 
 	public function createTurnusForFamily(int $familyId, int $userId): int
@@ -234,9 +269,22 @@ class FamilyRepository extends BaseRepository
 		?string $city,
 		?int $userId,
 		int &$pageCount,
+		int &$totalCount,
 	): array
 	{
-		return $this->findRowsByType(self::TYPE_FAMILY, $page, $itemsPerPage, $countryId, $statusId, $partnerId, $firstLetter, $city, $userId, $pageCount);
+		return $this->findRowsByType(
+			self::TYPE_FAMILY,
+			$page,
+			$itemsPerPage,
+			$countryId,
+			$statusId,
+			$partnerId,
+			$firstLetter,
+			$city,
+			$userId,
+			$pageCount,
+			$totalCount,
+		);
 	}
 
 	/**
@@ -252,9 +300,22 @@ class FamilyRepository extends BaseRepository
 		?string $city,
 		?int $userId,
 		int &$pageCount,
+		int &$totalCount,
 	): array
 	{
-		return $this->findRowsByType(self::TYPE_PROJECT, $page, $itemsPerPage, $countryId, $statusId, $partnerId, $firstLetter, $city, $userId, $pageCount);
+		return $this->findRowsByType(
+			self::TYPE_PROJECT,
+			$page,
+			$itemsPerPage,
+			$countryId,
+			$statusId,
+			$partnerId,
+			$firstLetter,
+			$city,
+			$userId,
+			$pageCount,
+			$totalCount,
+		);
 	}
 
 	/**
@@ -271,6 +332,7 @@ class FamilyRepository extends BaseRepository
 		?string $city,
 		?int $userId,
 		int &$pageCount,
+		int &$totalCount,
 	): array
 	{
 		$f = FamilyTableMap::TABLE_NAME;
@@ -474,9 +536,10 @@ class FamilyRepository extends BaseRepository
 	}
 
 	/**
+	 * @param list<int> $includeUserIds
 	 * @return array<int, string>
 	 */
-	public function findUserSelectOptions(): array
+	public function findUserSelectOptions(array $includeUserIds = []): array
 	{
 		$options = [0 => '---'];
 		$rows = $this->database->table(UserTableMap::TABLE_NAME)
@@ -484,7 +547,25 @@ class FamilyRepository extends BaseRepository
 			->order(UserTableMap::COL_SECOND_NAME . ' ASC, ' . UserTableMap::COL_NAME . ' ASC');
 
 		foreach ($rows as $row) {
-			$options[(int) $row->{UserTableMap::COL_ID}] = trim((string) $row->{UserTableMap::COL_SECOND_NAME} . ' ' . (string) $row->{UserTableMap::COL_NAME});
+			$options[(int) $row->{UserTableMap::COL_ID}] = $this->formatUserOption($row);
+		}
+
+		$includeUserIds = array_values(array_unique(array_filter(
+			$includeUserIds,
+			static fn (int $userId): bool => $userId > 0,
+		)));
+
+		if ($includeUserIds !== []) {
+			$includedRows = $this->database->table(UserTableMap::TABLE_NAME)
+				->where(UserTableMap::COL_ID, $includeUserIds)
+				->order(UserTableMap::COL_SECOND_NAME . ' ASC, ' . UserTableMap::COL_NAME . ' ASC');
+
+			foreach ($includedRows as $row) {
+				$id = (int) $row->{UserTableMap::COL_ID};
+				if (!array_key_exists($id, $options)) {
+					$options[$id] = $this->formatUserOption($row);
+				}
+			}
 		}
 
 		return $options;
@@ -504,6 +585,7 @@ class FamilyRepository extends BaseRepository
 				$t." . TurnusTableMap::COL_DATE_FROM . " AS date_from,
 				$t." . TurnusTableMap::COL_DATE_TO . " AS date_to,
 				$t." . TurnusTableMap::COL_STATUS . " AS status_id,
+				$t." . TurnusTableMap::COL_INVOICE_STATUS . " AS invoice_status_id,
 				$t." . TurnusTableMap::COL_FAMILY_ID . " AS family_id,
 				$t." . TurnusTableMap::COL_BABYSITTER_ID . " AS babysitter_id,
 				$st." . StatusTurnusTableMap::COL_STATUS . " AS status,
@@ -511,6 +593,7 @@ class FamilyRepository extends BaseRepository
 				" . FamilyTableMap::TABLE_NAME . "." . FamilyTableMap::COL_NAME . " AS family_name,
 				" . FamilyTableMap::TABLE_NAME . "." . FamilyTableMap::COL_SURNAME . " AS family_surname,
 				" . FamilyTableMap::TABLE_NAME . "." . FamilyTableMap::COL_DE_PROJECT_NUMBER . " AS family_project_number,
+				" . FamilyTableMap::TABLE_NAME . "." . FamilyTableMap::COL_STATE . " AS family_state,
 				" . OpatrovatelkaTableMap::TABLE_NAME . "." . OpatrovatelkaTableMap::COL_NAME . " AS babysitter_name,
 				" . OpatrovatelkaTableMap::TABLE_NAME . "." . OpatrovatelkaTableMap::COL_SURNAME . " AS babysitter_surname,
 				" . SelectWorkPositionTableMap::TABLE_NAME . "." . SelectWorkPositionTableMap::COL_POSITION . " AS work_position
@@ -522,7 +605,7 @@ class FamilyRepository extends BaseRepository
 			WHERE $t." . TurnusTableMap::COL_FAMILY_ID . " = ?
 				AND $t." . TurnusTableMap::COL_DELETED . " = 0
 			ORDER BY
-				CASE WHEN $t." . TurnusTableMap::COL_DATE_FROM . " IS NULL OR $t." . TurnusTableMap::COL_DATE_FROM . " = '0000-00-00' THEN 0 ELSE 1 END ASC,
+				CASE WHEN $t." . TurnusTableMap::COL_DATE_FROM . " IS NULL OR $t." . TurnusTableMap::COL_DATE_FROM . " = '' OR $t." . TurnusTableMap::COL_DATE_FROM . " = '0000-00-00' THEN 0 ELSE 1 END ASC,
 				$t." . TurnusTableMap::COL_DATE_FROM . " DESC,
 				$t." . TurnusTableMap::COL_ID . " DESC
 		";
@@ -540,9 +623,18 @@ class FamilyRepository extends BaseRepository
 				'familyProjectNumber' => (string) ($row->family_project_number ?? ''),
 				'babysitterName' => trim((string) ($row->babysitter_name ?? '') . ' ' . (string) ($row->babysitter_surname ?? '')),
 				'workPosition' => (string) ($row->work_position ?? ''),
+				'isInvoiceUnpaid' => $this->isInvoiceUnpaid($row),
 			],
 			$this->database->query($sql, $familyId)->fetchAll(),
 		);
+	}
+
+	private function isInvoiceUnpaid(Row $row): bool
+	{
+		return !in_array((int) ($row->babysitter_id ?? 0), self::UNPAID_INVOICE_EXCLUDED_BABYSITTERS, true)
+			&& in_array((int) ($row->invoice_status_id ?? 0), self::UNPAID_INVOICE_STATUSES, true)
+			&& !in_array((int) ($row->status_id ?? 0), self::UNPAID_INVOICE_EXCLUDED_TURNUS_STATUSES, true)
+			&& (int) ($row->family_state ?? 0) === self::GERMANY_COUNTRY_ID;
 	}
 
 	/**
@@ -829,6 +921,11 @@ class FamilyRepository extends BaseRepository
 		}
 
 		return $options;
+	}
+
+	private function formatUserOption(ActiveRow $row): string
+	{
+		return trim((string) $row->{UserTableMap::COL_SECOND_NAME} . ' ' . (string) $row->{UserTableMap::COL_NAME});
 	}
 
 }

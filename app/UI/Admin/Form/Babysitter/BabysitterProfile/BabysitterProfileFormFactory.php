@@ -40,6 +40,7 @@ final readonly class BabysitterProfileFormFactory
 		}
 
 		$form = $this->baseFormFactory->create();
+		$type = (int) $babysitter['type'];
 		$form->getElementPrototype()
 			->setAttribute('class', 'babysitter-profile-form js-autosave-form')
 			->setAttribute('style', 'display:contents;');
@@ -53,12 +54,12 @@ final readonly class BabysitterProfileFormFactory
 
 		foreach ([
 			'allergyDetail' => ['Alergie - detail', 'h100'],
-			'howLongWork' => [(int) $babysitter['type'] === 1 ? 'Ako dlho pracuje ako opatrovateľka' : 'Prax v obore', 'h100'],
+			'howLongWork' => [$type === 1 ? 'Ako dlho pracuje ako opatrovateľka' : 'Prax v obore', 'h100'],
 			'howLongWorkGerman' => ['Ako dlho pracuje v Nemeckých krajinách', 'h100'],
 			'timeScale' => ['Časové rozmedzie', 'h100'],
 			'workPlace' => ['Miesto práce', 'h100'],
 			'jobPositionInterest' => ['Záujem o pracovnú pozíciu', 'h150'],
-			'workDescription' => [(int) $babysitter['type'] === 1 ? 'Činnosti pri opatrovanej osobe' : 'Popis pracovných pozícii', 'h300'],
+			'workDescription' => [$type === 1 ? 'Činnosti pri opatrovanej osobe' : 'Popis pracovných pozícii', 'h300'],
 			'generalActivities' => ['Všeobecné činnosti', 'h300'],
 			'ratingAgency' => ['Hodnotenie agentúry', 'h100'],
 		] as $name => [$label, $heightClass]) {
@@ -77,13 +78,14 @@ final readonly class BabysitterProfileFormFactory
 			->setHtmlAttribute('class', 'js-autosave-control');
 		$form->addSubmit('save', 'Uložiť')->setHtmlAttribute('class', 'd-none');
 
-		$form->onSuccess[] = function (Form $form, ArrayHash $values) use ($onSuccess): void {
+		$form->onSuccess[] = function (Form $form, ArrayHash $values) use ($onSuccess, $type): void {
 			if (!$this->user->isAllowed(Resource::BABYSITTER->value)) {
 				throw new \Nette\Application\ForbiddenRequestException('Prístup zamietnutý');
 			}
 
 			$onSuccess(new BabysitterProfileForm(
 				(int) $values->id,
+				$type,
 				(int) $values->smoker,
 				(int) $values->allergy,
 				(string) $values->allergyDetail,

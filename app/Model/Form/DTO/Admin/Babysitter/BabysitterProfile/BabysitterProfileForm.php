@@ -6,6 +6,7 @@ final readonly class BabysitterProfileForm
 {
 	public function __construct(
 		public int $id,
+		public int $type,
 		public int $smoker,
 		public int $allergy,
 		public string $allergyDetail,

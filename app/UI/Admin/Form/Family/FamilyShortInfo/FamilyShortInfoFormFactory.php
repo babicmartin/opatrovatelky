@@ -6,6 +6,8 @@ use App\Model\Enum\Acl\Resource;
 use App\Model\Form\DTO\Admin\Family\FamilyShortInfo\FamilyShortInfoForm;
 use App\Model\Form\Factory\BaseFormFactory;
 use Nette\Application\UI\Form;
+use Nette\Forms\Controls\BaseControl;
+use Nette\Forms\Form as NetteForm;
 use Nette\Security\User;
 use Nette\Utils\ArrayHash;
 
@@ -48,11 +50,21 @@ final readonly class FamilyShortInfoFormFactory
 			$onSuccess(new FamilyShortInfoForm(
 				(int) $values->id,
 				(string) $family['clientNumber'],
-				(string) $values->deProjectNumber,
+				$this->hasSubmittedControl($form, 'deProjectNumber') ? (string) $values->deProjectNumber : null,
 				(int) $values->state,
 			));
 		};
 
 		return $form;
+	}
+
+	private function hasSubmittedControl(Form $form, string $name): bool
+	{
+		$control = $form->getComponent($name, false);
+		if (!$control instanceof BaseControl) {
+			return false;
+		}
+
+		return $form->getHttpData(NetteForm::DataText, $control->getHtmlName()) !== null;
 	}
 }

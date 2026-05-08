@@ -6,6 +6,7 @@ use App\Model\Form\DTO\Login\LoginForm\LoginFormDTO;
 use App\Model\Form\Factory\BaseFormFactory;
 use App\Model\Security\AdminAuthenticator;
 use Nette\Application\UI\Form;
+use Nette\Http\Session;
 use Nette\Security\AuthenticationException;
 use Nette\Security\User;
 use Nette\SmartObject;
@@ -21,6 +22,7 @@ class LoginFormFactory
         private readonly AdminAuthenticator $adminAuthenticator,
 		private readonly LoggerInterface $logger,
 		private readonly BaseFormFactory $baseFormFactory,
+		private readonly Session $session,
 	) {	}
 
 	public function create(): Form
@@ -43,6 +45,7 @@ class LoginFormFactory
 		try {
 			$this->user->setAuthenticator($this->adminAuthenticator);
 			$this->user->login($formDTO->getEmail(), $formDTO->getPassword());
+			$this->session->regenerateId();
 		} catch (AuthenticationException $exception) {
 			$form->addError('Prihlásenie sa nepodarilo');
 			$this->logger->warning('Login failed: ' . $formDTO->getEmail());

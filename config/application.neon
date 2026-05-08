@@ -18,6 +18,9 @@ security:
 
 session:
 	expiration: 1 day
+	cookieSecure: auto
+	cookieSamesite: Lax
+	cookieHttponly: true
 
 di:
 	export:

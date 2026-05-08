@@ -61,7 +61,8 @@
       "Bash(\"C:/wamp64/bin/mariadb/mariadb11.4.9/bin/mariadb.exe\" -u root -P 3307 -e \"SELECT id, dir, name, upload FROM sn_files WHERE id IN \\(3420, 4168\\);\" opatrovatelky_nette)",
       "PowerShell(& \"C:\\\\wamp64\\\\bin\\\\php\\\\php8.5.0\\\\php.exe\" vendor/bin/phpstan analyse app --level 8 --memory-limit=512M --no-progress 2>&1 | Select-Object -Last 60)",
       "mcp__nette-inspector__router_match_url",
-      "mcp__nette-inspector__tracy_get_exceptions"
+      "mcp__nette-inspector__tracy_get_exceptions",
+      "Bash(grep -rn '$form->addProtection\\\\|csrf' /c/wamp64/www/monika/opatrovatelky/local/app '--include=*.php')"
     ]
   },
   "enabledMcpjsonServers": [

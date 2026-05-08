@@ -100,24 +100,25 @@
 	<script>
 		document.querySelectorAll('.filter-babysitter').forEach(select => {
 			select.addEventListener('change', () => {
-				const params = new URLSearchParams();
-				const country = document.getElementById('filter-country').value;
-				const language = document.getElementById('filter-language').value;
-				const workingStatus = document.getElementById('filter-working-status').value;
-				const gender = document.getElementById('filter-gender').value;
-				const driver = document.getElementById('filter-driver-license').value;
-				const smoker = document.getElementById('filter-smoker').value;
-				const agency = document.getElementById('filter-agency').value;
-				const status = document.getElementById('filter-status').value;
+				const params = new URLSearchParams(window.location.search);
+				params.delete('page');
 
-				if (country) params.set('country', country);
-				if (language) params.set('language', language);
-				if (workingStatus) params.set('working-status', workingStatus);
-				if (gender) params.set('gender', gender);
-				if (driver) params.set('driver', driver);
-				if (smoker) params.set('smoker', smoker);
-				if (agency) params.set('agency', agency);
-				if (status) params.set('status', status);
+				[
+					['country', document.getElementById('filter-country').value],
+					['language', document.getElementById('filter-language').value],
+					['working-status', document.getElementById('filter-working-status').value],
+					['gender', document.getElementById('filter-gender').value],
+					['driver', document.getElementById('filter-driver-license').value],
+					['smoker', document.getElementById('filter-smoker').value],
+					['agency', document.getElementById('filter-agency').value],
+					['status', document.getElementById('filter-status').value],
+				].forEach(([name, value]) => {
+					if (value) {
+						params.set(name, value);
+					} else {
+						params.delete(name);
+					}
+				});
 
 				window.location.href = params.toString() ? '?' + params.toString() : window.location.pathname;
 			});

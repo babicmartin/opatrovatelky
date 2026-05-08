@@ -126,6 +126,7 @@ class BabysitterPresenter extends AdminPresenter
 		$workProfile = is_string($workProfileRaw) || is_int($workProfileRaw) ? (int) $workProfileRaw : null;
 
 		$this->babysitterId = $id;
+		$this->babysitterRepository->generateClientNumberIfMissing($id);
 		$this->babysitter = $this->babysitterRepository->findUpdateRow($id);
 		if ($this->babysitter === null) {
 			$this->error('Opatrovateľka neexistuje.', 404);
@@ -299,9 +300,11 @@ class BabysitterPresenter extends AdminPresenter
 		$form->getElementPrototype()->setAttribute('enctype', 'multipart/form-data');
 		$form->addUpload('image', 'Obrázok')
 			->setRequired('Vyberte obrázok.')
-			->addRule(Form::Image, 'Iba obrázky typu .png, .jpg');
+			->addRule(Form::Image, 'Iba obrázky typu .png, .jpg')
+			->setHtmlAttribute('class', 'js-babysitter-image-input')
+			->setHtmlAttribute('style', 'display:none');
 		$form->addSubmit('save', 'Nahrať')
-			->setHtmlAttribute('class', 'btn btn-success btn-sm');
+			->setHtmlAttribute('class', 'btn btn-success btn-sm js-babysitter-image-upload');
 
 		$form->onSuccess[] = function (Form $form, ArrayHash $values): void {
 			$this->assertCanManage();

@@ -25,6 +25,7 @@ final class AuthorizatorFactory
 		$acl->addRole(UserRole::ADMIN->value, UserRole::CEO->value);
 
 		$acl->allow(UserRole::ADMIN->value);
+		// TODO SECURITY: Development-only bypass. Remove before production deployment.
 		$acl->allow('guest');
 
 		foreach (Resource::cases() as $resource) {

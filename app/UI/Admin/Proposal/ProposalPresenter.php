@@ -63,6 +63,7 @@ class ProposalPresenter extends AdminPresenter
 
 	private function proposalUpdateFormSucceeded(ProposalUpdateForm $form): void
 	{
+		$this->tryHandleAutosavePartialRequest();
 		$this->familyProposalRepository->updateFromForm($form);
 
 		if ($this->isAjax()) {

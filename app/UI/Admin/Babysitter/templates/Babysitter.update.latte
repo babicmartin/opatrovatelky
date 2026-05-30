@@ -20,6 +20,7 @@
 		<a n:if="(int) $babysitter['type'] === 2" href="{plink :Admin:Babysitter:update, id: $id, tab: 'work-profile'}" class="btn btn-sm btn-success">Odborné zameranie</a>
 		<a href="{plink :Admin:Babysitter:update, id: $id, tab: 'documents'}" class="btn btn-sm btn-success">Dokumenty</a>
 		<a n:if="(int) $babysitter['type'] === 1" href="{plink :Admin:Babysitter:update, id: $id, tab: 'pdf'}" class="btn btn-sm btn-success">PDF</a>
+		<a href="{plink :Admin:Babysitter:update, id: $id, tab: 'video'}" class="btn btn-sm btn-success">Video</a>
 
 		<div class="space20">&nbsp;</div>
 
@@ -233,6 +234,11 @@
 				<div class="col-xl-2 d-none d-xl-block">{include shortInfo}</div>
 				<div class="col-xl-6 col-md-12">{control babysitterDocuments}</div>
 			</div>
+		{elseif $activeTab === 'video'}
+			<div class="row">
+				<div class="col-xl-2 d-none d-xl-block">{include shortInfo}</div>
+				<div class="col-xl-10 col-md-12">{control babysitterVideos}</div>
+			</div>
 		{elseif $activeTab === 'pdf'}
 			<div class="row">
 				<div class="col-xl-2 d-none d-xl-block">{include shortInfo}</div>
@@ -329,7 +335,8 @@
 {/define}
 
 {block scripts}
-	<script src="{$basePath}/js/autosaveForm.js"></script>
+	<script src="{$basePath}/js/autosaveForm.js?v=20260530-audit2"></script>
 	<script src="{$basePath}/js/babysitterPdfLoader.js"></script>
+	<script src="{$basePath}/js/babysitterVideoUpload.js"></script>
 	<script src="{$basePath}/js/babysitterImageUpload.js"></script>
 {/block}

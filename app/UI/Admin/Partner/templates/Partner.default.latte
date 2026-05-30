@@ -15,7 +15,7 @@
 		<div class="col-md-12">
 			<div class="d-inline-block me-4">
 				<div class="fw-bold">Krajina:</div>
-				<select name="filter-country" id="filter-country" class="form-control filter-partner">
+				<select name="filter-country" id="filter-country" class="form-select filter-partner">
 					<option value="">---</option>
 					<option n:foreach="$countries as $filterCountry" value="{$filterCountry['id']}" n:attr="selected: $country === $filterCountry['id']">{$filterCountry['name']}</option>
 				</select>
@@ -23,7 +23,7 @@
 
 			<div class="d-inline-block">
 				<div class="fw-bold">Status:</div>
-				<select name="filter-status" id="filter-status" class="form-control filter-partner">
+				<select name="filter-status" id="filter-status" class="form-select filter-partner">
 					<option value="">---</option>
 					<option n:foreach="$statuses as $filterStatus" value="{$filterStatus['id']}" n:attr="selected: $status === $filterStatus['id']">{$filterStatus['status']}</option>
 				</select>

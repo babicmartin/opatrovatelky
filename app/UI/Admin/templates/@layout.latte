@@ -48,8 +48,12 @@
 			{control search}
 			<div class="col-xl-2 col-md-1 offset-md-0 col-sm-2 offset-sm-0 col-3">
 				<div class="logout fright">
-					<a href="{link :Login:Login:logout}" class="d-none d-xl-block">Odhlásiť sa</a>
-					<a href="{link :Login:Login:logout}" class="d-xl-none"><i class="fas fa-power-off" style="font-size:35px; color:#8A2062; padding-top:8px;"></i></a>
+					<form n:name="logoutForm">
+						<button n:name="send" type="submit" aria-label="Odhlásiť sa" style="background:transparent; border:0; padding:0; cursor:pointer;">
+							<span class="d-none d-xl-inline">Odhlásiť sa</span>
+							<i class="fas fa-power-off d-xl-none" style="font-size:35px; color:#8A2062; padding-top:8px;"></i>
+						</button>
+					</form>
 				</div>
 				<div class="fright d-none d-xl-block">
 					{control userProfileImage}

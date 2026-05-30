@@ -10,6 +10,7 @@ use App\Model\Form\DTO\Admin\UserManagement\UserProfileUpdate\UserAccessUpdateFo
 use App\Model\Form\DTO\Admin\UserManagement\UserProfileUpdate\UserPasswordUpdateForm;
 use App\Model\Form\DTO\Admin\UserManagement\UserProfileUpdate\UserProfileUpdateForm;
 use App\Model\Repository\UserRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
 use App\Model\Table\UserTableMap;
 use App\Model\Utils\Validator\ImageValidator;
 use App\UI\Admin\AdminPresenter;
@@ -34,6 +35,7 @@ final class UserManagementPresenter extends AdminPresenter
 		private readonly DirectoryProvider $directoryProvider,
 		private readonly StorageDirProvider $storageDirProvider,
 		private readonly ImageValidator $imageValidator,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 		parent::__construct();
 	}
@@ -88,6 +90,7 @@ final class UserManagementPresenter extends AdminPresenter
 		}
 
 		$id = $this->userRepository->createEmptyUser($this->passwords->hash(Random::generate(24)));
+		$this->changeAuditLogger->logCreated('user.profile', UserTableMap::TABLE_NAME, $id, 'Používateľ');
 		$this->redirect('update', $id);
 	}
 
@@ -137,6 +140,7 @@ final class UserManagementPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
+		$this->tryHandleAutosavePartialRequest($userId);
 		$this->userRepository->updateProfile($userId, $form);
 
 		if ($this->isAjax()) {
@@ -159,6 +163,7 @@ final class UserManagementPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
+		$this->tryHandleAutosavePartialRequest($userId);
 		$this->userRepository->updateAccess($userId, $form->getPermission(), $form->getActive());
 
 		if ($this->isAjax()) {
@@ -211,6 +216,29 @@ final class UserManagementPresenter extends AdminPresenter
 		$this->userRepository->updateImage($userId, $fileName);
 		$this->flashMessage('Obrázok bol nahraný.', 'success');
 		$this->redirect('this');
+	}
+
+	protected function validateAutosavePartialRequest(string $context, int $entityId): void
+	{
+		parent::validateAutosavePartialRequest($context, $entityId);
+
+		$user = $this->userRepository->findById($entityId);
+		if (!$user instanceof ActiveRow) {
+			$this->sendAutosavePartialError(404, 'Používateľ neexistuje.');
+			return;
+		}
+
+		$permission = (int) $user->{UserTableMap::COL_PERMISSION};
+		if ($context === 'user.access') {
+			if (!$this->canEditAccess($permission)) {
+				$this->sendAutosavePartialError(403, 'Prístup zamietnutý.');
+			}
+			return;
+		}
+
+		if ($context === 'user.profile' && !$this->canEditUser($entityId, $permission)) {
+			$this->sendAutosavePartialError(403, 'Prístup zamietnutý.');
+		}
 	}
 
 	private function getEditableUserId(): int
@@ -279,11 +307,12 @@ final class UserManagementPresenter extends AdminPresenter
 	}
 
 	/**
-	 * @return array{name:string,secondName:string,acronym:string,email:string,color:string,permission:int,active:int}
+	 * @return array{id:int,name:string,secondName:string,acronym:string,email:string,color:string,permission:int,active:int}
 	 */
 	private function createUserTemplateData(ActiveRow $user): array
 	{
 		return [
+			'id' => (int) $user->{UserTableMap::COL_ID},
 			'name' => (string) $user->{UserTableMap::COL_NAME},
 			'secondName' => (string) $user->{UserTableMap::COL_SECOND_NAME},
 			'acronym' => (string) $user->{UserTableMap::COL_ACRONYM},

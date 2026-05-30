@@ -1,5 +1,5 @@
 parameters:
-    logPath: ../log/app.log
+    logPath: %rootDir%/log/app.log
     logLevel: Monolog\Logger::DEBUG
     logChannel: 'app'
 
@@ -9,4 +9,4 @@ services:
 
     monolog:
         class: Monolog\Logger
-        arguments: [%logChannel%]
+        arguments: [%logChannel%, [@monolog.handler]]

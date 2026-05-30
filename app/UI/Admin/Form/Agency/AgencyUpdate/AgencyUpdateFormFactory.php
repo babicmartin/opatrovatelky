@@ -55,7 +55,7 @@ final readonly class AgencyUpdateFormFactory
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');
 		$form->addSelect('state', 'Krajina', $countryOptions)
 			->setDefaultValue((int) $agency['state'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addText('dateStart', 'Začiatok spolupráce')
 			->setDefaultValue($agency['dateStart'] instanceof \DateTimeImmutable ? $agency['dateStart']->format('d.m.Y') : '')
 			->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
@@ -83,7 +83,7 @@ final readonly class AgencyUpdateFormFactory
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');
 		$form->addSelect('status', 'Status', $statusOptions)
 			->setDefaultValue((int) $agency['status'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addTextArea('notice', 'Poznámka')
 			->setDefaultValue((string) $agency['notice'])
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control h300');

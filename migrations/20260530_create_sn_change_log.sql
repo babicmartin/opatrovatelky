@@ -1,0 +1,25 @@
+CREATE TABLE IF NOT EXISTS `sn_change_log` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `context` VARCHAR(100) NOT NULL,
+  `entity_table` VARCHAR(100) NOT NULL,
+  `entity_id` INT UNSIGNED NOT NULL,
+  `field_name` VARCHAR(100) NOT NULL,
+  `field_label` VARCHAR(190) NOT NULL,
+  `column_name` VARCHAR(100) DEFAULT NULL,
+  `value_type` VARCHAR(30) NOT NULL DEFAULT 'text',
+  `old_value_id` VARCHAR(100) DEFAULT NULL,
+  `old_value_label` LONGTEXT DEFAULT NULL,
+  `new_value_id` VARCHAR(100) DEFAULT NULL,
+  `new_value_label` LONGTEXT DEFAULT NULL,
+  `user_id` INT UNSIGNED DEFAULT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `metadata` LONGTEXT DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_change_log_created_at` (`created_at`),
+  KEY `idx_change_log_user_created_at` (`user_id`, `created_at`),
+  KEY `idx_change_log_entity_created_at` (`entity_table`, `entity_id`, `created_at`),
+  KEY `idx_change_log_context_created_at` (`context`, `created_at`),
+  KEY `idx_change_log_field_created_at` (`field_name`, `created_at`),
+  CONSTRAINT `chk_sn_change_log_metadata_json`
+    CHECK (`metadata` IS NULL OR JSON_VALID(`metadata`))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

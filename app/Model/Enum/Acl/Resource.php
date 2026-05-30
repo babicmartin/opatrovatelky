@@ -17,6 +17,7 @@ enum Resource: string
 	case STATS = 'stats';
 	case USER_MANAGEMENT = 'userManagement';
 	case SETTINGS = 'settings';
+	case CHANGE_LOG = 'change-log';
 	case COUNTRY = 'country';
 	case TODO = 'todo';
 	case TODO_VIEW_ALL = 'todoViewAll';

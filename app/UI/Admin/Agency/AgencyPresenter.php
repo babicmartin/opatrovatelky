@@ -5,6 +5,8 @@ namespace App\UI\Admin\Agency;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Form\DTO\Admin\Agency\AgencyUpdate\AgencyUpdateForm;
 use App\Model\Repository\AgencyRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
+use App\Model\Table\AgencyTableMap;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Agency\AgencyDocuments\AgencyDocumentsControl;
 use App\UI\Admin\Control\Agency\AgencyDocuments\AgencyDocumentsControlFactory;
@@ -25,6 +27,7 @@ class AgencyPresenter extends AdminPresenter
 		private readonly AgencyRepository $agencyRepository,
 		private readonly AgencyUpdateFormFactory $agencyUpdateFormFactory,
 		private readonly AgencyDocumentsControlFactory $agencyDocumentsControlFactory,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 		parent::__construct();
 	}
@@ -71,6 +74,7 @@ class AgencyPresenter extends AdminPresenter
 		}
 
 		$id = $this->agencyRepository->createEmptyAgency();
+		$this->changeAuditLogger->logCreated('agency.update', AgencyTableMap::TABLE_NAME, $id, 'Agentúra');
 		$this->redirect('update', $id);
 	}
 
@@ -96,6 +100,7 @@ class AgencyPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
+		$this->tryHandleAutosavePartialRequest();
 		$this->agencyRepository->updateFromForm($form);
 		$this->finishAutosave();
 	}

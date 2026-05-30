@@ -30,10 +30,10 @@ class ProposalUpdateFormFactory
 		$form->addHidden('id', (string) $proposal['id']);
 		$form->addSelect('status', 'Status', $statusOptions)
 			->setDefaultValue((int) $proposal['status'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('babysitterId', 'Opatrovateľka', $babysitterOptions)
 			->setDefaultValue((int) $proposal['babysitterId'])
-			->setHtmlAttribute('class', 'form-control updateSelectReload js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelectReload js-autosave-control');
 		$form->addText('dateStartingWork', 'Kedy môže nastúpiť')
 			->setDefaultValue($proposal['dateStartingWork'] instanceof \DateTimeImmutable ? $proposal['dateStartingWork']->format('d.m.Y') : '')
 			->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')

@@ -28,7 +28,7 @@
 		<div class="col-md-12">
 			<div class="d-inline-block me-4">
 				<div class="fw-bold">Krajina:</div>
-				<select name="filter-country" id="filter-country" class="form-control filter-babysitter">
+				<select name="filter-country" id="filter-country" class="form-select filter-babysitter">
 					<option value="">---</option>
 					<option n:foreach="$countries as $filterCountry" value="{$filterCountry['id']}" n:attr="selected: $country === $filterCountry['id']">{$filterCountry['name']}</option>
 				</select>
@@ -36,7 +36,7 @@
 
 			<div class="d-inline-block me-4" style="max-width:150px;">
 				<div class="fw-bold">Úroveň nemčiny:</div>
-				<select name="filter-language" id="filter-language" class="form-control filter-babysitter">
+				<select name="filter-language" id="filter-language" class="form-select filter-babysitter">
 					<option value="">---</option>
 					<option n:foreach="$languages as $filterLanguage" value="{$filterLanguage['id']}" n:attr="selected: $language === $filterLanguage['id']">{$filterLanguage['label']}</option>
 				</select>
@@ -44,7 +44,7 @@
 
 			<div class="d-inline-block me-4">
 				<div class="fw-bold">Pracovný status:</div>
-				<select name="filter-working-status" id="filter-working-status" class="form-control filter-babysitter">
+				<select name="filter-working-status" id="filter-working-status" class="form-select filter-babysitter">
 					<option value="">---</option>
 					<option n:foreach="$workingStatuses as $filterWorkingStatus" value="{$filterWorkingStatus['id']}" n:attr="selected: $workingStatus === $filterWorkingStatus['id']">{$filterWorkingStatus['label']}</option>
 				</select>
@@ -52,7 +52,7 @@
 
 			<div class="d-inline-block me-4">
 				<div class="fw-bold">Pohlavie:</div>
-				<select name="filter-gender" id="filter-gender" class="form-control filter-babysitter">
+				<select name="filter-gender" id="filter-gender" class="form-select filter-babysitter">
 					<option value="">---</option>
 					<option n:foreach="$genders as $filterGender" value="{$filterGender['id']}" n:attr="selected: $gender === $filterGender['id']">{$filterGender['label']}</option>
 				</select>
@@ -60,7 +60,7 @@
 
 			<div class="d-inline-block me-4">
 				<div class="fw-bold">Vodičský:</div>
-				<select name="filter-driver-license" id="filter-driver-license" class="form-control filter-babysitter">
+				<select name="filter-driver-license" id="filter-driver-license" class="form-select filter-babysitter">
 					<option value="">---</option>
 					<option n:foreach="$yesNoOptions as $filterDriver" value="{$filterDriver['id']}" n:attr="selected: $driver === $filterDriver['id']">{$filterDriver['label']}</option>
 				</select>
@@ -68,7 +68,7 @@
 
 			<div class="d-inline-block me-4">
 				<div class="fw-bold">Fajčiar/ka:</div>
-				<select name="filter-smoker" id="filter-smoker" class="form-control filter-babysitter">
+				<select name="filter-smoker" id="filter-smoker" class="form-select filter-babysitter">
 					<option value="">---</option>
 					<option n:foreach="$yesNoOptions as $filterSmoker" value="{$filterSmoker['id']}" n:attr="selected: $smoker === $filterSmoker['id']">{$filterSmoker['label']}</option>
 				</select>
@@ -76,7 +76,7 @@
 
 			<div class="d-inline-block me-4" style="max-width:150px;">
 				<div class="fw-bold">Agentúra</div>
-				<select name="filter-agency" id="filter-agency" class="form-control filter-babysitter">
+				<select name="filter-agency" id="filter-agency" class="form-select filter-babysitter">
 					<option value="">---</option>
 					<option n:foreach="$agencies as $filterAgency" value="{$filterAgency['id']}" n:attr="selected: $agency === $filterAgency['id']">{$filterAgency['name']}</option>
 				</select>
@@ -84,7 +84,7 @@
 
 			<div class="d-inline-block">
 				<div class="fw-bold">Status:</div>
-				<select name="filter-status" id="filter-status" class="form-control filter-babysitter">
+				<select name="filter-status" id="filter-status" class="form-select filter-babysitter">
 					<option value="">---</option>
 					<option n:foreach="$statuses as $filterStatus" value="{$filterStatus['id']}" n:attr="selected: $status === $filterStatus['id']">{$filterStatus['label']}</option>
 				</select>

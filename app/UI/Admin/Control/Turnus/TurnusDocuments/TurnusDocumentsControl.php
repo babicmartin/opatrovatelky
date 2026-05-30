@@ -7,7 +7,9 @@ use App\Model\DataProvider\Directory\StorageDirProvider;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Form\Factory\BaseFormFactory;
 use App\Model\Repository\FileRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
 use App\Model\Utils\Date\DateService;
+use App\UI\Admin\AdminPresenter;
 use Nette\Application\Responses\FileResponse;
 use Nette\Application\UI\Control;
 use Nette\Application\UI\Form;
@@ -40,6 +42,7 @@ class TurnusDocumentsControl extends Control
 		private readonly StorageDirProvider $storageDirProvider,
 		private readonly User $user,
 		private readonly DateService $dateService,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 	}
 
@@ -83,7 +86,13 @@ class TurnusDocumentsControl extends Control
 	{
 		$this->assertCanManage();
 
+		$document = $this->fileRepository->findDocument(self::DIR, $this->turnusId, $id);
+		if ($document === null) {
+			$this->getPresenter()->error('Dokument neexistuje.', 404);
+		}
+
 		$this->fileRepository->softDelete($id);
+		$this->changeAuditLogger->logDocumentDeleted('documents.turnus', $id, (string) $document['name'], self::DIR, $this->turnusId);
 		$this->redirect('this');
 	}
 
@@ -119,6 +128,11 @@ class TurnusDocumentsControl extends Control
 
 			$form->onSuccess[] = function (Form $form, ArrayHash $values): void {
 				$this->assertCanManage();
+
+				$presenter = $this->getPresenter();
+				if ($presenter instanceof AdminPresenter) {
+					$presenter->tryHandleAutosavePartialRequest();
+				}
 
 				$this->fileRepository->updateDocument((int) $values->id, [
 					'notice' => (string) $values->notice,
@@ -189,7 +203,12 @@ class TurnusDocumentsControl extends Control
 
 			FileSystem::createDir($targetDir);
 			$upload->move($targetDir . '/' . $fileName);
-			$this->fileRepository->insertDocument(self::DIR, $this->turnusId, $fileName, $type, (int) $this->user->getId());
+			$documentId = $this->fileRepository->insertDocument(self::DIR, $this->turnusId, $fileName, $type, (int) $this->user->getId());
+			$this->changeAuditLogger->logDocumentUploaded('documents.turnus', $documentId, $fileName, self::DIR, $this->turnusId, [
+				'file_type' => $type,
+				'extension' => $extension,
+				'size_bytes' => $upload->getSize(),
+			]);
 			$this->redirect('this');
 		};
 

@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `sn_babysitter_videos` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `babysitter_id` INT UNSIGNED NOT NULL,
+  `original_name` VARCHAR(255) NOT NULL,
+  `stored_name` VARCHAR(255) NOT NULL,
+  `extension` VARCHAR(10) NOT NULL,
+  `mime_type` VARCHAR(100) NOT NULL,
+  `size_bytes` BIGINT UNSIGNED NOT NULL,
+  `duration_seconds` INT UNSIGNED DEFAULT NULL,
+  `checksum_sha256` CHAR(64) NOT NULL,
+  `uploaded_by_user_id` INT UNSIGNED NOT NULL,
+  `uploaded_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `deleted_by_user_id` INT UNSIGNED DEFAULT NULL,
+  `deleted_at` DATETIME DEFAULT NULL,
+  `active` TINYINT(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_sn_babysitter_videos_stored_name` (`stored_name`),
+  KEY `idx_sn_babysitter_videos_babysitter_active_uploaded` (`babysitter_id`, `active`, `uploaded_at`),
+  KEY `idx_sn_babysitter_videos_uploaded_by` (`uploaded_by_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_slovak_ci;

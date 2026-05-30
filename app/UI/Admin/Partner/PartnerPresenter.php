@@ -5,6 +5,8 @@ namespace App\UI\Admin\Partner;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Form\DTO\Admin\Partner\PartnerUpdate\PartnerUpdateForm;
 use App\Model\Repository\PartnerRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
+use App\Model\Table\PartnerTableMap;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Partner\PartnerDocuments\PartnerDocumentsControl;
 use App\UI\Admin\Control\Partner\PartnerDocuments\PartnerDocumentsControlFactory;
@@ -25,6 +27,7 @@ class PartnerPresenter extends AdminPresenter
 		private readonly PartnerRepository $partnerRepository,
 		private readonly PartnerUpdateFormFactory $partnerUpdateFormFactory,
 		private readonly PartnerDocumentsControlFactory $partnerDocumentsControlFactory,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 		parent::__construct();
 	}
@@ -69,6 +72,7 @@ class PartnerPresenter extends AdminPresenter
 		}
 
 		$id = $this->partnerRepository->createEmptyPartner();
+		$this->changeAuditLogger->logCreated('partner.update', PartnerTableMap::TABLE_NAME, $id, 'Partner');
 		$this->redirect('update', $id);
 	}
 
@@ -94,6 +98,7 @@ class PartnerPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
+		$this->tryHandleAutosavePartialRequest();
 		$this->partnerRepository->updateFromForm($form);
 		$this->finishAutosave();
 	}

@@ -23,6 +23,7 @@ final class RouterFactory
             ->addRoute('partner[/<action>[/<id>]]', 'Partner:default')
             ->addRoute('agency[/<action>[/<id>]]', 'Agency:default')
             ->addRoute('missing-registry[/<action>[/<id>]]', 'MissingRegistry:default')
+            ->addRoute('change-log[/<action>[/<id>]]', 'ChangeLog:default')
             ->addRoute('user-management[/<action>[/<id>]]', 'UserManagement:default')
             ->addRoute('proposal[/<action>[/<id>]]', 'Proposal:default')
             ->addRoute('family[/<action>[/<id>]]', 'Family:default')

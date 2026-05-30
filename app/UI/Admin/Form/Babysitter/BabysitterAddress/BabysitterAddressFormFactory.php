@@ -60,10 +60,10 @@ final readonly class BabysitterAddressFormFactory
 			->setHtmlAttribute('autocomplete', 'off');
 		$form->addSelect('pohlavie', 'Pohlavie', $genderOptions)
 			->setDefaultValue((int) $babysitter['pohlavie'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('country', 'Národnosť', $countryOptions)
 			->setDefaultValue((int) $babysitter['country'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		foreach ([
 			'about' => ['O sebe', 'h200'],
 			'requirements' => ['Požiadavky', 'h200'],

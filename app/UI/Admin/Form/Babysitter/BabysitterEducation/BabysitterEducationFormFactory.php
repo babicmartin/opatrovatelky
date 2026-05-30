@@ -44,22 +44,22 @@ final readonly class BabysitterEducationFormFactory
 		$form->addHidden('id', (string) $babysitter['id']);
 		$form->addSelect('education', 'Vzdelanie', $educationOptions)
 			->setDefaultValue((int) $babysitter['education'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('drivingLicence', 'Vodičský preukaz', $drivingOptions)
 			->setDefaultValue((int) $babysitter['drivingLicence'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('readyDrive', 'Pripravený riadiť', $yesNoOptions)
 			->setDefaultValue((int) $babysitter['readyDrive'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('languageSkills', 'Jazykové znalosti', $languageOptions)
 			->setDefaultValue((int) $babysitter['languageSkills'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addTextArea('languageSkillsOther', 'Iné jazyky')
 			->setDefaultValue((string) $babysitter['languageSkillsOther'])
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control h100');
 		$form->addSelect('course', 'Kurzy', $yesNoOptions)
 			->setDefaultValue((int) $babysitter['course'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addTextArea('courseDetail', 'Kurzy - detail')
 			->setDefaultValue((string) $babysitter['courseDetail'])
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control h200');

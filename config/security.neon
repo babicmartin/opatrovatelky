@@ -9,4 +9,7 @@ services:
 
     -
         class: App\Model\Security\AdminAuthenticator
-        autowired: self
+        autowired: true
+
+    - App\Model\Security\LoginRateLimiter
+    - App\Model\Security\SecurityAuditLogger

@@ -5,6 +5,7 @@ parameters:
         countryImages: img/country
         documents: documents
         privateDocuments: private/documents
+        privateVideos: private/videos
         documentTypeImages: img/type
         babysitterPdf: private/export/babysitter/pdf
     url:

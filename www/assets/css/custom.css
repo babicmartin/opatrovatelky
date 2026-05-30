@@ -92,3 +92,31 @@ li.nav-item {margin-right:20px;}
 	letter-spacing: 0.2px;
 }
 .pdf-loader-ring[data-state="error"] ~ .pdf-loader-status { color: #dc3545; }
+
+.babysitter-video-upload {
+	border-bottom: 1px solid #e9ecef;
+	margin-bottom: 20px;
+	padding-bottom: 20px;
+}
+
+.babysitter-video-table video {
+	background: #111;
+	border-radius: 4px;
+	display: block;
+	max-height: 220px;
+	max-width: 320px;
+	width: 100%;
+}
+
+.babysitter-video-preview {
+	min-width: 340px;
+	white-space: normal;
+}
+
+.change-log-filter {
+	background: #f4f8fb;
+	border: 1px solid #cfe0ec;
+	border-left: 4px solid #38cb89;
+	border-radius: 4px;
+	padding: 16px;
+}

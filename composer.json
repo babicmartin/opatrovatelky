@@ -20,7 +20,8 @@
 		"monolog/monolog": "^3.5.0",
 		"mpdf/mpdf": "^8.3",
 		"psr/clock": "^1.0",
-		"ext-simplexml": "*"
+		"ext-simplexml": "*",
+		"james-heinrich/getid3": "^1.9"
 	},
 	"require-dev": {
 		"nette/tester": "^2.6",

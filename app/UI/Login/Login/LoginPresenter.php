@@ -22,11 +22,12 @@ final class LoginPresenter extends AdminPresenter
 
 	public function actionLogout(): void
 	{
-		if ($this->getUser()->isLoggedIn()) {
-			$this->getUser()->logout(true);
-			$this->getSession()->regenerateId();
+		if (!$this->getHttpRequest()->isMethod('POST')) {
+			$this->redirect($this->getUser()->isLoggedIn() ? '@home' : '@login');
 		}
 
-		$this->redirect('@login');
+		if ($this->getHttpRequest()->getPost('_do') === null) {
+			$this->error('Metóda nie je povolená.', 405);
+		}
 	}
 }

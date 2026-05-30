@@ -56,6 +56,7 @@ final class TranslationPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
+		$this->tryHandleAutosavePartialRequest();
 		$this->translateRepository->updateGerman($id, $data);
 
 		if ($this->isAjax()) {

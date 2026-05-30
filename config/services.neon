@@ -13,8 +13,11 @@ search:
 services:
 	- App\Router\RouterFactory::createRouter
 	- App\Model\DataProvider\Directory\DirectoryProvider(appDir: %appDir%, tempDir: %tempDir%, vendorDir: %vendorDir%, rootDir: %rootDir%, logDir: %rootDir%/log)
-	- App\Model\DataProvider\Directory\StorageDirProvider(userImages: %storageDir.userImages%, userImagesEmpty: %storageDir.userImagesEmpty%, countryImages: %storageDir.countryImages%, documents: %storageDir.documents%, privateDocuments: %storageDir.privateDocuments%, documentTypeImages: %storageDir.documentTypeImages%, babysitterPdf: %storageDir.babysitterPdf%)
+	- App\Model\DataProvider\Directory\StorageDirProvider(userImages: %storageDir.userImages%, userImagesEmpty: %storageDir.userImagesEmpty%, countryImages: %storageDir.countryImages%, documents: %storageDir.documents%, privateDocuments: %storageDir.privateDocuments%, privateVideos: %storageDir.privateVideos%, documentTypeImages: %storageDir.documentTypeImages%, babysitterPdf: %storageDir.babysitterPdf%)
 	- App\Model\DataProvider\UrlProvider\UrlProvider(appName: %url.appName%)
 	- App\Model\Service\Clock\ClockService
+	- App\Model\Repository\ChangeLogRepository
+	- App\Model\Service\Audit\ChangeAuditLogger
+	- App\Model\Service\Autosave\AutosaveFieldUpdateService
 	- App\Model\Service\Pdf\BabysitterPdfService
-
+	- App\Model\Service\Video\VideoMetadataReader

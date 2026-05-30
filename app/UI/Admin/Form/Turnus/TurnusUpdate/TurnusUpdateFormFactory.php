@@ -63,31 +63,31 @@ final readonly class TurnusUpdateFormFactory
 		$form->addHidden('id', (string) $turnus['id']);
 		$form->addSelect('status', 'Status', $statusOptions)
 			->setDefaultValue((int) $turnus['status'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('familyId', 'Rodina', $familyOptions)
 			->setDefaultValue((int) $turnus['familyId'])
-			->setHtmlAttribute('class', 'form-control updateSelectReload js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelectReload js-autosave-control');
 		$form->addSelect('babysitterId', 'Opatrovateľka', $babysitterOptions)
 			->setDefaultValue((int) $turnus['babysitterId'])
-			->setHtmlAttribute('class', 'form-control updateSelectReload js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelectReload js-autosave-control');
 		$this->addDate($form, 'dateFrom', 'Nástup', $turnus['dateFrom'] ?? null);
 		$this->addDate($form, 'dateTo', 'Ukončenie', $turnus['dateTo'] ?? null);
 		$form->addSelect('userId', 'Spracováva', $userOptions)
 			->setDefaultValue((int) $turnus['userId'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('agencyId', 'Agentúra', $agencyOptions)
 			->setDefaultValue((int) $turnus['agencyId'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('partnerId', 'Partner', $partnerOptions)
 			->setDefaultValue((int) $turnus['partnerId'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('workingStatus', 'Status zamestnanca', $workingStatusOptions)
 			->setDefaultValue((int) $turnus['workingStatus'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		if ($showWorkPosition) {
 			$form->addSelect('workPositionId', 'Pracovná pozícia', $workPositionOptions)
 				->setDefaultValue((int) $turnus['workPositionId'])
-				->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+				->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		} else {
 			$form->addHidden('workPositionId', (string) $turnus['workPositionId']);
 		}
@@ -95,7 +95,7 @@ final readonly class TurnusUpdateFormFactory
 		$this->addText($form, 'invoiceNumber', 'Číslo FA', $turnus);
 		$form->addSelect('invoiceStatus', 'Status FA', $invoiceStatusOptions)
 			->setDefaultValue((int) $turnus['invoiceStatus'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$this->addFloatText($form, 'fee', 'Honorár DLV', $turnus);
 		$this->addFloatText($form, 'feeAg', 'Honorár AG', $turnus);
 		$this->addFloatText($form, 'feeBk', 'Honorár BK', $turnus);
@@ -109,11 +109,11 @@ final readonly class TurnusUpdateFormFactory
 		$this->addFloatText($form, 'commissionPartners', 'Partneri', $turnus);
 		$form->addSelect('paymentPeriodPartner', 'Platba', $paymentPeriodOptions)
 			->setDefaultValue((int) $turnus['paymentPeriodPartner'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$this->addFloatText($form, 'commission4ms', '4MS', $turnus);
 		$form->addSelect('paymentPeriod', 'Platba', $paymentPeriodOptions)
 			->setDefaultValue((int) $turnus['paymentPeriod'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$this->addFloatText($form, 'remainingPayment', 'Zostávajúca platba', $turnus);
 		$form->addTextArea('notice', 'Poznámka')
 			->setDefaultValue((string) $turnus['notice'])
@@ -123,7 +123,7 @@ final readonly class TurnusUpdateFormFactory
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control h150');
 		$form->addSelect('complaintStatus', 'Status Reklamácie', $complaintStatusOptions)
 			->setDefaultValue((int) $turnus['complaintStatus'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSubmit('save', 'Uložiť')
 			->setHtmlAttribute('class', 'd-none');
 
@@ -187,7 +187,7 @@ final readonly class TurnusUpdateFormFactory
 		$form->addHidden('id', (string) $turnus['id']);
 		$form->addSelect('statusA1', 'Status A1', $statusA1Options)
 			->setDefaultValue((int) $turnus['statusA1'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSubmit('save', 'Uložiť')
 			->setHtmlAttribute('class', 'd-none');
 

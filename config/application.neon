@@ -16,9 +16,11 @@ security:
 		expiration: 1 day
 		storage: session
 
+http:
+	cookieSecure: auto
+
 session:
 	expiration: 1 day
-	cookieSecure: auto
 	cookieSamesite: Lax
 	cookieHttponly: true
 

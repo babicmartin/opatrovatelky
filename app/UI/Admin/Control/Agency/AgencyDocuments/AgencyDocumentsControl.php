@@ -7,7 +7,9 @@ use App\Model\DataProvider\Directory\StorageDirProvider;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Form\Factory\BaseFormFactory;
 use App\Model\Repository\FileRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
 use App\Model\Utils\Date\DateService;
+use App\UI\Admin\AdminPresenter;
 use Nette\Application\Responses\FileResponse;
 use Nette\Application\UI\Control;
 use Nette\Application\UI\Form;
@@ -43,6 +45,7 @@ class AgencyDocumentsControl extends Control
 		private readonly StorageDirProvider $storageDirProvider,
 		private readonly User $user,
 		private readonly DateService $dateService,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 	}
 
@@ -94,7 +97,13 @@ class AgencyDocumentsControl extends Control
 			$this->getPresenter()->error('Prístup zamietnutý', 403);
 		}
 
+		$document = $this->fileRepository->findDocument($this->dir, $this->agencyId, $id);
+		if ($document === null) {
+			$this->getPresenter()->error('Dokument neexistuje.', 404);
+		}
+
 		$this->fileRepository->softDelete($id);
+		$this->changeAuditLogger->logDocumentDeleted('documents.agency', $id, (string) $document['name'], $this->dir, $this->agencyId);
 		$this->redirect('this');
 	}
 
@@ -129,12 +138,17 @@ class AgencyDocumentsControl extends Control
 				->setHtmlAttribute('autocomplete', 'off');
 			$form->addSelect('status', 'Status', $this->fileRepository->findStatusOptions())
 				->setDefaultValue((int) $document['status'])
-				->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+				->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 			$form->addSubmit('save', 'Uložiť')->setHtmlAttribute('class', 'd-none');
 
 			$form->onSuccess[] = function (Form $form, ArrayHash $values): void {
 				if (!$this->user->isAllowed(Resource::AGENCY->value)) {
 					$this->getPresenter()->error('Prístup zamietnutý', 403);
+				}
+
+				$presenter = $this->getPresenter();
+				if ($presenter instanceof AdminPresenter) {
+					$presenter->tryHandleAutosavePartialRequest();
 				}
 
 				$this->fileRepository->updateDocument((int) $values->id, [
@@ -204,7 +218,12 @@ class AgencyDocumentsControl extends Control
 
 			FileSystem::createDir($targetDir);
 			$upload->move($targetDir . '/' . $fileName);
-			$this->fileRepository->insertDocument($this->dir, $this->agencyId, $fileName, $type, (int) $this->user->getId());
+			$documentId = $this->fileRepository->insertDocument($this->dir, $this->agencyId, $fileName, $type, (int) $this->user->getId());
+			$this->changeAuditLogger->logDocumentUploaded('documents.agency', $documentId, $fileName, $this->dir, $this->agencyId, [
+				'file_type' => $type,
+				'extension' => $extension,
+				'size_bytes' => $upload->getSize(),
+			]);
 			$this->redirect('this');
 		};
 

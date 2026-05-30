@@ -8,6 +8,10 @@ use App\Model\Form\DTO\Admin\Family\FamilyInfo\FamilyInfoForm;
 use App\Model\Form\DTO\Admin\Family\FamilyShortInfo\FamilyShortInfoForm;
 use App\Model\Repository\FamilyRepository;
 use App\Model\Repository\FamilyProposalRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
+use App\Model\Table\FamilyProposalTableMap;
+use App\Model\Table\FamilyTableMap;
+use App\Model\Table\TurnusTableMap;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Family\FamilyDocuments\FamilyDocumentsControl;
 use App\UI\Admin\Control\Family\FamilyDocuments\FamilyDocumentsControlFactory;
@@ -37,6 +41,7 @@ class FamilyPresenter extends AdminPresenter
 		private readonly FamilyAddressFormFactory $familyAddressFormFactory,
 		private readonly FamilyShortInfoFormFactory $familyShortInfoFormFactory,
 		private readonly FamilyDocumentsControlFactory $familyDocumentsControlFactory,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 		parent::__construct();
 	}
@@ -125,6 +130,9 @@ class FamilyPresenter extends AdminPresenter
 		}
 
 		$id = $this->familyRepository->createEmptyFamily();
+		$this->changeAuditLogger->logCreated('family.shortInfo', FamilyTableMap::TABLE_NAME, $id, 'Rodina', [
+			'created_as' => 'family',
+		]);
 		$this->redirect('update', $id);
 	}
 
@@ -135,6 +143,10 @@ class FamilyPresenter extends AdminPresenter
 		}
 
 		$id = $this->familyRepository->createTurnusForFamily($familyId, (int) $this->getUser()->getId());
+		$this->changeAuditLogger->logCreated('turnus.update', TurnusTableMap::TABLE_NAME, $id, 'Turnus', [
+			'created_from' => 'family',
+			'family_id' => $familyId,
+		]);
 		$this->redirect(':Admin:Turnus:update', $id);
 	}
 
@@ -145,6 +157,10 @@ class FamilyPresenter extends AdminPresenter
 		}
 
 		$id = $this->familyProposalRepository->createForFamily($familyId, (int) $this->getUser()->getId());
+		$this->changeAuditLogger->logCreated('proposal.update', FamilyProposalTableMap::TABLE_NAME, $id, 'Návrh', [
+			'created_from' => 'family',
+			'family_id' => $familyId,
+		]);
 		$this->redirect(':Admin:Proposal:update', $id);
 	}
 
@@ -155,6 +171,7 @@ class FamilyPresenter extends AdminPresenter
 		}
 
 		$this->familyRepository->softDeleteIfNoTurnus($familyId);
+		$this->changeAuditLogger->logDeleted('family.shortInfo', FamilyTableMap::TABLE_NAME, $familyId, 'Rodina/projekt');
 		$this->redirect('default');
 	}
 
@@ -215,6 +232,7 @@ class FamilyPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
+		$this->tryHandleAutosavePartialRequest();
 		$this->familyRepository->updateInfoFromForm($form);
 		$this->finishAutosave();
 	}
@@ -225,6 +243,7 @@ class FamilyPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
+		$this->tryHandleAutosavePartialRequest();
 		$this->familyRepository->updateAddressFromForm($form);
 		$this->finishAutosave();
 	}
@@ -235,6 +254,7 @@ class FamilyPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
+		$this->tryHandleAutosavePartialRequest();
 		$this->familyRepository->updateShortInfoFromForm($form);
 		$this->finishAutosave();
 	}

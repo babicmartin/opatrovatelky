@@ -5,6 +5,8 @@ namespace App\UI\Admin\Turnus;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Form\DTO\Admin\Turnus\TurnusUpdate\TurnusUpdateForm;
 use App\Model\Repository\TurnusRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
+use App\Model\Table\TurnusTableMap;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Turnus\TurnusDocuments\TurnusDocumentsControl;
 use App\UI\Admin\Control\Turnus\TurnusDocuments\TurnusDocumentsControlFactory;
@@ -43,6 +45,7 @@ class TurnusPresenter extends AdminPresenter
 		private readonly TurnusRepository $turnusRepository,
 		private readonly TurnusUpdateFormFactory $turnusUpdateFormFactory,
 		private readonly TurnusDocumentsControlFactory $turnusDocumentsControlFactory,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 		parent::__construct();
 	}
@@ -96,6 +99,7 @@ class TurnusPresenter extends AdminPresenter
 		$this->assertCanManage();
 
 		$id = $this->turnusRepository->createEmptyTurnus((int) $this->getUser()->getId());
+		$this->changeAuditLogger->logCreated('turnus.update', TurnusTableMap::TABLE_NAME, $id, 'Turnus');
 		$this->redirect('update', $id);
 	}
 
@@ -104,6 +108,7 @@ class TurnusPresenter extends AdminPresenter
 		$this->assertCanManage();
 
 		$this->turnusRepository->softDelete($id);
+		$this->changeAuditLogger->logDeleted('turnus.update', TurnusTableMap::TABLE_NAME, $id, 'Turnus');
 		$this->flashMessage('Turnus bol odstránený.', 'success');
 		$this->redirect('default');
 	}
@@ -169,6 +174,7 @@ class TurnusPresenter extends AdminPresenter
 	private function turnusUpdateFormSucceeded(TurnusUpdateForm $form): void
 	{
 		$this->assertCanManage();
+		$this->tryHandleAutosavePartialRequest();
 		$this->turnusRepository->updateFromForm($form);
 		$this->finishAutosave();
 	}
@@ -180,6 +186,7 @@ class TurnusPresenter extends AdminPresenter
 			$this->error('Neplatný turnus.', 400);
 		}
 
+		$this->tryHandleAutosavePartialRequest();
 		$this->turnusRepository->updateStatusA1($id, $statusA1);
 		$this->finishAutosave();
 	}

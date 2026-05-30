@@ -34,7 +34,7 @@
 		<div class="col-md-12">
 			<div class="d-inline-block me-4">
 				<div class="fw-bold">Krajina:</div>
-				<select name="filter-country" id="filter-country" class="form-control filter-family">
+				<select name="filter-country" id="filter-country" class="form-select filter-family">
 					<option value="">---</option>
 					<option n:foreach="$countries as $filterCountry" value="{$filterCountry['id']}" n:attr="selected: $country === $filterCountry['id']">{$filterCountry['name']}</option>
 				</select>
@@ -42,7 +42,7 @@
 
 			<div class="d-inline-block me-4" style="max-width:150px;">
 				<div class="fw-bold">Partner</div>
-				<select name="filter-partner" id="filter-partner" class="form-control filter-family">
+				<select name="filter-partner" id="filter-partner" class="form-select filter-family">
 					<option value="">---</option>
 					<option n:foreach="$partners as $filterPartner" value="{$filterPartner['id']}" n:attr="selected: $partner === $filterPartner['id']">{$filterPartner['name']}</option>
 				</select>
@@ -50,7 +50,7 @@
 
 			<div class="d-inline-block me-4">
 				<div class="fw-bold">Mesto:</div>
-				<select name="filter-city" id="filter-city" class="form-control filter-family" style="max-width:150px;">
+				<select name="filter-city" id="filter-city" class="form-select filter-family" style="max-width:150px;">
 					<option value="">---</option>
 					<option n:foreach="$cities as $filterCity" value="{$filterCity}" n:attr="selected: $city === $filterCity">{$filterCity}</option>
 				</select>
@@ -58,7 +58,7 @@
 
 			<div class="d-inline-block">
 				<div class="fw-bold">Status:</div>
-				<select name="filter-status" id="filter-status" class="form-control filter-family">
+				<select name="filter-status" id="filter-status" class="form-select filter-family">
 					<option value="">---</option>
 					<option n:foreach="$statuses as $filterStatus" value="{$filterStatus['id']}" n:attr="selected: $status === $filterStatus['id']">{$filterStatus['status']}</option>
 				</select>

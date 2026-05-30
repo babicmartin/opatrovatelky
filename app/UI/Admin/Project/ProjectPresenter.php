@@ -4,6 +4,8 @@ namespace App\UI\Admin\Project;
 
 use App\Model\Enum\Acl\Resource;
 use App\Model\Repository\FamilyRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
+use App\Model\Table\FamilyTableMap;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Filter\AlphabetFilter\AlphabetFilterPresenterTrait;
 use App\UI\Admin\Control\Project\ProjectList\ProjectListPresenterTrait;
@@ -15,6 +17,7 @@ class ProjectPresenter extends AdminPresenter
 
 	public function __construct(
 		private readonly FamilyRepository $familyRepository,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 		parent::__construct();
 	}
@@ -60,6 +63,9 @@ class ProjectPresenter extends AdminPresenter
 		}
 
 		$id = $this->familyRepository->createEmptyProject();
+		$this->changeAuditLogger->logCreated('family.shortInfo', FamilyTableMap::TABLE_NAME, $id, 'Projekt', [
+			'created_as' => 'project',
+		]);
 		$this->redirect(':Admin:Family:update', $id);
 	}
 }

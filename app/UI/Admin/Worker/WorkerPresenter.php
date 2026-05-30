@@ -4,6 +4,8 @@ namespace App\UI\Admin\Worker;
 
 use App\Model\Enum\Acl\Resource;
 use App\Model\Repository\BabysitterRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
+use App\Model\Table\OpatrovatelkaTableMap;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Filter\AlphabetFilter\AlphabetFilterPresenterTrait;
 use App\UI\Admin\Control\Worker\WorkerList\WorkerListPresenterTrait;
@@ -15,6 +17,7 @@ class WorkerPresenter extends AdminPresenter
 
 	public function __construct(
 		private readonly BabysitterRepository $babysitterRepository,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 		parent::__construct();
 	}
@@ -74,6 +77,9 @@ class WorkerPresenter extends AdminPresenter
 		}
 
 		$id = $this->babysitterRepository->createEmptyWorker();
+		$this->changeAuditLogger->logCreated('babysitter.main', OpatrovatelkaTableMap::TABLE_NAME, $id, 'Pracovník', [
+			'created_as' => 'worker',
+		]);
 		$this->redirect(':Admin:Babysitter:update', $id);
 	}
 }

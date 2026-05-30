@@ -6,6 +6,8 @@ use App\Model\DataProvider\Directory\DirectoryProvider;
 use App\Model\DataProvider\Directory\StorageDirProvider;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Repository\CountryRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
+use App\Model\Table\CountryTableMap;
 use App\Model\Utils\Validator\ImageValidator;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Form\Country\CountryUpdate\CountryUpdateFormFactory;
@@ -26,6 +28,7 @@ final class CountryPresenter extends AdminPresenter
 		private readonly DirectoryProvider $directoryProvider,
 		private readonly StorageDirProvider $storageDirProvider,
 		private readonly ImageValidator $imageValidator,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 		parent::__construct();
 	}
@@ -61,6 +64,7 @@ final class CountryPresenter extends AdminPresenter
 		}
 
 		$id = $this->countryRepository->createEmpty();
+		$this->changeAuditLogger->logCreated('country.update', CountryTableMap::TABLE_NAME, $id, 'Krajina');
 		$this->redirect('update', $id);
 	}
 
@@ -88,6 +92,7 @@ final class CountryPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
+		$this->tryHandleAutosavePartialRequest();
 		$this->countryRepository->updateTextFields($id, $data);
 
 		if ($this->isAjax()) {

@@ -77,15 +77,32 @@ class DateService
 		if ($value === null) {
 			return null;
 		}
-		$value = trim($value);
+		$value = preg_replace('/[\s\x{00A0}]+/u', '', trim($value)) ?? '';
 		if ($value === '') {
 			return null;
 		}
-		$dt = DateTimeImmutable::createFromFormat('!d.m.Y', $value);
-		if ($dt === false) {
-			return null;
+
+		if (preg_match('/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/', $value, $matches) === 1) {
+			$day = (int) $matches[1];
+			$month = (int) $matches[2];
+			$year = (int) $matches[3];
+
+			return checkdate($month, $day, $year)
+				? new DateTimeImmutable(sprintf('%04d-%02d-%02d', $year, $month, $day))
+				: null;
 		}
-		return $dt->format('d.m.Y') === $value ? $dt : null;
+
+		if (preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $value, $matches) === 1) {
+			$year = (int) $matches[1];
+			$month = (int) $matches[2];
+			$day = (int) $matches[3];
+
+			return checkdate($month, $day, $year)
+				? new DateTimeImmutable(sprintf('%04d-%02d-%02d', $year, $month, $day))
+				: null;
+		}
+
+		return null;
 	}
 
 	public function createDateTimeImmutableFromYearMonth(int $year, ?int $month = null): DateTimeImmutable

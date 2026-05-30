@@ -48,19 +48,19 @@ final readonly class TodoUpdateFormFactory
 		$form->addHidden('id', (string) $todo['id']);
 		$form->addSelect('familyId', 'Rodina', $familyOptions)
 			->setDefaultValue((int) $todo['familyId'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('babysitterId', 'Opatrovateľka', $babysitterOptions)
 			->setDefaultValue((int) $todo['babysitterId'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('todoFromUser', 'Úlohu zadal', $userOptions)
 			->setDefaultValue((int) $todo['todoFromUser'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('todoToUser1', 'Úlohu spracováva', $userOptions)
 			->setDefaultValue((int) $todo['todoToUser1'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('todoToUser2', 'Úlohu spracováva', $userOptions)
 			->setDefaultValue((int) $todo['todoToUser2'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addText('todoCreated', 'Dátum vytvorenia')
 			->setDefaultValue($todo['todoCreated'] instanceof \DateTimeImmutable ? $todo['todoCreated']->format('d.m.Y') : '')
 			->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
@@ -71,7 +71,7 @@ final readonly class TodoUpdateFormFactory
 			->setHtmlAttribute('autocomplete', 'off');
 		$form->addSelect('status', 'Status', $statusOptions)
 			->setDefaultValue((int) $todo['status'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addText('title', 'Názov úlohy')
 			->setDefaultValue((string) $todo['title'])
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');

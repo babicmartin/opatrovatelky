@@ -45,12 +45,12 @@ final readonly class BabysitterProfileFormFactory
 			->setAttribute('class', 'babysitter-profile-form js-autosave-form')
 			->setAttribute('style', 'display:contents;');
 		$form->addHidden('id', (string) $babysitter['id']);
-		$form->addSelect('smoker', 'Fajčiar', $smokerOptions)->setDefaultValue((int) $babysitter['smoker'])->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
-		$form->addSelect('allergy', 'Alergie', $yesNoOptions)->setDefaultValue((int) $babysitter['allergy'])->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
-		$form->addSelect('dailyCare', 'Denná starostlivosť', $yesNoOptions)->setDefaultValue((int) $babysitter['dailyCare'])->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
-		$form->addSelect('hourlyCare', 'Hodinová starostlivosť', $yesNoOptions)->setDefaultValue((int) $babysitter['hourlyCare'])->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
-		$form->addSelect('accommodationType', 'Ubytovanie', $accommodationOptions)->setDefaultValue((int) $babysitter['accommodationType'])->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
-		$form->addSelect('workShoes', 'Pracovná obuv', $yesNoOptions)->setDefaultValue((int) $babysitter['workShoes'])->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+		$form->addSelect('smoker', 'Fajčiar', $smokerOptions)->setDefaultValue((int) $babysitter['smoker'])->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
+		$form->addSelect('allergy', 'Alergie', $yesNoOptions)->setDefaultValue((int) $babysitter['allergy'])->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
+		$form->addSelect('dailyCare', 'Denná starostlivosť', $yesNoOptions)->setDefaultValue((int) $babysitter['dailyCare'])->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
+		$form->addSelect('hourlyCare', 'Hodinová starostlivosť', $yesNoOptions)->setDefaultValue((int) $babysitter['hourlyCare'])->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
+		$form->addSelect('accommodationType', 'Ubytovanie', $accommodationOptions)->setDefaultValue((int) $babysitter['accommodationType'])->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
+		$form->addSelect('workShoes', 'Pracovná obuv', $yesNoOptions)->setDefaultValue((int) $babysitter['workShoes'])->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 
 		foreach ([
 			'allergyDetail' => ['Alergie - detail', 'h100'],

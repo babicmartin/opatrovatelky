@@ -28,6 +28,7 @@ final class UserProfileUpdateFormFactory
 	{
 		$form = $this->baseFormFactory->create();
 		$form->getElementPrototype()->setAttribute('class', 'user-profile-update-form js-autosave-form');
+		$form->addHidden('id', (string) ($user['id'] ?? 0));
 
 		$form->addText('name', 'Meno')
 			->setDefaultValue((string) $user['name'])
@@ -74,13 +75,14 @@ final class UserProfileUpdateFormFactory
 
 		$form = $this->baseFormFactory->create();
 		$form->getElementPrototype()->setAttribute('class', 'user-access-update-form js-autosave-form');
+		$form->addHidden('id', (string) ($user['id'] ?? 0));
 
 		$form->addSelect('permission', 'Práva', $permissionOptions)
 			->setDefaultValue((int) $user['permission'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('active', 'Status', $activeOptions)
 			->setDefaultValue((int) $user['active'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSubmit('save', 'Uložiť')
 			->setHtmlAttribute('class', 'd-none');
 

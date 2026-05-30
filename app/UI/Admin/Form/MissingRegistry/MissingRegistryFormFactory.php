@@ -26,7 +26,7 @@ class MissingRegistryFormFactory
 		$form->addHidden('id', (string) $row['id']);
 		$form->addSelect('userId', 'Kto', $userOptions)
 			->setDefaultValue($row['userId'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addText('dateFrom', 'Od')
 			->setDefaultValue($row['dateFrom'] instanceof \DateTimeImmutable ? $row['dateFrom']->format('d.m.Y') : '')
 			->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')

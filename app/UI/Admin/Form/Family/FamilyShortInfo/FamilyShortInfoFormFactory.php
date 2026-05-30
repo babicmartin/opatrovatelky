@@ -39,7 +39,7 @@ final readonly class FamilyShortInfoFormFactory
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');
 		$form->addSelect('state', 'Krajina', $countryOptions)
 			->setDefaultValue((int) $family['state'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSubmit('save', 'Uložiť')->setHtmlAttribute('class', 'd-none');
 
 		$form->onSuccess[] = function (Form $form, ArrayHash $values) use ($onSuccess, $family): void {

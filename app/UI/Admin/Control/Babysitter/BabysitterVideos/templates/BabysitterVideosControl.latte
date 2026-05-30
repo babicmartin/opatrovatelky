@@ -1,0 +1,105 @@
+{varType array $videos}
+{varType bool $canDeleteVideos}
+{varType int $maxFileSize}
+{varType string $maxFileSizeLabel}
+{varType string $appMaxFileSizeLabel}
+{varType bool $serverLimitIsLower}
+{varType string $serverUploadLimitLabel}
+{varType string $maxDurationLabel}
+{varType array $allowedExtensions}
+{varType string $allowedExtensionsLabel}
+
+<div class="divone babysitter-video-section">
+	<h3 style="font-size:18px; margin:0 0 15px;">Video</h3>
+
+	<div class="babysitter-video-upload">
+		{form uploadForm}
+			<ul class="alert alert-danger" n:ifcontent>
+				<li n:foreach="$form->ownErrors as $error">{$error}</li>
+			</ul>
+			<div class="row g-2 align-items-start">
+				<div class="col-xl-8 col-md-12">
+					{label video class => 'inputLabel' /}
+					{input video}
+					<div class="text-danger fs-12" n:ifcontent>{inputError video}</div>
+					<div class="text-muted fs-12 mt-1">
+						Povolené: {$allowedExtensionsLabel}. Maximum {$maxFileSizeLabel}, dĺžka {$maxDurationLabel}.
+						<span n:if="$serverLimitIsLower">Serverový limit je {$serverUploadLimitLabel}; aplikačný limit je {$appMaxFileSizeLabel}.</span>
+					</div>
+				</div>
+				<div class="col-xl-4 col-md-12">
+					<div class="inputLabel d-none d-xl-block" aria-hidden="true">&nbsp;</div>
+					{input upload}
+				</div>
+			</div>
+			<div class="js-babysitter-video-error text-danger fw-bold mt-2"></div>
+		{/form}
+	</div>
+
+	<div class="table-responsive mt-4">
+		<table class="table table-striped card-table table-vcenter babysitter-video-table">
+			<thead>
+				<tr class="thead">
+					<th>Video</th>
+					<th class="tcenter">Nahraté</th>
+					<th class="tcenter">Nahral</th>
+					<th class="tcenter">Dĺžka</th>
+					<th class="tcenter">Veľkosť</th>
+					<th class="tcenter">Typ</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr n:if="count($videos) === 0">
+					<td colspan="7" class="text-muted">Zatiaľ nie je nahraté žiadne video.</td>
+				</tr>
+				<tr n:foreach="$videos as $video">
+					<td class="babysitter-video-preview">
+						<video controls preload="metadata">
+							<source src="{link play!, id: $video['id']}" type="{$video['mimeType']}">
+						</video>
+						<div class="fw-bold mt-2">{$video['originalName']}</div>
+					</td>
+					<td class="tcenter text-nowrap">{$video['uploadedAtLabel']}</td>
+					<td class="tcenter">
+						<span n:if="$video['userAcronym'] !== ''" class="badge" style="background-color:{$video['userColor']|noescape}" title="{$video['userName']}">{$video['userAcronym']}</span>
+						<span n:if="$video['userAcronym'] === ''">{$video['userName']}</span>
+					</td>
+					<td class="tcenter text-nowrap">{$video['durationLabel']}</td>
+					<td class="tcenter text-nowrap">{$video['sizeLabel']}</td>
+					<td class="tcenter text-nowrap">{$video['mimeType']}</td>
+					<td class="tcenter text-nowrap">
+						<a href="{link download!, id: $video['id']}" class="btn btn-success btn-sm" title="Stiahnuť">
+							<i class="fas fa-download"></i>
+						</a>
+						<a n:if="$canDeleteVideos" href="{link delete!, id: $video['id']}" class="btn btn-danger btn-sm" title="Odstrániť" onclick="return confirm('Naozaj chcete vymazať toto video?');">
+							<i class="fas fa-trash"></i>
+						</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="modal fade pdf-loader-modal" id="videoUploadModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-sm">
+		<div class="modal-content">
+			<div class="modal-body text-center py-4">
+				<div class="pdf-loader-ring" data-state="loading">
+					<svg viewBox="0 0 120 120" width="120" height="120">
+						<circle class="pdf-loader-track" cx="60" cy="60" r="52" fill="none" stroke-width="8"/>
+						<circle class="pdf-loader-progress" cx="60" cy="60" r="52" fill="none" stroke-width="8" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+						<text class="pdf-loader-percent" x="60" y="68" text-anchor="middle">0%</text>
+						<path class="pdf-loader-check" d="M40 62 L54 76 L82 48" fill="none" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</div>
+				<div class="pdf-loader-status"
+					data-status-loading="Nahrávam video..."
+					data-status-success="Video nahraté!"
+					data-status-error="Chyba pri nahrávaní videa">Nahrávam video...</div>
+				<button type="button" class="btn btn-sm btn-outline-secondary pdf-loader-close mt-3" data-bs-dismiss="modal" hidden>Zavrieť</button>
+			</div>
+		</div>
+	</div>
+</div>

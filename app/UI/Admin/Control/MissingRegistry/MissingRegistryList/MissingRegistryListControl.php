@@ -5,8 +5,11 @@ namespace App\UI\Admin\Control\MissingRegistry\MissingRegistryList;
 use App\Model\Factory\PaginatorFactory;
 use App\Model\Repository\MissingRegistryRepository;
 use App\Model\Repository\UserRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
+use App\Model\Table\MissingRegistryTableMap;
 use App\Model\Utils\Date\DateService;
 use App\Model\Utils\Paginator\Paginator;
+use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Form\MissingRegistry\MissingRegistryFormFactory;
 use Nette\Application\UI\Control;
 use Nette\Application\UI\Form;
@@ -32,6 +35,7 @@ class MissingRegistryListControl extends Control
 		private readonly PaginatorFactory $paginatorFactory,
 		private readonly MissingRegistryFormFactory $missingRegistryFormFactory,
 		private readonly DateService $dateService,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 	}
 
@@ -54,13 +58,15 @@ class MissingRegistryListControl extends Control
 
 	public function handleCreate(): void
 	{
-		$this->missingRegistryRepository->createEmpty();
+		$id = $this->missingRegistryRepository->createEmpty();
+		$this->changeAuditLogger->logCreated('missingRegistry.row', MissingRegistryTableMap::TABLE_NAME, $id, 'Neprítomnosť');
 		$this->redirect('this');
 	}
 
 	public function handleDelete(int $id): void
 	{
 		$this->missingRegistryRepository->softDelete($id);
+		$this->changeAuditLogger->logDeleted('missingRegistry.row', MissingRegistryTableMap::TABLE_NAME, $id, 'Neprítomnosť');
 		$this->redirect('this');
 	}
 
@@ -88,6 +94,11 @@ class MissingRegistryListControl extends Control
 	 */
 	private function registryFormSucceeded(int $id, array $values): void
 	{
+		$presenter = $this->getPresenter();
+		if ($presenter instanceof AdminPresenter) {
+			$presenter->tryHandleAutosavePartialRequest();
+		}
+
 		$values['dateFrom'] = $this->dateService->tryCreateFromUserInput((string) ($values['dateFrom'] ?? ''));
 		$values['dateTo'] = $this->dateService->tryCreateFromUserInput((string) ($values['dateTo'] ?? ''));
 		$this->missingRegistryRepository->updateRegistryRow($id, $values);

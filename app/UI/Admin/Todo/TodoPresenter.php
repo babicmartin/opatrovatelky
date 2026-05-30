@@ -5,6 +5,8 @@ namespace App\UI\Admin\Todo;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Form\DTO\Admin\Todo\TodoUpdate\TodoUpdateForm;
 use App\Model\Repository\TodoClientRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
+use App\Model\Table\TodoClientTableMap;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Todo\TodoActiveList\TodoActiveListPresenterTrait;
 use App\UI\Admin\Control\Todo\TodoClosedList\TodoClosedListPresenterTrait;
@@ -24,6 +26,7 @@ class TodoPresenter extends AdminPresenter
 	public function __construct(
 		private readonly TodoClientRepository $todoClientRepository,
 		private readonly TodoUpdateFormFactory $todoUpdateFormFactory,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 		parent::__construct();
 	}
@@ -73,6 +76,7 @@ class TodoPresenter extends AdminPresenter
 
 		$createdBy = $this->getUser()->isLoggedIn() ? (int) $this->getUser()->getId() : 0;
 		$id = $this->todoClientRepository->createEmptyTodo($createdBy);
+		$this->changeAuditLogger->logCreated('todo.update', TodoClientTableMap::TABLE_NAME, $id, 'Úloha');
 		$this->redirect('update', $id);
 	}
 
@@ -100,6 +104,7 @@ class TodoPresenter extends AdminPresenter
 			$this->error('Na úpravu tejto úlohy nemáte oprávnenie alebo neexistuje.', 403);
 		}
 
+		$this->tryHandleAutosavePartialRequest();
 		$this->todoClientRepository->updateFromForm($form);
 
 		if ($this->isAjax()) {
@@ -108,6 +113,15 @@ class TodoPresenter extends AdminPresenter
 
 		$this->flashMessage('Úloha bola uložená.', 'success');
 		$this->redirect('this');
+	}
+
+	protected function validateAutosavePartialRequest(string $context, int $entityId): void
+	{
+		parent::validateAutosavePartialRequest($context, $entityId);
+
+		if ($context === 'todo.update' && $this->getAllowedTodo($entityId) === null) {
+			$this->sendAutosavePartialError(403, 'Na úpravu tejto úlohy nemáte oprávnenie.');
+		}
 	}
 
 	/**

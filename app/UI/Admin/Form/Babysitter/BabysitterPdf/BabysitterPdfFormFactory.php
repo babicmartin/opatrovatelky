@@ -33,7 +33,7 @@ final readonly class BabysitterPdfFormFactory
 		$form->addHidden('id', (string) $babysitter['id']);
 		$form->addSelect('profilShowContact', 'Zobraziť kontakt', $yesNoOptions)
 			->setDefaultValue((int) $babysitter['profilShowContact'])
-			->setHtmlAttribute('class', 'form-control updateSelectReload js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelectReload js-autosave-control');
 		$form->addSubmit('save', 'Uložiť')->setHtmlAttribute('class', 'd-none');
 
 		$form->onSuccess[] = function (Form $form, ArrayHash $values) use ($onSuccess): void {

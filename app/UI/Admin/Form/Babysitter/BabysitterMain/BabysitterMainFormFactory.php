@@ -46,22 +46,22 @@ final readonly class BabysitterMainFormFactory
 		$form->addHidden('id', (string) $babysitter['id']);
 		$form->addSelect('type', 'Typ pracovnej pozície', $typeOptions)
 			->setDefaultValue((int) $babysitter['type'])
-			->setHtmlAttribute('class', 'form-control updateSelectReload js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelectReload js-autosave-control');
 		$form->addSelect('agencyId', 'Agentúra', $agencyOptions)
 			->setDefaultValue((int) $babysitter['agencyId'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('workingStatus', 'Pracovný status', $workingStatusOptions)
 			->setDefaultValue((int) $babysitter['workingStatus'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('status', 'Status', $statusOptions)
 			->setDefaultValue((int) $babysitter['status'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('firstContactUserId', 'Prvý kontakt vytvoril', $userOptions)
 			->setDefaultValue((int) $babysitter['firstContactUserId'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('blacklist', 'Blacklist', $blacklistOptions)
 			->setDefaultValue((int) $babysitter['blacklist'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addTextArea('notice', 'Poznámka')
 			->setDefaultValue((string) $babysitter['notice'])
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control h200');

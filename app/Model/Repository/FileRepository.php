@@ -6,6 +6,7 @@ use App\Model\Table\FileTableMap;
 use App\Model\Table\StatusDocumentTableMap;
 use App\Model\Table\UserTableMap;
 use Nette\Database\Row;
+use Nette\Database\Table\ActiveRow;
 
 class FileRepository extends BaseRepository
 {
@@ -77,9 +78,9 @@ class FileRepository extends BaseRepository
 		return null;
 	}
 
-	public function insertDocument(string $dir, int $ownerId, string $name, string $type, int $userId): void
+	public function insertDocument(string $dir, int $ownerId, string $name, string $type, int $userId): int
 	{
-		$this->insert([
+		$row = $this->insert([
 			FileTableMap::COL_DIR => $dir . '/' . $ownerId,
 			FileTableMap::COL_NAME => $name,
 			FileTableMap::COL_TYPE => $type,
@@ -87,6 +88,12 @@ class FileRepository extends BaseRepository
 			FileTableMap::COL_UPLOAD => date('Y-m-d H:i:s'),
 			FileTableMap::COL_ACTIVE => 1,
 		]);
+
+		if (!$row instanceof ActiveRow) {
+			throw new \RuntimeException('Document row was not created.');
+		}
+
+		return (int) $row->{FileTableMap::COL_ID};
 	}
 
 	/**

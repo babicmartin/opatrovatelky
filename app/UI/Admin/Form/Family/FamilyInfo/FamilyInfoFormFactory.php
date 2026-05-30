@@ -53,19 +53,19 @@ final readonly class FamilyInfoFormFactory
 		$form->addHidden('id', (string) $family['id']);
 		$form->addSelect('type', 'Rodina / Projekt', $typeOptions)
 			->setDefaultValue((int) $family['type'])
-			->setHtmlAttribute('class', 'form-control updateSelectReload js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelectReload js-autosave-control');
 		$form->addSelect('partnerId', 'Partner', $partnerOptions)
 			->setDefaultValue((int) $family['partnerId'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('acquiredByUserId', 'Rodinu získal', $userOptions)
 			->setDefaultValue((int) $family['acquiredByUserId'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('userId', 'Spravuje', $userOptions)
 			->setDefaultValue((int) $family['userId'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('status', 'Status', $statusOptions)
 			->setDefaultValue((int) $family['status'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addText('phone', 'Telefónne číslo')
 			->setDefaultValue((string) $family['phone'])
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');
@@ -79,13 +79,13 @@ final readonly class FamilyInfoFormFactory
 			->setHtmlAttribute('autocomplete', 'off');
 		$form->addSelect('orderStatus', 'Status objednávky', $documentStatusOptions)
 			->setDefaultValue((int) $family['orderStatus'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('contractStatus', 'Status zmluvy', $documentStatusOptions)
 			->setDefaultValue((int) $family['contractStatus'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addSelect('workStatusStaff', 'Pracovný status personálu', $workStatusOptions)
 			->setDefaultValue((int) $family['workStatusStaff'])
-			->setHtmlAttribute('class', 'form-control updateSelect js-autosave-control');
+			->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 		$form->addTextArea('projectDescription', 'Popis projektu')
 			->setDefaultValue((string) $family['projectDescription'])
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control h100');

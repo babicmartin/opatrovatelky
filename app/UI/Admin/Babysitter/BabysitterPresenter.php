@@ -13,12 +13,17 @@ use App\Model\Form\DTO\Admin\Babysitter\BabysitterProfile\BabysitterProfileForm;
 use App\Model\Form\DTO\Admin\Babysitter\BabysitterWorkProfile\BabysitterWorkProfileForm;
 use App\Model\Form\Factory\BaseFormFactory;
 use App\Model\Repository\BabysitterRepository;
+use App\Model\Service\Audit\ChangeAuditLogger;
 use App\Model\Service\Pdf\BabysitterPdfService;
+use App\Model\Table\OpatrovatelkaTableMap;
+use App\Model\Table\TurnusTableMap;
 use App\Model\Utils\Validator\ImageValidator;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Babysitter\BabysitterDocuments\BabysitterDocumentsControl;
 use App\UI\Admin\Control\Babysitter\BabysitterDocuments\BabysitterDocumentsControlFactory;
 use App\UI\Admin\Control\Babysitter\BabysitterList\BabysitterListPresenterTrait;
+use App\UI\Admin\Control\Babysitter\BabysitterVideos\BabysitterVideosControl;
+use App\UI\Admin\Control\Babysitter\BabysitterVideos\BabysitterVideosControlFactory;
 use App\UI\Admin\Control\Filter\AlphabetFilter\AlphabetFilterPresenterTrait;
 use App\UI\Admin\Form\Babysitter\BabysitterAddress\BabysitterAddressFormFactory;
 use App\UI\Admin\Form\Babysitter\BabysitterEducation\BabysitterEducationFormFactory;
@@ -54,11 +59,13 @@ class BabysitterPresenter extends AdminPresenter
 		private readonly BabysitterPdfFormFactory $babysitterPdfFormFactory,
 		private readonly BabysitterWorkProfileFormFactory $babysitterWorkProfileFormFactory,
 		private readonly BabysitterDocumentsControlFactory $babysitterDocumentsControlFactory,
+		private readonly BabysitterVideosControlFactory $babysitterVideosControlFactory,
 		private readonly BaseFormFactory $baseFormFactory,
 		private readonly DirectoryProvider $directoryProvider,
 		private readonly StorageDirProvider $storageDirProvider,
 		private readonly ImageValidator $imageValidator,
 		private readonly BabysitterPdfService $babysitterPdfService,
+		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 		parent::__construct();
 	}
@@ -116,6 +123,7 @@ class BabysitterPresenter extends AdminPresenter
 		?int $profil = null,
 		?int $documents = null,
 		?int $pdf = null,
+		?int $video = null,
 	): void
 	{
 		if (!$this->getUser()->isAllowed(Resource::BABYSITTER->value)) {
@@ -132,7 +140,7 @@ class BabysitterPresenter extends AdminPresenter
 			$this->error('Opatrovateľka neexistuje.', 404);
 		}
 
-		$this->activeTab = $this->normalizeTab($tab, $address, $education, $profil, $workProfile, $documents, $pdf);
+		$this->activeTab = $this->normalizeTab($tab, $address, $education, $profil, $workProfile, $documents, $pdf, $video);
 
 		$this->template->id = $id;
 		$this->template->babysitter = $this->babysitter;
@@ -153,6 +161,9 @@ class BabysitterPresenter extends AdminPresenter
 		}
 
 		$id = $this->babysitterRepository->createEmptyBabysitter();
+		$this->changeAuditLogger->logCreated('babysitter.main', OpatrovatelkaTableMap::TABLE_NAME, $id, 'Opatrovateľka', [
+			'created_as' => 'babysitter',
+		]);
 		$this->redirect('update', $id);
 	}
 
@@ -163,6 +174,10 @@ class BabysitterPresenter extends AdminPresenter
 		}
 
 		$id = $this->babysitterRepository->createTurnusForBabysitter($babysitterId, (int) $this->getUser()->getId());
+		$this->changeAuditLogger->logCreated('turnus.update', TurnusTableMap::TABLE_NAME, $id, 'Turnus', [
+			'created_from' => 'babysitter',
+			'babysitter_id' => $babysitterId,
+		]);
 		$this->redirect(':Admin:Turnus:update', $id);
 	}
 
@@ -292,6 +307,12 @@ class BabysitterPresenter extends AdminPresenter
 			->setContext($this->babysitterId);
 	}
 
+	protected function createComponentBabysitterVideos(): BabysitterVideosControl
+	{
+		return $this->babysitterVideosControlFactory->create()
+			->setContext($this->babysitterId);
+	}
+
 	protected function createComponentBabysitterImageForm(): Form
 	{
 		$this->assertCanManage();
@@ -336,6 +357,7 @@ class BabysitterPresenter extends AdminPresenter
 	private function babysitterMainFormSucceeded(BabysitterMainForm $form): void
 	{
 		$this->assertCanManage();
+		$this->tryHandleAutosavePartialRequest();
 		$this->babysitterRepository->updateMainFromForm($form);
 		$this->finishAutosave();
 	}
@@ -343,6 +365,7 @@ class BabysitterPresenter extends AdminPresenter
 	private function babysitterAddressFormSucceeded(BabysitterAddressForm $form): void
 	{
 		$this->assertCanManage();
+		$this->tryHandleAutosavePartialRequest();
 		$this->babysitterRepository->updateAddressFromForm($form);
 		$this->finishAutosave();
 	}
@@ -350,6 +373,7 @@ class BabysitterPresenter extends AdminPresenter
 	private function babysitterEducationFormSucceeded(BabysitterEducationForm $form): void
 	{
 		$this->assertCanManage();
+		$this->tryHandleAutosavePartialRequest();
 		$this->babysitterRepository->updateEducationFromForm($form);
 		$this->finishAutosave();
 	}
@@ -357,6 +381,7 @@ class BabysitterPresenter extends AdminPresenter
 	private function babysitterProfileFormSucceeded(BabysitterProfileForm $form): void
 	{
 		$this->assertCanManage();
+		$this->tryHandleAutosavePartialRequest();
 		$this->babysitterRepository->updateProfileFromForm($form);
 		$this->finishAutosave();
 	}
@@ -364,6 +389,7 @@ class BabysitterPresenter extends AdminPresenter
 	private function babysitterPdfFormSucceeded(BabysitterPdfForm $form): void
 	{
 		$this->assertCanManage();
+		$this->tryHandleAutosavePartialRequest();
 		$this->babysitterRepository->updatePdfFromForm($form);
 		$this->finishAutosave();
 	}
@@ -371,6 +397,7 @@ class BabysitterPresenter extends AdminPresenter
 	private function babysitterWorkProfileFormSucceeded(BabysitterWorkProfileForm $form): void
 	{
 		$this->assertCanManage();
+		$this->tryHandleAutosavePartialRequest();
 		$this->babysitterRepository->updateWorkProfileFromForm($form);
 		$this->finishAutosave();
 	}
@@ -406,7 +433,7 @@ class BabysitterPresenter extends AdminPresenter
 		$this->redirect('this');
 	}
 
-	private function normalizeTab(?string $tab, ?int $address, ?int $education, ?int $profil, ?int $workProfile, ?int $documents, ?int $pdf): string
+	private function normalizeTab(?string $tab, ?int $address, ?int $education, ?int $profil, ?int $workProfile, ?int $documents, ?int $pdf, ?int $video): string
 	{
 		if ($tab === null) {
 			if ($address === 1) {
@@ -427,10 +454,13 @@ class BabysitterPresenter extends AdminPresenter
 			if ($pdf === 1) {
 				return 'pdf';
 			}
+			if ($video === 1) {
+				return 'video';
+			}
 
 			return 'main';
 		}
 
-		return in_array($tab, ['main', 'info', 'education', 'profil', 'work-profile', 'documents', 'pdf'], true) ? $tab : 'main';
+		return in_array($tab, ['main', 'info', 'education', 'profil', 'work-profile', 'documents', 'pdf', 'video'], true) ? $tab : 'main';
 	}
 }

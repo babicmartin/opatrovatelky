@@ -49,13 +49,19 @@ class MissingRegistryRepository extends BaseRepository
 		return $row === null ? null : $this->mapRow($row);
 	}
 
-	public function createEmpty(): void
+	public function createEmpty(): int
 	{
-		$this->insert([
+		$row = $this->insert([
 			MissingRegistryTableMap::COL_USER_ID => 0,
 			MissingRegistryTableMap::COL_ACTIVE => 1,
 			MissingRegistryTableMap::COL_DELETED => 0,
 		]);
+
+		if (!$row instanceof ActiveRow) {
+			throw new \RuntimeException('Missing registry row was not created.');
+		}
+
+		return (int) $row->{MissingRegistryTableMap::COL_ID};
 	}
 
 	/**

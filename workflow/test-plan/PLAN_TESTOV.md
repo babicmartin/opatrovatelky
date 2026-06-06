@@ -20,6 +20,14 @@
 - Agent 5 je dokonceny: supporting repository testy a form factory testy pokryvaju default hodnoty, DTO mapping, validacie a ACL vetvy.
 - DB testy treba spustat sekvencne nad jednym `TEST_DATABASE_DSN`; paralelni agenti maju pouzit samostatne `_test` databazy, inak si budu resetovat data.
 
+### Doplnene Utils unit testy (2026-06-06)
+
+- Zrkadlova cesta `tests/Unit/Model/Utils/...`. Pridane: `Paginator` (clamping, offset, route query,
+  `fromPageCount`, vsetky vetvy `getVisiblePageItems`), `ArrayService` (paginate, unique merge, key/value
+  filtre, split, max fallback), `CheckboxService`, `NumberService`, `TypeConverter` (comma decimal),
+  `TypeChecker`, `FloatService`, `EmailValidator`, `UrlValidator`, `ImageValidator` (real PNG fixture +
+  non-image + missing path), `QuarterService`, `YearService` (clock mock).
+
 ### Doplnene neotestovane repository (2026-06-06)
 
 - `StatsRepository`: `getOverview()` — pocty podla statusu a krajiny, filter count>0, link destinations/parameters.

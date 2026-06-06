@@ -9,6 +9,24 @@ use Nette\Security\Permission;
 
 final class AuthorizatorFactory
 {
+	/** @var array<string, Resource> */
+	private const array PAGE_RESOURCE_ALIASES = [
+		'opatrovatelky' => Resource::BABYSITTER,
+		'opatrovatelky-update' => Resource::BABYSITTER,
+		'families' => Resource::FAMILY,
+		'families-update' => Resource::FAMILY,
+		'rodiny' => Resource::FAMILY,
+		'rodiny-update' => Resource::FAMILY,
+		'partneri' => Resource::PARTNER,
+		'partneri-update' => Resource::PARTNER,
+		'agencies' => Resource::AGENCY,
+		'agencies-update' => Resource::AGENCY,
+		'projekty' => Resource::PROJECT,
+		'pracovnici' => Resource::WORKER,
+		'proposal-records' => Resource::PROPOSAL,
+		'proposal-update' => Resource::PROPOSAL,
+	];
+
 	public function __construct(
 		private readonly PageRepository $pageRepository,
 	) {
@@ -51,6 +69,7 @@ final class AuthorizatorFactory
 
 			$role = UserRole::fromPermissionId($permission);
 			$acl->allow($role->value, $url);
+			$this->allowResourceAlias($acl, $role->value, $url);
 
 			if ($url === 'user-management') {
 				$acl->allow($role->value, Resource::USER_MANAGEMENT->value);
@@ -58,5 +77,15 @@ final class AuthorizatorFactory
 		}
 
 		return $acl;
+	}
+
+	private function allowResourceAlias(Permission $acl, string $role, string $url): void
+	{
+		$resource = self::PAGE_RESOURCE_ALIASES[$url] ?? null;
+		if ($resource === null) {
+			return;
+		}
+
+		$acl->allow($role, $resource->value);
 	}
 }

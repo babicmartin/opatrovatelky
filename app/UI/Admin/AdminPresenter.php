@@ -15,7 +15,10 @@ use App\UI\Admin\Control\User\UserProfileImage\UserProfileImagePresenterTrait;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\Presenter;
 use Nette\Database\Explorer;
+use Nette\Security\IIdentity;
 use Nette\Security\SimpleIdentity;
+use Nette\Security\User as SecurityUser;
+use Psr\Log\LoggerInterface;
 
 abstract class AdminPresenter extends Presenter
 {
@@ -30,6 +33,7 @@ abstract class AdminPresenter extends Presenter
 	private AutosaveFieldUpdateService $autosaveFieldUpdateService;
 	private SecurityAuditLogger $securityAuditLogger;
 	private Explorer $database;
+	private LoggerInterface $logger;
 
 	public function injectAutosaveFieldUpdateService(AutosaveFieldUpdateService $autosaveFieldUpdateService): void
 	{
@@ -46,6 +50,11 @@ abstract class AdminPresenter extends Presenter
 		$this->securityAuditLogger = $securityAuditLogger;
 	}
 
+	public function injectLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
+	}
+
 	protected function getResource(): ?string
 	{
 		return null;
@@ -60,9 +69,11 @@ abstract class AdminPresenter extends Presenter
 	{
 		parent::startup();
 
+		$sessionExistsBeforeStart = $this->getSession()->exists();
 		$this->getSession()->start();
 
 		if (!$this->getUser()->isLoggedIn() && $this->getName() !== 'Login:Login') {
+			$this->logger->warning('Admin request redirected to login because user is not logged in.', $this->createUnauthenticatedRequestLogContext($sessionExistsBeforeStart));
 			$this->redirect('@login', ['storeRequestId' => $this->storeRequest()]);
 		}
 
@@ -243,6 +254,64 @@ abstract class AdminPresenter extends Presenter
 	{
 		$this->getHttpResponse()->setCode($code);
 		$this->sendJson(['success' => false, 'message' => $message]);
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function createUnauthenticatedRequestLogContext(bool $sessionExistsBeforeStart): array
+	{
+		$request = $this->getHttpRequest();
+		$session = $this->getSession();
+		$sessionName = $session->getName();
+		$sessionCookie = $request->getCookie($sessionName);
+		$sessionCookieValue = is_scalar($sessionCookie) ? (string) $sessionCookie : null;
+		$userStorage = $session->getSection('Nette.Http.UserStorage/');
+		$storedIdentity = $userStorage->get('identity');
+		$storedAuthTime = $userStorage->get('authTime');
+		$storedExpireTime = $userStorage->get('expireTime');
+		$storedExpireDelta = $userStorage->get('expireDelta');
+		$identity = $this->getUser()->getIdentity();
+
+		return [
+			'presenter' => $this->getName(),
+			'action' => $this->getAction(),
+			'method' => $request->getMethod(),
+			'url' => (string) $request->getUrl(),
+			'host' => $request->getUrl()->getHost(),
+			'remoteAddress' => $request->getRemoteAddress(),
+			'userAgent' => $request->getHeader('User-Agent'),
+			'referer' => $request->getHeader('Referer'),
+			'isSameSite' => $request->isSameSite(),
+			'sessionName' => $sessionName,
+			'sessionStarted' => $session->isStarted(),
+			'sessionExistsBeforeStart' => $sessionExistsBeforeStart,
+			'hasSessionCookie' => $sessionCookieValue !== null,
+			'sessionCookieHash' => $sessionCookieValue !== null ? hash('sha256', $sessionCookieValue) : null,
+			'sessionIdHash' => $session->getId() !== '' ? hash('sha256', $session->getId()) : null,
+			'logoutReason' => $this->resolveLogoutReason($this->getUser()->getLogoutReason()),
+			'identityId' => $identity !== null ? $identity->getId() : null,
+			'storedAuthenticated' => $userStorage->get('authenticated'),
+			'storedReason' => $this->resolveLogoutReason($userStorage->get('reason')),
+			'storedIdentityId' => $storedIdentity instanceof IIdentity ? $storedIdentity->getId() : null,
+			'storedAuthTime' => is_numeric($storedAuthTime) ? date('c', (int) $storedAuthTime) : null,
+			'storedExpireTime' => is_numeric($storedExpireTime) ? date('c', (int) $storedExpireTime) : null,
+			'storedExpireDelta' => is_numeric($storedExpireDelta) ? (int) $storedExpireDelta : null,
+			'storedSecondsUntilExpiration' => is_numeric($storedExpireTime) ? (int) $storedExpireTime - time() : null,
+		];
+	}
+
+	private function resolveLogoutReason(mixed $reason): ?string
+	{
+		if (!is_int($reason)) {
+			return null;
+		}
+
+		return match ($reason) {
+			SecurityUser::LogoutManual => 'manual',
+			SecurityUser::LogoutInactivity => 'inactivity',
+			default => 'unknown:' . $reason,
+		};
 	}
 
 	private function getCurrentRouteId(): ?int

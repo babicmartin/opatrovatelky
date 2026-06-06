@@ -48,7 +48,7 @@ use App\Model\Utils\Date\DateService;
 use DateTimeInterface;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
-use Nette\Http\Request;
+use Nette\Http\IRequest;
 use Nette\Security\User;
 
 final class AutosaveFieldUpdateService
@@ -64,7 +64,7 @@ final class AutosaveFieldUpdateService
 	) {
 	}
 
-	public function tryHandleRequest(Request $request): bool
+	public function tryHandleRequest(IRequest $request): bool
 	{
 		$context = (string) ($request->getPost('__autosave_context') ?? '');
 		$field = (string) ($request->getPost('__autosave_field') ?? '');

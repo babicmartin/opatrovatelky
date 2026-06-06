@@ -1,0 +1,4 @@
+database:
+	dsn: %env.TEST_DATABASE_DSN%
+	user: %env.TEST_DATABASE_USER%
+	password: %env.TEST_DATABASE_PASSWORD%

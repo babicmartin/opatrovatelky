@@ -24,12 +24,6 @@ use Nette\Database\Table\ActiveRow;
 class ChangeLogRepository extends BaseRepository
 {
 	/** @var array<string, string> */
-	private array $entityLabelCache = [];
-
-	/** @var array<string, array{table:string,id:int,label:string}|null> */
-	private array $documentOwnerCache = [];
-
-	/** @var array<string, string> */
 	private const array SECTION_OPTIONS = [
 		'babysitter' => 'Opatrovateľky / pracovníci',
 		'family' => 'Rodiny',
@@ -609,15 +603,7 @@ class ChangeLogRepository extends BaseRepository
 			}
 		}
 
-		$cacheKey = $table . ':' . $entityId;
-		if (isset($this->entityLabelCache[$cacheKey])) {
-			return $this->entityLabelCache[$cacheKey];
-		}
-
-		$label = $this->doResolveEntityLabel($table, $entityId);
-		$this->entityLabelCache[$cacheKey] = $label;
-
-		return $label;
+		return $this->doResolveEntityLabel($table, $entityId);
 	}
 
 	private function doResolveEntityLabel(string $table, int $entityId): string
@@ -716,22 +702,13 @@ class ChangeLogRepository extends BaseRepository
 	 */
 	private function resolveDocumentOwner(string $context, int $fileId): ?array
 	{
-		$cacheKey = $context . ':' . $fileId;
-		if (array_key_exists($cacheKey, $this->documentOwnerCache)) {
-			return $this->documentOwnerCache[$cacheKey];
-		}
-
 		$file = $this->database->table(FileTableMap::TABLE_NAME)->get($fileId);
 		if (!$file instanceof ActiveRow) {
-			$this->documentOwnerCache[$cacheKey] = null;
 			return null;
 		}
 
 		$dir = trim((string) ($file->{FileTableMap::COL_DIR} ?? ''));
-		$owner = $this->resolveDocumentOwnerFromDir($dir);
-		$this->documentOwnerCache[$cacheKey] = $owner;
-
-		return $owner;
+		return $this->resolveDocumentOwnerFromDir($dir);
 	}
 
 	/**

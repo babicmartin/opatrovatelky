@@ -6,4 +6,5 @@
 	<a n:if="$user->isAllowed('userManagement')" href="{plink :Admin:UserManagement:default}" class="btn btn-success btn-sm">Správa užívateľov</a>
 	<a n:if="$user->isAllowed('translation')" href="{plink :Admin:Translation:default}" class="btn btn-success btn-sm">Preklady profilu</a>
 	<a n:if="$user->isAllowed('change-log')" href="{plink :Admin:ChangeLog:default}" class="btn btn-success btn-sm">Evidencia zmien</a>
+	<a n:if="$user->isAllowed('login-log')" href="{plink :Admin:LoginLog:default}" class="btn btn-success btn-sm">Evidencia prihlásení</a>
 {/block}

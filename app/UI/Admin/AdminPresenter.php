@@ -191,6 +191,7 @@ abstract class AdminPresenter extends Presenter
 			$ownerId = $this->getCurrentRouteId();
 			if ($ownerId === null) {
 				$this->sendAutosavePartialError(400, 'Chýba vlastník dokumentu.');
+				return;
 			}
 
 			$dirs = match ($context) {

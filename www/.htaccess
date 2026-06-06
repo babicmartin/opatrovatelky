@@ -12,6 +12,8 @@ Require all granted
 	# RewriteBase /
 
 	# legacy URLs from old PHP admin (?page=...)
+	RewriteRule ^login\.php$ /login/ [R=301,L,QSD]
+
 	RewriteCond %{QUERY_STRING} ^page=families-update&id=([0-9]+)&address=1(?:&.*)?$ [NC]
 	RewriteRule ^(?:index\.php)?$ /family/update/%1?tab=info [R=301,L]
 	RewriteCond %{QUERY_STRING} ^page=families-update&id=([0-9]+)&proposal=1(?:&.*)?$ [NC]

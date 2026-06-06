@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/bootstrap.php';
 
 // If you need some environment variables for bootstrapping
 // you can load them here if they are not loaded in app/Bootstrap.php

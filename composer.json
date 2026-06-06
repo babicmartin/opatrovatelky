@@ -42,6 +42,20 @@
 			"Tests\\": "tests"
 		}
 	},
+	"scripts": {
+		"test": [
+			"@test:phpunit",
+			"@test:tester"
+		],
+		"test:phpunit": "@php vendor/bin/phpunit",
+		"test:tester": "@php vendor/bin/tester tests/Tester -s",
+		"qa": [
+			"@test",
+			"@php vendor/bin/phpstan analyse --memory-limit=512M",
+			"@php vendor/bin/neon-lint config",
+			"@php vendor/bin/latte-lint app/UI"
+		]
+	},
 	"minimum-stability": "stable",
 	"config": {
 		"allow-plugins": {

@@ -81,6 +81,10 @@
 - **E2E** (`tests/E2E`): in-process workflow testy (login/logout, wrong-password reject, dealer 403 na
   ChangeLog, autosave->audit->zobrazenie, turnus create/delete + audit) bezia pod default PHPUnit bez
   prehliadaca. Volitelny Playwright scaffold v `tests/E2E/playwright` (login smoke, mimo CI/PHPUnit).
+  README doplneny o presny "seed user" krok (bcrypt hash + INSERT do `sany_users`); selektory overene
+  oproti `LoginFormFactory`/`LoginControl.latte` (placeholder Email/Heslo, tlacidlo Prihlásiť). Browser
+  beh sa nespustil — dev web `opatrovatelky.local` bol pocas pripravy nedostupny; scaffold ostava ako
+  zdokumentovany volitelny krok.
 - **API** kryje HTTP/JSON kontrakt zdielaneho `handleAutosavePartial` signalu (same-origin CSRF guard,
   ajax/POST guard, allowed-context allow-list, entity a document ownership, success/error envelope).
   Field-update logiku kryje `AutosaveFieldUpdateServiceTest`; API suite drzi presenter-level zmluvu.

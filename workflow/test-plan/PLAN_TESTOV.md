@@ -20,6 +20,15 @@
 - Agent 5 je dokonceny: supporting repository testy a form factory testy pokryvaju default hodnoty, DTO mapping, validacie a ACL vetvy.
 - DB testy treba spustat sekvencne nad jednym `TEST_DATABASE_DSN`; paralelni agenti maju pouzit samostatne `_test` databazy, inak si budu resetovat data.
 
+### Doplnene neotestovane repository (2026-06-06)
+
+- `StatsRepository`: `getOverview()` — pocty podla statusu a krajiny, filter count>0, link destinations/parameters.
+- `SearchRepository`: guard na kratke terminy a neznamy typ, mapovanie joinov pre babysitter, rodina + kontakt,
+  partner/agentura s `type` tagom, resolving veku.
+- `TranslateRepository`: `findRows()` mapping + order id DESC, `updateGerman()` persist.
+- `PageRepository`: `findMenuItems()` filtre (active/parent/position/in_menu/permission, order), entity wrap,
+  `getAll()`. Pozn.: `sany_pages.id` nema auto-increment, test prideluje explicitne id (od 100).
+
 ### Reorganizacia na 1:1 (2026-06-06)
 
 - Repository integration testy maju teraz konvenciu **jedna produkcna trieda = jedna test trieda**

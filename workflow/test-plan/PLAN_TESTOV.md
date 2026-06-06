@@ -25,6 +25,12 @@
 - `AdminCrudPresenterSmokeTest`: default akcia renderuje HTML pre ADMIN a DEALER dostane 403 pre vsetky
   CRUD presentery (Family, Partner, Agency, Turnus, Todo, Country, Proposal, UserManagement, Translation,
   MissingRegistry). Update akcia renderuje HTML pre ADMIN tam, kde existuje (8 presenterov so seedovanou entitou).
+- `SearchSignalContractTest` (Api): signal `search-search` vracia `{html: ...}` envelope; matching term
+  vyrenderuje fragment s riadkami, kratky term (<3) da prazdny fragment. Pozn.: signal params sub-komponentu
+  su prefixovane (`search-type`, `search-term`).
+- Audit create/delete handlery: kryje `AdminAuditHandlersRegressionTest` (Turnus create+delete -> change-log).
+- Zostava (vyssi effort): document upload/delete a BabysitterVideos JSON signaly su form-driven (multipart
+  upload), vyzaduju samostatny upload harness; autosave document path uz kryje `AutosavePartialContractTest`.
 
 ### Doplnene Utils unit testy (2026-06-06)
 

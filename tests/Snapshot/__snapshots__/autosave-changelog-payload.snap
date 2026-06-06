@@ -1,0 +1,54 @@
+[
+    {
+        "context": "babysitter.address",
+        "entity_table": "sn_opatrovatelky",
+        "field_name": "name",
+        "field_label": "Meno",
+        "column_name": "name",
+        "value_type": "text",
+        "old_value_id": null,
+        "old_value_label": "Anna",
+        "new_value_id": null,
+        "new_value_label": "Eva",
+        "metadata": null
+    },
+    {
+        "context": "babysitter.main",
+        "entity_table": "sn_opatrovatelky",
+        "field_name": "type",
+        "field_label": "Typ pracovnej pozície",
+        "column_name": "type",
+        "value_type": "select",
+        "old_value_id": "1",
+        "old_value_label": "Opatrovateľka",
+        "new_value_id": "2",
+        "new_value_label": "Pracovník",
+        "metadata": null
+    },
+    {
+        "context": "babysitter.address",
+        "entity_table": "sn_opatrovatelky",
+        "field_name": "birthday",
+        "field_label": "Dátum narodenia",
+        "column_name": "birthday",
+        "value_type": "date",
+        "old_value_id": null,
+        "old_value_label": null,
+        "new_value_id": null,
+        "new_value_label": "12.04.1985",
+        "metadata": null
+    },
+    {
+        "context": "babysitter.profile",
+        "entity_table": "sn_babysitter_disease",
+        "field_name": "diseaseIds",
+        "field_label": "Skúsenosti s chorobami",
+        "column_name": "disease_id",
+        "value_type": "junction",
+        "old_value_id": null,
+        "old_value_label": null,
+        "new_value_id": "1",
+        "new_value_label": "Demencia",
+        "metadata": "{\"action\":\"added\",\"item_id\":1,\"item_label\":\"Demencia\"}"
+    }
+]

@@ -1,0 +1,13 @@
+{
+  "name": "opatrovatelky-e2e",
+  "private": true,
+  "description": "Optional browser end-to-end tests for the Opatrovatelky CRM (Playwright).",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

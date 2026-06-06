@@ -1,25 +1,19 @@
 <?php declare(strict_types=1);
 
-namespace Tests\Functional;
+namespace Tests\Smoke;
 
 use App\Model\Enum\UserRole\UserRole;
 use App\Model\Table\ChangeLogTableMap;
 use App\Model\Table\OpatrovatelkaTableMap;
 use Nette\Application\BadRequestException;
-use Nette\Application\IPresenterFactory;
-use Nette\Application\Request as ApplicationRequest;
-use Nette\Application\Response;
-use Nette\Application\Responses\TextResponse;
-use Nette\Application\UI\Presenter;
-use Nette\Http\IRequest;
-use Nette\Http\IResponse;
-use Nette\Security\SimpleIdentity;
-use Nette\Security\User;
 use Tests\Support\Database\TestDatabase;
 use Tests\Support\PHPUnit\DatabaseTestCase;
+use Tests\Support\PHPUnit\PresenterWorkflowTrait;
 
 final class AdminPresenterSmokeTest extends DatabaseTestCase
 {
+	use PresenterWorkflowTrait;
+
 	public function testSettingsPageRendersChangeLogLinkForCeo(): void
 	{
 		$this->loginAs(UserRole::CEO);
@@ -92,68 +86,8 @@ final class AdminPresenterSmokeTest extends DatabaseTestCase
 
 	protected function tearDown(): void
 	{
-		$this->getContainer()->getByType(User::class)->logout(true);
+		$this->logout();
 
 		parent::tearDown();
-	}
-
-	private function loginAs(UserRole $role, ?int $id = null): void
-	{
-		$id ??= TestDatabase::createUser([
-			'email' => strtolower($role->value) . '.presenter@example.test',
-			'permission' => $role->getPermissionId(),
-		]);
-
-		$this->getContainer()->getByType(User::class)->login(new SimpleIdentity($id, [$role->value], [
-			'email' => strtolower($role->value) . '.presenter@example.test',
-		]));
-	}
-
-	/**
-	 * @param array<string, mixed> $params
-	 */
-	private function renderPresenter(string $name, array $params = []): string
-	{
-		$response = $this->runPresenter($name, $params);
-
-		self::assertInstanceOf(TextResponse::class, $response);
-
-		return $this->sendTextResponse($response);
-	}
-
-	/**
-	 * @param array<string, mixed> $params
-	 */
-	private function runPresenter(string $name, array $params = []): Response
-	{
-		$params += ['action' => 'default'];
-
-		$presenterFactory = $this->getContainer()->getByType(IPresenterFactory::class);
-		$presenter = $presenterFactory->createPresenter($name);
-		if (!$presenter instanceof Presenter) {
-			self::fail($name . ' presenter must be a UI presenter.');
-		}
-
-		$presenter->autoCanonicalize = false;
-
-		return $presenter->run(new ApplicationRequest($name, 'GET', $params));
-	}
-
-	private function sendTextResponse(TextResponse $response): string
-	{
-		$level = ob_get_level();
-		ob_start();
-		try {
-			$response->send(
-				$this->getContainer()->getByType(IRequest::class),
-				$this->getContainer()->getByType(IResponse::class),
-			);
-
-			return (string) ob_get_clean();
-		} finally {
-			while (ob_get_level() > $level) {
-				ob_end_clean();
-			}
-		}
 	}
 }

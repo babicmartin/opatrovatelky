@@ -386,10 +386,24 @@ final class TestDatabase
 		$data = array_intersect_key($row, array_flip($columns));
 
 		try {
-			self::insert($table, $data);
+			self::replace($table, $data);
 		} catch (PDOException $e) {
 			throw new RuntimeException('Unable to seed lookup table ' . $table . ': ' . $e->getMessage(), 0, $e);
 		}
+	}
+
+	/**
+	 * @param array<string, mixed> $data
+	 */
+	private static function replace(string $table, array $data): void
+	{
+		$pdo = self::pdo();
+		$columns = array_keys($data);
+		$columnSql = implode(', ', array_map(static fn(string $column): string => '`' . str_replace('`', '``', $column) . '`', $columns));
+		$parameterSql = implode(', ', array_fill(0, count($columns), '?'));
+
+		$statement = $pdo->prepare('REPLACE INTO `' . str_replace('`', '``', $table) . "` ($columnSql) VALUES ($parameterSql)");
+		$statement->execute(array_values($data));
 	}
 
 	/**

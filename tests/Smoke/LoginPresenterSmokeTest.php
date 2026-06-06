@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Tests\Functional;
+namespace Tests\Smoke;
 
 use Nette\Application\IPresenterFactory;
 use Nette\Application\Request as ApplicationRequest;

@@ -22,11 +22,21 @@
 		<testsuite name="Integration">
 			<directory>tests/Integration</directory>
 		</testsuite>
-		<testsuite name="Functional">
-			<directory>tests/Functional</directory>
+		<testsuite name="Api">
+			<directory>tests/Api</directory>
+		</testsuite>
+		<testsuite name="Smoke">
+			<directory>tests/Smoke</directory>
 		</testsuite>
 		<testsuite name="Regression">
 			<directory>tests/Regression</directory>
+		</testsuite>
+		<testsuite name="Snapshot">
+			<directory>tests/Snapshot</directory>
+		</testsuite>
+		<testsuite name="E2E">
+			<directory>tests/E2E</directory>
+			<exclude>tests/E2E/playwright</exclude>
 		</testsuite>
 	</testsuites>
 

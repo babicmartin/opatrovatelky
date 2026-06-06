@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+	bootstrap="tests/bootstrap.php"
+	cacheDirectory="temp/phpunit-performance"
+	colors="true"
+	failOnRisky="true"
+	failOnWarning="true"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+>
+	<php>
+		<env name="APP_ENV" value="test" force="true"/>
+		<env name="TEST_DATABASE_DSN" value="mysql:host=127.0.0.1;port=3307;dbname=opatrovatelky_nette_test"/>
+		<env name="TEST_DATABASE_USER" value="root"/>
+		<env name="TEST_DATABASE_PASSWORD" value=""/>
+	</php>
+
+	<testsuites>
+		<testsuite name="Performance">
+			<directory>tests/Performance</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

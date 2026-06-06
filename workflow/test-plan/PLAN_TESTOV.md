@@ -20,6 +20,12 @@
 - Agent 5 je dokonceny: supporting repository testy a form factory testy pokryvaju default hodnoty, DTO mapping, validacie a ACL vetvy.
 - DB testy treba spustat sekvencne nad jednym `TEST_DATABASE_DSN`; paralelni agenti maju pouzit samostatne `_test` databazy, inak si budu resetovat data.
 
+### Agent 6 — admin presenter smoke (2026-06-06)
+
+- `AdminCrudPresenterSmokeTest`: default akcia renderuje HTML pre ADMIN a DEALER dostane 403 pre vsetky
+  CRUD presentery (Family, Partner, Agency, Turnus, Todo, Country, Proposal, UserManagement, Translation,
+  MissingRegistry). Update akcia renderuje HTML pre ADMIN tam, kde existuje (8 presenterov so seedovanou entitou).
+
 ### Doplnene Utils unit testy (2026-06-06)
 
 - Zrkadlova cesta `tests/Unit/Model/Utils/...`. Pridane: `Paginator` (clamping, offset, route query,

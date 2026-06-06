@@ -8,6 +8,7 @@
 {varType array $turnusRows}
 {varType bool $pdfExists}
 {varType ?\DateTimeImmutable $pdfGeneratedAt}
+{varType string $profileImagePath}
 
 {block pageTitle}{$pageTitleText}{/block}
 
@@ -312,11 +313,7 @@
 
 {define profileImage}
 	<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">Profilový obrázok</div>
-	{if $babysitter['image'] !== ''}
-		<img src="{$basePath}/img/users/{$babysitter['image']}" class="rounded-circle" style="height:120px; width:auto;" alt="">
-	{else}
-		<img src="{$basePath}/img/users/empty.jpg" class="rounded-circle" style="height:120px; width:120px;" alt="">
-	{/if}
+	<img src="{$basePath}/{$profileImagePath}" class="rounded-circle" style="height:120px; width:120px; object-fit:cover;" alt="">
 {/define}
 
 {define mainForm}

@@ -16,6 +16,7 @@ use RuntimeException;
 final class BabysitterPdfService
 {
 	private const string DEFAULT_FONT = 'Bahnschrift Condensed';
+	private const string LEGACY_BABYSITTER_IMAGE_DIR = 'img/opatrovatelka';
 
 	private const string FOOTER_HTML =
 		'<div style="text-align:center; background:#414042; width:100%; height:32px; line-height:32px; color:#fff; font-size:14px; font-style:normal">'
@@ -128,13 +129,23 @@ final class BabysitterPdfService
 	private function buildProfileImageHtml(string $image, string $wwwDir): string
 	{
 		$baseStyle = 'max-width:180px; max-height:180px; margin-left:auto; margin-right:auto; display:block;';
-		$userImagesDir = $wwwDir . '/' . $this->storageDirProvider->getUserImages();
-		$emptyImage = $wwwDir . '/' . $this->storageDirProvider->getUserImagesEmpty();
-		$src = $image !== '' && is_file($userImagesDir . '/' . $image)
-			? $userImagesDir . '/' . $image
-			: $emptyImage;
+		$src = $this->resolveProfileImagePath($image, $wwwDir);
 
-		return '<img style="' . $baseStyle . '" src="' . $src . '">';
+		return '<img style="' . $baseStyle . '" src="' . htmlspecialchars($src, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '">';
+	}
+
+	private function resolveProfileImagePath(string $image, string $wwwDir): string
+	{
+		if ($image !== '') {
+			foreach ([$this->storageDirProvider->getUserImages(), self::LEGACY_BABYSITTER_IMAGE_DIR] as $imageDir) {
+				$path = $this->normalize($wwwDir . '/' . $imageDir . '/' . $image);
+				if (is_file($path)) {
+					return $path;
+				}
+			}
+		}
+
+		return $this->normalize($wwwDir . '/' . $this->storageDirProvider->getUserImagesEmpty());
 	}
 
 	private function getTargetDir(): string

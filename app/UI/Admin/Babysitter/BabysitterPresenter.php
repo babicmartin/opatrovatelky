@@ -43,6 +43,8 @@ class BabysitterPresenter extends AdminPresenter
 	use AlphabetFilterPresenterTrait;
 	use BabysitterListPresenterTrait;
 
+	private const string LEGACY_BABYSITTER_IMAGE_DIR = 'img/opatrovatelka';
+
 	private int $babysitterId = 0;
 
 	private string $activeTab = 'main';
@@ -144,6 +146,7 @@ class BabysitterPresenter extends AdminPresenter
 
 		$this->template->id = $id;
 		$this->template->babysitter = $this->babysitter;
+		$this->template->profileImagePath = $this->resolveProfileImagePath((string) $this->babysitter['image']);
 		$this->template->activeTab = $this->activeTab;
 		$this->template->pageTitleText = (int) $this->babysitter['type'] === 1 ? 'Opatrovateľka' : 'Pracovník';
 		$this->template->canManageBabysitter = $this->getUser()->isAllowed(Resource::BABYSITTER->value);
@@ -462,5 +465,21 @@ class BabysitterPresenter extends AdminPresenter
 		}
 
 		return in_array($tab, ['main', 'info', 'education', 'profil', 'work-profile', 'documents', 'pdf', 'video'], true) ? $tab : 'main';
+	}
+
+	private function resolveProfileImagePath(string $image): string
+	{
+		if ($image === '') {
+			return $this->storageDirProvider->getUserImagesEmpty();
+		}
+
+		foreach ([$this->storageDirProvider->getUserImages(), self::LEGACY_BABYSITTER_IMAGE_DIR] as $imageDir) {
+			$relativePath = $imageDir . '/' . $image;
+			if (is_file($this->directoryProvider->getRootDir() . '/www/' . $relativePath)) {
+				return $relativePath;
+			}
+		}
+
+		return $this->storageDirProvider->getUserImagesEmpty();
 	}
 }

@@ -30,7 +30,8 @@
 		"symfony/thanks": "^1.4",
 		"phpstan/phpstan": "^2.1",
 		"phpstan/phpstan-nette": "^2.0",
-		"nette/mcp-inspector": "^1.0.x-dev"
+		"nette/mcp-inspector": "^1.0.x-dev",
+		"infection/infection": "^0.31"
 	},
 	"autoload": {
 		"psr-4": {
@@ -60,7 +61,8 @@
 	"config": {
 		"allow-plugins": {
 			"symfony/thanks": true,
-			"php-http/discovery": true
+			"php-http/discovery": true,
+			"infection/extension-installer": true
 		},
 		"platform": {
 			"php": "8.5"

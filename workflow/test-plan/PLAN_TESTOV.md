@@ -84,7 +84,11 @@
 - **API** kryje HTTP/JSON kontrakt zdielaneho `handleAutosavePartial` signalu (same-origin CSRF guard,
   ajax/POST guard, allowed-context allow-list, entity a document ownership, success/error envelope).
   Field-update logiku kryje `AutosaveFieldUpdateServiceTest`; API suite drzi presenter-level zmluvu.
-- **Mutation** ostava mimo rozsahu (vyzaduje Infection).
+- **Mutation** (`tests/Mutation`, `infection.json5`): Infection 0.31 pridany ako dev dependency, scope
+  zuzeny na 4 rizikove triedy (AutosaveFieldUpdateService, ChangeLogRepository, SecurityAuditLogRepository,
+  AuthorizatorFactory). Samostatny runner (mimo default PHPUnit). Prikaz a prerekvizity v
+  `tests/Mutation/README.md`. Pozn.: beh vyzaduje coverage driver — aktualny dev box ma nekompatibilny
+  xdebug build (php_xdebug 8.4 pod PHP 8.5), treba nainstalovat matching xdebug alebo pcov.
 - Zdielane test infra: `SnapshotAssertions`, `PerformanceAssertions`, `PresenterWorkflowTrait`,
   `FakePostRequest`, `BabysitterPdfFixture` v `tests/Support`.
 - `phpunit.xml`: pridane suites `Snapshot`, `E2E` a `Api`; `Functional` priecinok zmazany (prazdny po
@@ -146,7 +150,7 @@ Agent 1 najprv rozsiri test infra v `tests/Support`:
 | API | `tests/Api` | Hotovo. HTTP/JSON kontrakt `handleAutosavePartial`: CSRF/ajax guard, allowed-context, entity+document ownership, success/error envelope. | PHPUnit default |
 | Snapshot | `tests/Snapshot` | Hotovo. PDF template render, autosave payload tvar, `Admin:Settings` HTML; baseline + `UPDATE_SNAPSHOTS=1`. | PHPUnit default |
 | E2E | `tests/E2E` | Hotovo (in-process). Login/logout, ACL, autosave audit, turnus create/delete. Browser vrstva = volitelny Playwright scaffold. | PHPUnit default + opcny Playwright |
-| Mutation | `tests/Mutation` | Mimo rozsahu. Vyziada si Infection a cieleny scope. | Samostatny runner |
+| Mutation | `tests/Mutation` | Hotovo (config). Infection 0.31 + `infection.json5` scoped na 4 rizikove triedy. Beh vyzaduje coverage driver (xdebug 8.5/pcov). | Samostatny runner (`vendor/bin/infection`) |
 | Performance | `tests/Performance` | Hotovo. Query, autosave, PDF render s medianom a env prahmi; video metadata sa skipne bez fixture. | `phpunit.performance.xml` |
 
 ## Verejne rozhrania a konvencie

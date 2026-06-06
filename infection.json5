@@ -1,0 +1,24 @@
+{
+    // Mutation testing config. Intentionally scoped to the highest-risk classes only
+    // (autosave field updates, change/audit log repositories, authorizator) — never the
+    // whole app, which would be far too slow. Narrow further per run with --filter.
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "source": {
+        "directories": [
+            "app/Model/Service/Autosave",
+            "app/Model/Repository",
+            "app/Model/Security/Authorizator"
+        ]
+    },
+    "tmpDir": "temp/infection",
+    "logs": {
+        "text": "temp/infection/infection.log",
+        "summary": "temp/infection/summary.log",
+        "html": "temp/infection/infection.html"
+    },
+    "mutators": {
+        "@default": true
+    },
+    "testFramework": "phpunit",
+    "testFrameworkOptions": "--testsuite=Unit,Integration"
+}

@@ -20,6 +20,15 @@
 - Agent 5 je dokonceny: supporting repository testy a form factory testy pokryvaju default hodnoty, DTO mapping, validacie a ACL vetvy.
 - DB testy treba spustat sekvencne nad jednym `TEST_DATABASE_DSN`; paralelni agenti maju pouzit samostatne `_test` databazy, inak si budu resetovat data.
 
+### Video metadata fixture (2026-06-06)
+
+- Deterministicky 575B MP4 fixture (`tests/Support/fixtures/sample-video.mp4`) + generator
+  `build-sample-video.php` (ftyp+moov, 1s video trak; bez ffmpeg/encoderu). getID3 ho parsuje
+  (duration 1s, mime `video/quicktime`).
+- `VideoMetadataPerformanceTest` uz nie je skipnuty (bezi pod `phpunit.performance.xml`).
+- `VideoMetadataReaderTest` (Unit, default suite): happy path + error vetvy (chybajuci subor, subor bez
+  video stopy).
+
 ### Agent 6 — admin presenter smoke (2026-06-06)
 
 - `AdminCrudPresenterSmokeTest`: default akcia renderuje HTML pre ADMIN a DEALER dostane 403 pre vsetky

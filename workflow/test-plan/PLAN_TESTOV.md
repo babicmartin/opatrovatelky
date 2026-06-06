@@ -20,11 +20,23 @@
 - Agent 5 je dokonceny: supporting repository testy a form factory testy pokryvaju default hodnoty, DTO mapping, validacie a ACL vetvy.
 - DB testy treba spustat sekvencne nad jednym `TEST_DATABASE_DSN`; paralelni agenti maju pouzit samostatne `_test` databazy, inak si budu resetovat data.
 
+### Reorganizacia na 1:1 (2026-06-06)
+
+- Repository integration testy maju teraz konvenciu **jedna produkcna trieda = jedna test trieda**
+  na zrkadlovej ceste (`app/Model/Repository/XRepository.php` -> `tests/Integration/Repository/XRepositoryTest.php`).
+- Zlievane subory rozdelene: `AgencyPartnerRepositoryTest` -> `AgencyRepositoryTest` + `PartnerRepositoryTest`;
+  `RegistryCountryUserFileRepositoryTest` -> `MissingRegistryRepositoryTest` + `CountryRepositoryTest` +
+  `UserRepositoryTest` + `FileRepositoryTest`; `TodoProposalRepositoryTest` -> `TodoClientRepositoryTest` +
+  `FamilyProposalRepositoryTest`.
+- Vynimka (zamerne): `ChangeLogRepository` a `SecurityAuditLogRepository` maju dvojicu suborov
+  `*Test` (write) + `*ReadTest` (read) — rovnaky nazov repozitara, oddelenie podla concern, plne dohladatelne.
+
 ### Doplnene kategorie (2026-06-06)
 
 - **Snapshot** (`tests/Snapshot`): realne testy bezia pod default PHPUnit. PDF Latte template render
   (DB-light cez `BabysitterPdfFixture`), autosave change-log payload tvar a `Admin:Settings` HTML.
   Baseline v `tests/Snapshot/__snapshots__/`, explicitny update cez `UPDATE_SNAPSHOTS=1`.
+  Binarnu mpdf vrstvu (nielen markup) kryje `BabysitterPdfBinarySmokeTest` v `tests/Smoke`.
 - **Performance** (`tests/Performance`): samostatny config `phpunit.performance.xml`, **nebezi** v default
   PHPUnit. Merania s medianom a env prahmi (`PERF_MAX_MS_*`): babysitter list query, autosave update,
   PDF render. Video metadata test sa skipne, kym nie je fixture (`TEST_VIDEO_FIXTURE`).
@@ -92,7 +104,7 @@ Agent 1 najprv rozsiri test infra v `tests/Support`:
 
 | Typ | Priecinok | Stav | Runner |
 | --- | --- | --- | --- |
-| Smoke | `tests/Smoke` | Hotovo. Rychle boot/render kontroly; presenter smoke testy presunute sem. | PHPUnit default |
+| Smoke | `tests/Smoke` | Hotovo. Boot/render kontroly, presenter smoke testy a mpdf binarny smoke (`BabysitterPdfBinarySmokeTest`). | PHPUnit default |
 | API | `tests/Api` | Hotovo. HTTP/JSON kontrakt `handleAutosavePartial`: CSRF/ajax guard, allowed-context, entity+document ownership, success/error envelope. | PHPUnit default |
 | Snapshot | `tests/Snapshot` | Hotovo. PDF template render, autosave payload tvar, `Admin:Settings` HTML; baseline + `UPDATE_SNAPSHOTS=1`. | PHPUnit default |
 | E2E | `tests/E2E` | Hotovo (in-process). Login/logout, ACL, autosave audit, turnus create/delete. Browser vrstva = volitelny Playwright scaffold. | PHPUnit default + opcny Playwright |

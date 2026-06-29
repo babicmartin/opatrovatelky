@@ -38,18 +38,24 @@
 
 							<div class="col-xl-9 col-md-12">
 								{include projectInfo}
-
-								<div class="divone">
-									<h3 style="font-size:18px; margin:0 0 15px;">{if (int) $family['type'] === 1}Evidencia opatrovania{else}Evidencia pracovných turnusov{/if}</h3>
-
-									<a href="{link createTurnus!, familyId: $id}" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;">Vytvoriť novú evidenciu</a>
-
-									{include turnusTable, rows: $turnusRowsWithoutDate}
-									{include turnusTable, rows: $turnusRowsWithDate}
-								</div>
 							</div>
 						</div>
 					{/form}
+
+					<div class="row">
+						<div class="offset-xl-3 col-xl-9 col-md-12">
+							<div class="divone">
+								<h3 style="font-size:18px; margin:0 0 15px;">{if (int) $family['type'] === 1}Evidencia opatrovania{else}Evidencia pracovných turnusov{/if}</h3>
+
+								{form createFamilyTurnusForm}
+									{input create}
+								{/form}
+
+								{include turnusTable, rows: $turnusRowsWithoutDate}
+								{include turnusTable, rows: $turnusRowsWithDate}
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		{elseif $activeTab === 'info'}
@@ -105,7 +111,9 @@
 				<div class="col-xl-10 col-md-12">
 					<div class="divone">
 						<h3 style="font-size:18px; margin:0 0 15px;">{if (int) $family['type'] === 1}Návrhy opatrovateliek{else}Návrhy pracovníkov{/if}</h3>
-						<a href="{link createProposal!, familyId: $id}" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;" onclick="return confirm('{if (int) $family['type'] === 1}Naozaj chceš vytvoriť návrh pre rodinu?{else}Naozaj chceš vytvoriť návrh pre projekt?{/if}');">Vytvoriť nový návrh</a>
+						{form createFamilyProposalForm}
+							{input create}
+						{/form}
 						<div class="table-responsive">
 							<table class="table table-striped card-table table-vcenter text-nowrap">
 								<thead>

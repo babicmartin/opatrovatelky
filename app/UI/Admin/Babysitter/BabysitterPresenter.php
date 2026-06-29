@@ -174,12 +174,7 @@ class BabysitterPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
-		$id = $this->babysitterRepository->createTurnusForBabysitter($babysitterId, (int) $this->getUser()->getId());
-		$this->changeAuditLogger->logCreated('turnus.update', TurnusTableMap::TABLE_NAME, $id, 'Turnus', [
-			'created_from' => 'babysitter',
-			'babysitter_id' => $babysitterId,
-		]);
-		$this->redirect(':Admin:Turnus:update', $id);
+		$this->redirect('update', ['id' => $babysitterId, 'tab' => 'main']);
 	}
 
 	public function handleGeneratePdf(int $id): void
@@ -253,6 +248,17 @@ class BabysitterPresenter extends AdminPresenter
 			'Pridať novú opatrovateľku',
 			'Naozaj chcete vytvoriť novú opatrovateľku?',
 			$this->createBabysitterFormSucceeded(...),
+		);
+	}
+
+	protected function createComponentCreateBabysitterTurnusForm(): Form
+	{
+		$this->assertCanManage();
+
+		return $this->createConfirmedCreateForm(
+			'Vytvoriť novú evidenciu',
+			'Naozaj chcete vytvoriť novú evidenciu?',
+			$this->createBabysitterTurnusFormSucceeded(...),
 		);
 	}
 
@@ -383,6 +389,18 @@ class BabysitterPresenter extends AdminPresenter
 			'created_as' => 'babysitter',
 		]);
 		$this->redirect('update', $id);
+	}
+
+	private function createBabysitterTurnusFormSucceeded(Form $form): void
+	{
+		$this->assertCanManage();
+
+		$id = $this->babysitterRepository->createTurnusForBabysitter($this->babysitterId, (int) $this->getUser()->getId());
+		$this->changeAuditLogger->logCreated('turnus.update', TurnusTableMap::TABLE_NAME, $id, 'Turnus', [
+			'created_from' => 'babysitter',
+			'babysitter_id' => $this->babysitterId,
+		]);
+		$this->redirect(':Admin:Turnus:update', $id);
 	}
 
 	private function babysitterAddressFormSucceeded(BabysitterAddressForm $form): void

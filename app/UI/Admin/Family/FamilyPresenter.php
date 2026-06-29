@@ -134,12 +134,7 @@ class FamilyPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
-		$id = $this->familyRepository->createTurnusForFamily($familyId, (int) $this->getUser()->getId());
-		$this->changeAuditLogger->logCreated('turnus.update', TurnusTableMap::TABLE_NAME, $id, 'Turnus', [
-			'created_from' => 'family',
-			'family_id' => $familyId,
-		]);
-		$this->redirect(':Admin:Turnus:update', $id);
+		$this->redirect('update', ['id' => $familyId, 'tab' => 'main']);
 	}
 
 	public function handleCreateProposal(int $familyId): void
@@ -148,12 +143,7 @@ class FamilyPresenter extends AdminPresenter
 			$this->error('Prístup zamietnutý', 403);
 		}
 
-		$id = $this->familyProposalRepository->createForFamily($familyId, (int) $this->getUser()->getId());
-		$this->changeAuditLogger->logCreated('proposal.update', FamilyProposalTableMap::TABLE_NAME, $id, 'Návrh', [
-			'created_from' => 'family',
-			'family_id' => $familyId,
-		]);
-		$this->redirect(':Admin:Proposal:update', $id);
+		$this->redirect('update', ['id' => $familyId, 'tab' => 'proposals']);
 	}
 
 	public function handleDelete(int $familyId): void
@@ -188,6 +178,36 @@ class FamilyPresenter extends AdminPresenter
 			'Pridať novú rodinu',
 			'Naozaj chcete vytvoriť novú rodinu?',
 			$this->createFamilyFormSucceeded(...),
+		);
+	}
+
+	protected function createComponentCreateFamilyTurnusForm(): Form
+	{
+		if (!$this->getUser()->isAllowed(Resource::FAMILY->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		return $this->createConfirmedCreateForm(
+			'Vytvoriť novú evidenciu',
+			'Naozaj chcete vytvoriť novú evidenciu?',
+			$this->createFamilyTurnusFormSucceeded(...),
+		);
+	}
+
+	protected function createComponentCreateFamilyProposalForm(): Form
+	{
+		if (!$this->getUser()->isAllowed(Resource::FAMILY->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		$family = $this->getFamily();
+
+		return $this->createConfirmedCreateForm(
+			'Vytvoriť nový návrh',
+			(int) $family['type'] === 1
+				? 'Naozaj chceš vytvoriť návrh pre rodinu?'
+				: 'Naozaj chceš vytvoriť návrh pre projekt?',
+			$this->createFamilyProposalFormSucceeded(...),
 		);
 	}
 
@@ -275,6 +295,34 @@ class FamilyPresenter extends AdminPresenter
 			'created_as' => 'family',
 		]);
 		$this->redirect('update', $id);
+	}
+
+	private function createFamilyTurnusFormSucceeded(Form $form): void
+	{
+		if (!$this->getUser()->isAllowed(Resource::FAMILY->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		$id = $this->familyRepository->createTurnusForFamily($this->familyId, (int) $this->getUser()->getId());
+		$this->changeAuditLogger->logCreated('turnus.update', TurnusTableMap::TABLE_NAME, $id, 'Turnus', [
+			'created_from' => 'family',
+			'family_id' => $this->familyId,
+		]);
+		$this->redirect(':Admin:Turnus:update', $id);
+	}
+
+	private function createFamilyProposalFormSucceeded(Form $form): void
+	{
+		if (!$this->getUser()->isAllowed(Resource::FAMILY->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		$id = $this->familyProposalRepository->createForFamily($this->familyId, (int) $this->getUser()->getId());
+		$this->changeAuditLogger->logCreated('proposal.update', FamilyProposalTableMap::TABLE_NAME, $id, 'Návrh', [
+			'created_from' => 'family',
+			'family_id' => $this->familyId,
+		]);
+		$this->redirect(':Admin:Proposal:update', $id);
 	}
 
 	/**

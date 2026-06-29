@@ -36,7 +36,9 @@
 				<div class="col-xl-8 col-md-12">
 					<div class="divone">
 						<h3 style="font-size:18px; margin:0 0 15px;">{if (int) $babysitter['type'] === 1}Evidencia opatrovania{else}Evidencia turnusov{/if}</h3>
-						<a href="{link createTurnus!, babysitterId: $id}" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;">Vytvoriť novú evidenciu</a>
+						{form createBabysitterTurnusForm}
+							{input create}
+						{/form}
 
 						<div class="table-responsive">
 							<table class="table table-striped card-table table-vcenter text-nowrap">

@@ -15,7 +15,9 @@
 {block pageTitle}Správa projektov{/block}
 
 {block content}
-	<a href="{link create!}" class="btn btn-success btn-sm" style="margin:0 0 20px 0;">Pridať nový projekt</a>
+	{form createProjectForm}
+		{input create}
+	{/form}
 
 	{if $canManageProjects && $user->isAllowed('familyManagement')}
 		<h2>Správa projektov</h2>

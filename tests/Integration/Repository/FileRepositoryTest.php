@@ -48,7 +48,7 @@ final class FileRepositoryTest extends DatabaseTestCase
 
 		self::assertCount(1, $documents);
 		self::assertSame($documentId, $documents[0]['id']);
-		self::assertSame('Nahraté 05.06.2026 o 00:00', $documents[0]['upload']);
+		self::assertSame('Nahraté 05.06.2026 o 14:30', $documents[0]['upload']);
 		self::assertSame('FD', $documents[0]['userAcronym']);
 		self::assertSame('#778899', $documents[0]['userColor']);
 		self::assertNotNull($document);

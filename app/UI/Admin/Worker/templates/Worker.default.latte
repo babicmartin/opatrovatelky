@@ -21,7 +21,9 @@
 {block pageTitle}Zoznam pracovníkov{/block}
 
 {block content}
-	<a href="{link create!}" class="btn btn-success btn-sm" style="margin:0 0 20px 0;">Pridať nového pracovníka</a>
+	{form createWorkerForm}
+		{input create}
+	{/form}
 
 	{if $canManageWorkers && $user->isAllowed('workerManagement')}
 		<h2>Správa pracovníkov</h2>

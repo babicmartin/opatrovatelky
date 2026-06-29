@@ -27,7 +27,7 @@ final class DateServiceTest extends TestCase
 	public function testTryCreateFromDbParsesDateAndDatetime(): void
 	{
 		self::assertSame('2026-06-06', $this->service->tryCreateFromDb('2026-06-06')?->format('Y-m-d'));
-		self::assertSame('2026-06-06', $this->service->tryCreateFromDb('2026-06-06 14:30:00')?->format('Y-m-d'));
+		self::assertSame('2026-06-06 14:30:00', $this->service->tryCreateFromDb('2026-06-06 14:30:00')?->format('Y-m-d H:i:s'));
 	}
 
 	public function testTryCreateFromUserInputParsesSupportedFormats(): void

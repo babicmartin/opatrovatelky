@@ -125,15 +125,7 @@ class FamilyPresenter extends AdminPresenter
 
 	public function handleCreate(): void
 	{
-		if (!$this->getUser()->isAllowed(Resource::FAMILY->value)) {
-			$this->error('Prístup zamietnutý', 403);
-		}
-
-		$id = $this->familyRepository->createEmptyFamily();
-		$this->changeAuditLogger->logCreated('family.shortInfo', FamilyTableMap::TABLE_NAME, $id, 'Rodina', [
-			'created_as' => 'family',
-		]);
-		$this->redirect('update', $id);
+		$this->redirect('default');
 	}
 
 	public function handleCreateTurnus(int $familyId): void
@@ -183,6 +175,19 @@ class FamilyPresenter extends AdminPresenter
 			$family,
 			$this->familyRepository->findCountrySelectOptions(),
 			$this->familyShortInfoFormSucceeded(...),
+		);
+	}
+
+	protected function createComponentCreateFamilyForm(): Form
+	{
+		if (!$this->getUser()->isAllowed(Resource::FAMILY->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		return $this->createConfirmedCreateForm(
+			'Pridať novú rodinu',
+			'Naozaj chcete vytvoriť novú rodinu?',
+			$this->createFamilyFormSucceeded(...),
 		);
 	}
 
@@ -257,6 +262,19 @@ class FamilyPresenter extends AdminPresenter
 		$this->tryHandleAutosavePartialRequest();
 		$this->familyRepository->updateShortInfoFromForm($form);
 		$this->finishAutosave();
+	}
+
+	private function createFamilyFormSucceeded(Form $form): void
+	{
+		if (!$this->getUser()->isAllowed(Resource::FAMILY->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		$id = $this->familyRepository->createEmptyFamily();
+		$this->changeAuditLogger->logCreated('family.shortInfo', FamilyTableMap::TABLE_NAME, $id, 'Rodina', [
+			'created_as' => 'family',
+		]);
+		$this->redirect('update', $id);
 	}
 
 	/**

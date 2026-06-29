@@ -15,7 +15,9 @@
 {block pageTitle}Správa rodín{/block}
 
 {block content}
-	<a href="{link create!}" class="btn btn-success btn-sm" style="margin:0 0 20px 0;">Pridať novú rodinu</a>
+	{form createFamilyForm}
+		{input create}
+	{/form}
 
 	{if $canManageFamilies && $user->isAllowed('familyManagement')}
 		<h2>Správa rodín</h2>

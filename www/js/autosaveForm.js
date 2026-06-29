@@ -4,6 +4,7 @@
 	var defaultBorder = '1px solid #CED4DA';
 	var savedBorder = '2px solid #8A2062';
 	var errorBorder = '2px solid #dc3545';
+	var datepickerDuplicateWindowMs = 1200;
 	var contextByFormClass = {
 		'agency-update-form': 'agency.update',
 		'partner-update-form': 'partner.update',
@@ -97,6 +98,27 @@
 		}
 
 		return control.value;
+	}
+
+	function isAutosaveDatepickerControl(control) {
+		return isAutosaveControl(control) && control.matches('input.datepicker');
+	}
+
+	function getTimestamp() {
+		return Date.now ? Date.now() : new Date().getTime();
+	}
+
+	function wasDatepickerSubmittedRecently(control) {
+		var previousValue = control.dataset.autosaveDatepickerValue || '';
+		var previousTime = parseInt(control.dataset.autosaveDatepickerTime || '0', 10);
+
+		return previousValue === getControlValue(control)
+			&& getTimestamp() - previousTime < datepickerDuplicateWindowMs;
+	}
+
+	function markDatepickerSubmitted(control) {
+		control.dataset.autosaveDatepickerValue = getControlValue(control);
+		control.dataset.autosaveDatepickerTime = String(getTimestamp());
 	}
 
 	function appendHiddenFields(form, formData) {
@@ -221,12 +243,43 @@
 			markControl(control, errorBorder);
 		}).finally(function () {
 			form.dataset.autosaveSaving = '0';
+			if (form._autosavePendingDatepickerControl instanceof HTMLElement) {
+				var pendingDatepickerControl = form._autosavePendingDatepickerControl;
+				form._autosavePendingDatepickerControl = null;
+				window.setTimeout(function () {
+					submitDatepickerControl(pendingDatepickerControl);
+				}, 0);
+			}
 		});
+	}
+
+	function submitDatepickerControl(control) {
+		var form = control.closest(formSelector);
+		if (!form || !isAutosaveDatepickerControl(control)) {
+			return;
+		}
+
+		if (form.dataset.autosaveSaving === '1') {
+			form._autosavePendingDatepickerControl = control;
+			return;
+		}
+
+		if (wasDatepickerSubmittedRecently(control)) {
+			return;
+		}
+
+		markDatepickerSubmitted(control);
+		submitForm(control);
 	}
 
 	document.addEventListener('change', function (event) {
 		var control = findAutosaveControl(event.target);
 		if (control) {
+			if (isAutosaveDatepickerControl(control)) {
+				submitDatepickerControl(control);
+				return;
+			}
+
 			submitForm(control);
 		}
 	});
@@ -238,15 +291,78 @@
 		}
 
 		if (control.matches('input[type="text"], input[type="date"], textarea')) {
+			if (isAutosaveDatepickerControl(control)) {
+				submitDatepickerControl(control);
+				return;
+			}
+
 			submitForm(control);
 		}
 	});
 
 	if (window.jQuery && window.jQuery.fn.datepicker) {
-		window.jQuery(function ($) {
-			$(formSelector + ' ' + controlSelector + '.datepicker').datepicker('option', 'onSelect', function () {
-				submitForm(this);
+		function createDatepickerCallback(previousCallback) {
+			var callback = function () {
+				var result;
+
+				if (typeof previousCallback === 'function') {
+					result = previousCallback.apply(this, arguments);
+				}
+
+				submitDatepickerControl(this);
+
+				return result;
+			};
+
+			callback.autosaveWrapped = true;
+
+			return callback;
+		}
+
+		function wrapDatepickerCallback($control, optionName) {
+			var currentCallback = $control.datepicker('option', optionName);
+			if (currentCallback && currentCallback.autosaveWrapped === true) {
+				return;
+			}
+
+			$control.datepicker('option', optionName, createDatepickerCallback(currentCallback));
+		}
+
+		function ensureAutosaveDatepicker($, control) {
+			var $control;
+
+			if (!isAutosaveDatepickerControl(control)) {
+				return;
+			}
+
+			$control = $(control);
+			if (!$control.data('datepicker') && !control.classList.contains('hasDatepicker')) {
+				$control.datepicker({
+					changeMonth: true,
+					changeYear: true,
+					dateFormat: 'dd.mm.yy'
+				});
+			}
+
+			wrapDatepickerCallback($control, 'onSelect');
+			wrapDatepickerCallback($control, 'onClose');
+		}
+
+		function installAutosaveDatepickers($, root) {
+			$(formSelector + ' ' + controlSelector + '.datepicker', root || document).each(function () {
+				ensureAutosaveDatepicker($, this);
 			});
+		}
+
+		window.jQuery(function ($) {
+			installAutosaveDatepickers($, document);
+		});
+
+		document.addEventListener('focusin', function (event) {
+			var control = findAutosaveControl(event.target);
+			if (control && isAutosaveDatepickerControl(control)) {
+				ensureAutosaveDatepicker(window.jQuery, control);
+			}
 		});
 	}
 })();

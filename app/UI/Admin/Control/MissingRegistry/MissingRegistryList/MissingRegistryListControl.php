@@ -10,6 +10,7 @@ use App\Model\Table\MissingRegistryTableMap;
 use App\Model\Utils\Date\DateService;
 use App\Model\Utils\Paginator\Paginator;
 use App\UI\Admin\AdminPresenter;
+use App\UI\Admin\Form\ConfirmedCreateFormFactory;
 use App\UI\Admin\Form\MissingRegistry\MissingRegistryFormFactory;
 use Nette\Application\UI\Control;
 use Nette\Application\UI\Form;
@@ -35,6 +36,7 @@ class MissingRegistryListControl extends Control
 		private readonly PaginatorFactory $paginatorFactory,
 		private readonly MissingRegistryFormFactory $missingRegistryFormFactory,
 		private readonly DateService $dateService,
+		private readonly ConfirmedCreateFormFactory $confirmedCreateFormFactory,
 		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 	}
@@ -58,8 +60,6 @@ class MissingRegistryListControl extends Control
 
 	public function handleCreate(): void
 	{
-		$id = $this->missingRegistryRepository->createEmpty();
-		$this->changeAuditLogger->logCreated('missingRegistry.row', MissingRegistryTableMap::TABLE_NAME, $id, 'Neprítomnosť');
 		$this->redirect('this');
 	}
 
@@ -87,6 +87,23 @@ class MissingRegistryListControl extends Control
 				$this->registryFormSucceeded(...),
 			);
 		});
+	}
+
+	protected function createComponentCreateMissingRegistryForm(): Form
+	{
+		return $this->confirmedCreateFormFactory->create(
+			'Pridať novú evidenciu',
+			'Naozaj chcete vytvoriť novú evidenciu neprítomnosti?',
+			$this->createMissingRegistryFormSucceeded(...),
+			'margin:0px 0px 20px 0;',
+		);
+	}
+
+	private function createMissingRegistryFormSucceeded(Form $form): void
+	{
+		$id = $this->missingRegistryRepository->createEmpty();
+		$this->changeAuditLogger->logCreated('missingRegistry.row', MissingRegistryTableMap::TABLE_NAME, $id, 'Neprítomnosť');
+		$this->redirect('this');
 	}
 
 	/**

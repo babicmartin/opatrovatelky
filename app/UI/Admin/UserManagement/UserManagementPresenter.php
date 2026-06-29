@@ -63,6 +63,8 @@ final class UserManagementPresenter extends AdminPresenter
 		));
 		$this->template->userImagesPath = $this->storageDirProvider->getUserImages();
 		$this->template->emptyUserImagePath = $this->storageDirProvider->getUserImagesEmpty();
+		$this->template->canCreateUser = $this->getUser()->isAllowed(Resource::USER_MANAGEMENT->value)
+			&& $this->canManageOtherUsers();
 	}
 
 	public function actionUpdate(?int $id = null): void
@@ -85,13 +87,7 @@ final class UserManagementPresenter extends AdminPresenter
 
 	public function handleCreate(): void
 	{
-		if (!$this->getUser()->isAllowed(Resource::USER_MANAGEMENT->value) || !$this->canManageOtherUsers()) {
-			$this->error('Prístup zamietnutý', 403);
-		}
-
-		$id = $this->userRepository->createEmptyUser($this->passwords->hash(Random::generate(24)));
-		$this->changeAuditLogger->logCreated('user.profile', UserTableMap::TABLE_NAME, $id, 'Používateľ');
-		$this->redirect('update', $id);
+		$this->redirect('default');
 	}
 
 	protected function createComponentUserProfileUpdateForm(): Form
@@ -99,6 +95,20 @@ final class UserManagementPresenter extends AdminPresenter
 		return $this->userProfileUpdateFormFactory->createProfileForm(
 			$this->createUserTemplateData($this->getCurrentUserRow()),
 			$this->userProfileUpdateFormSucceeded(...),
+		);
+	}
+
+	protected function createComponentCreateUserForm(): Form
+	{
+		if (!$this->getUser()->isAllowed(Resource::USER_MANAGEMENT->value) || !$this->canManageOtherUsers()) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		return $this->createConfirmedCreateForm(
+			'Pridať nového užívateľa',
+			'Naozaj chcete vytvoriť nového užívateľa?',
+			$this->createUserFormSucceeded(...),
+			'',
 		);
 	}
 
@@ -149,6 +159,17 @@ final class UserManagementPresenter extends AdminPresenter
 
 		$this->flashMessage('Profil bol uložený.', 'success');
 		$this->redirect('this');
+	}
+
+	private function createUserFormSucceeded(Form $form): void
+	{
+		if (!$this->getUser()->isAllowed(Resource::USER_MANAGEMENT->value) || !$this->canManageOtherUsers()) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		$id = $this->userRepository->createEmptyUser($this->passwords->hash(Random::generate(24)));
+		$this->changeAuditLogger->logCreated('user.profile', UserTableMap::TABLE_NAME, $id, 'Používateľ');
+		$this->redirect('update', $id);
 	}
 
 	private function userAccessUpdateFormSucceeded(UserAccessUpdateForm $form): void

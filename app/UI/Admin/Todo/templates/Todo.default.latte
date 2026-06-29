@@ -7,7 +7,9 @@
 {block content}
 	<div class="mb-3">
 		{if $canManage}
-			<a href="{link create!}" class="btn btn-success btn-sm" style="margin:0 10px 0 0;">Vytvoriť novú úlohu</a>
+			{form createTodoForm}
+				{input create}
+			{/form}
 		{/if}
 		<a href="{plink :Admin:Todo:closed}" class="btn btn-success btn-sm">Uzavreté úlohy</a>
 	</div>

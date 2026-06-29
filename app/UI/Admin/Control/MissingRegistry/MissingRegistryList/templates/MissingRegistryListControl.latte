@@ -51,7 +51,9 @@
 {/define}
 
 <div class="space20"></div>
-<a n:href="create!" class="btn btn-success btn-sm" style="margin:0px 0px 20px 0;">Pridať novú evidenciu</a>
+{form createMissingRegistryForm}
+	{input create}
+{/form}
 
 <div class="space20"></div>
 {if $newRow !== null}

@@ -3,7 +3,11 @@
 {block content}
 {varType list<array{id:int,name:string,german:string,image:string,active:int}> $countries}
 
-	<a n:if="$user->isAllowed('country')" n:href="create!" class="btn btn-success btn-sm">Pridať novú krajinu</a>
+	{if $user->isAllowed('country')}
+		{form createCountryForm}
+			{input create}
+		{/form}
+	{/if}
 
 	<div class="space20"></div>
 	<div class="divone" n:if="count($countries) > 0">

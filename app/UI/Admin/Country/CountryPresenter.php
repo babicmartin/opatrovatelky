@@ -59,13 +59,7 @@ final class CountryPresenter extends AdminPresenter
 
 	public function handleCreate(): void
 	{
-		if (!$this->getUser()->isAllowed(Resource::COUNTRY->value)) {
-			$this->error('Prístup zamietnutý', 403);
-		}
-
-		$id = $this->countryRepository->createEmpty();
-		$this->changeAuditLogger->logCreated('country.update', CountryTableMap::TABLE_NAME, $id, 'Krajina');
-		$this->redirect('update', $id);
+		$this->redirect('default');
 	}
 
 	protected function createComponentCountryUpdateForm(): Form
@@ -73,6 +67,20 @@ final class CountryPresenter extends AdminPresenter
 		return $this->countryUpdateFormFactory->create(
 			$this->getCountry(),
 			$this->countryUpdateFormSucceeded(...),
+		);
+	}
+
+	protected function createComponentCreateCountryForm(): Form
+	{
+		if (!$this->getUser()->isAllowed(Resource::COUNTRY->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		return $this->createConfirmedCreateForm(
+			'Pridať novú krajinu',
+			'Naozaj chcete vytvoriť novú krajinu?',
+			$this->createCountryFormSucceeded(...),
+			'',
 		);
 	}
 
@@ -101,6 +109,17 @@ final class CountryPresenter extends AdminPresenter
 
 		$this->flashMessage('Krajina bola uložená.', 'success');
 		$this->redirect('this');
+	}
+
+	private function createCountryFormSucceeded(Form $form): void
+	{
+		if (!$this->getUser()->isAllowed(Resource::COUNTRY->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		$id = $this->countryRepository->createEmpty();
+		$this->changeAuditLogger->logCreated('country.update', CountryTableMap::TABLE_NAME, $id, 'Krajina');
+		$this->redirect('update', $id);
 	}
 
 	private function countryImageUpdateFormSucceeded(Form $form, ArrayHash $values): void

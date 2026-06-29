@@ -70,14 +70,7 @@ class TodoPresenter extends AdminPresenter
 
 	public function handleCreate(): void
 	{
-		if (!$this->getUser()->isAllowed(Resource::TODO->value)) {
-			$this->error('Prístup zamietnutý', 403);
-		}
-
-		$createdBy = $this->getUser()->isLoggedIn() ? (int) $this->getUser()->getId() : 0;
-		$id = $this->todoClientRepository->createEmptyTodo($createdBy);
-		$this->changeAuditLogger->logCreated('todo.update', TodoClientTableMap::TABLE_NAME, $id, 'Úloha');
-		$this->redirect('update', $id);
+		$this->redirect('default');
 	}
 
 	protected function createComponentTodoUpdateForm(): Form
@@ -98,6 +91,23 @@ class TodoPresenter extends AdminPresenter
 		);
 	}
 
+	protected function createComponentCreateTodoForm(): Form
+	{
+		if (!$this->getUser()->isAllowed(Resource::TODO->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		$form = $this->createConfirmedCreateForm(
+			'Vytvoriť novú úlohu',
+			'Naozaj chcete vytvoriť novú úlohu?',
+			$this->createTodoFormSucceeded(...),
+			'margin:0 10px 0 0;',
+		);
+		$form->getElementPrototype()->setAttribute('style', 'display:inline-block; margin:0;');
+
+		return $form;
+	}
+
 	private function todoUpdateFormSucceeded(TodoUpdateForm $form): void
 	{
 		if ($this->getAllowedTodo($form->id) === null) {
@@ -113,6 +123,18 @@ class TodoPresenter extends AdminPresenter
 
 		$this->flashMessage('Úloha bola uložená.', 'success');
 		$this->redirect('this');
+	}
+
+	private function createTodoFormSucceeded(Form $form): void
+	{
+		if (!$this->getUser()->isAllowed(Resource::TODO->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		$createdBy = $this->getUser()->isLoggedIn() ? (int) $this->getUser()->getId() : 0;
+		$id = $this->todoClientRepository->createEmptyTodo($createdBy);
+		$this->changeAuditLogger->logCreated('todo.update', TodoClientTableMap::TABLE_NAME, $id, 'Úloha');
+		$this->redirect('update', $id);
 	}
 
 	protected function validateAutosavePartialRequest(string $context, int $entityId): void

@@ -12,6 +12,7 @@ use App\UI\Admin\Control\Layout\Toolbar\PartnerOffcanvas\PartnerOffcanvasPresent
 use App\UI\Admin\Control\Layout\Toolbar\ProjectOffcanvas\ProjectOffcanvasPresenterTrait;
 use App\UI\Admin\Control\Layout\Toolbar\ToolbarPresenterTrait;
 use App\UI\Admin\Control\User\UserProfileImage\UserProfileImagePresenterTrait;
+use App\UI\Admin\Form\ConfirmedCreateFormFactory;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\Presenter;
 use Nette\Database\Explorer;
@@ -34,6 +35,7 @@ abstract class AdminPresenter extends Presenter
 	private SecurityAuditLogger $securityAuditLogger;
 	private Explorer $database;
 	private LoggerInterface $logger;
+	private ConfirmedCreateFormFactory $confirmedCreateFormFactory;
 
 	public function injectAutosaveFieldUpdateService(AutosaveFieldUpdateService $autosaveFieldUpdateService): void
 	{
@@ -53,6 +55,11 @@ abstract class AdminPresenter extends Presenter
 	public function injectLogger(LoggerInterface $logger): void
 	{
 		$this->logger = $logger;
+	}
+
+	public function injectConfirmedCreateFormFactory(ConfirmedCreateFormFactory $confirmedCreateFormFactory): void
+	{
+		$this->confirmedCreateFormFactory = $confirmedCreateFormFactory;
 	}
 
 	protected function getResource(): ?string
@@ -86,6 +93,15 @@ abstract class AdminPresenter extends Presenter
 
 	protected function beforeRender(): void
 	{
+	}
+
+	protected function createConfirmedCreateForm(
+		string $buttonText,
+		string $confirmMessage,
+		callable $onSuccess,
+		string $style = 'margin:0 0 20px 0;',
+	): Form {
+		return $this->confirmedCreateFormFactory->create($buttonText, $confirmMessage, $onSuccess, $style);
 	}
 
 	protected function createComponentLogoutForm(): Form

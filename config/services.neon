@@ -20,4 +20,5 @@ services:
 	- App\Model\Service\Audit\ChangeAuditLogger
 	- App\Model\Service\Autosave\AutosaveFieldUpdateService
 	- App\Model\Service\Pdf\BabysitterPdfService
+	- App\Model\Service\Turnus\TurnusInvoicePaymentStatusService
 	- App\Model\Service\Video\VideoMetadataReader

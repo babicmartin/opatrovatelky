@@ -9,6 +9,7 @@ use App\Model\Table\OpatrovatelkaTableMap;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Filter\AlphabetFilter\AlphabetFilterPresenterTrait;
 use App\UI\Admin\Control\Worker\WorkerList\WorkerListPresenterTrait;
+use Nette\Application\UI\Form;
 
 class WorkerPresenter extends AdminPresenter
 {
@@ -71,6 +72,24 @@ class WorkerPresenter extends AdminPresenter
 	}
 
 	public function handleCreate(): void
+	{
+		$this->redirect('default');
+	}
+
+	protected function createComponentCreateWorkerForm(): Form
+	{
+		if (!$this->getUser()->isAllowed(Resource::WORKER->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		return $this->createConfirmedCreateForm(
+			'Pridať nového pracovníka',
+			'Naozaj chcete vytvoriť nového pracovníka?',
+			$this->createWorkerFormSucceeded(...),
+		);
+	}
+
+	private function createWorkerFormSucceeded(Form $form): void
 	{
 		if (!$this->getUser()->isAllowed(Resource::WORKER->value)) {
 			$this->error('Prístup zamietnutý', 403);

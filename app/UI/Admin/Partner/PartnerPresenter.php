@@ -67,13 +67,7 @@ class PartnerPresenter extends AdminPresenter
 
 	public function handleCreate(): void
 	{
-		if (!$this->getUser()->isAllowed(Resource::PARTNER->value)) {
-			$this->error('Prístup zamietnutý', 403);
-		}
-
-		$id = $this->partnerRepository->createEmptyPartner();
-		$this->changeAuditLogger->logCreated('partner.update', PartnerTableMap::TABLE_NAME, $id, 'Partner');
-		$this->redirect('update', $id);
+		$this->redirect('default');
 	}
 
 	protected function createComponentPartnerUpdateForm(): Form
@@ -83,6 +77,19 @@ class PartnerPresenter extends AdminPresenter
 			$this->partnerRepository->findCountrySelectOptions(),
 			$this->partnerRepository->findStatusSelectOptions(),
 			$this->partnerUpdateFormSucceeded(...),
+		);
+	}
+
+	protected function createComponentCreatePartnerForm(): Form
+	{
+		if (!$this->getUser()->isAllowed(Resource::PARTNER->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		return $this->createConfirmedCreateForm(
+			'Pridať nového partnera',
+			'Naozaj chcete vytvoriť nového partnera?',
+			$this->createPartnerFormSucceeded(...),
 		);
 	}
 
@@ -101,6 +108,17 @@ class PartnerPresenter extends AdminPresenter
 		$this->tryHandleAutosavePartialRequest();
 		$this->partnerRepository->updateFromForm($form);
 		$this->finishAutosave();
+	}
+
+	private function createPartnerFormSucceeded(Form $form): void
+	{
+		if (!$this->getUser()->isAllowed(Resource::PARTNER->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		$id = $this->partnerRepository->createEmptyPartner();
+		$this->changeAuditLogger->logCreated('partner.update', PartnerTableMap::TABLE_NAME, $id, 'Partner');
+		$this->redirect('update', $id);
 	}
 
 	/**

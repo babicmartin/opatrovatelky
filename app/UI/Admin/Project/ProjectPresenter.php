@@ -9,6 +9,7 @@ use App\Model\Table\FamilyTableMap;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Filter\AlphabetFilter\AlphabetFilterPresenterTrait;
 use App\UI\Admin\Control\Project\ProjectList\ProjectListPresenterTrait;
+use Nette\Application\UI\Form;
 
 class ProjectPresenter extends AdminPresenter
 {
@@ -57,6 +58,24 @@ class ProjectPresenter extends AdminPresenter
 	}
 
 	public function handleCreate(): void
+	{
+		$this->redirect('default');
+	}
+
+	protected function createComponentCreateProjectForm(): Form
+	{
+		if (!$this->getUser()->isAllowed(Resource::PROJECT->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		return $this->createConfirmedCreateForm(
+			'Pridať nový projekt',
+			'Naozaj chcete vytvoriť nový projekt?',
+			$this->createProjectFormSucceeded(...),
+		);
+	}
+
+	private function createProjectFormSucceeded(Form $form): void
 	{
 		if (!$this->getUser()->isAllowed(Resource::PROJECT->value)) {
 			$this->error('Prístup zamietnutý', 403);

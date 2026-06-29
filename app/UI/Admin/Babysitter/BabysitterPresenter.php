@@ -15,7 +15,9 @@ use App\Model\Form\Factory\BaseFormFactory;
 use App\Model\Repository\BabysitterRepository;
 use App\Model\Service\Audit\ChangeAuditLogger;
 use App\Model\Service\Pdf\BabysitterPdfService;
+use App\Model\Service\Turnus\TurnusInvoicePaymentStatusService;
 use App\Model\Table\OpatrovatelkaTableMap;
+use App\Model\Table\StatusFaTableMap;
 use App\Model\Table\TurnusTableMap;
 use App\Model\Utils\Validator\ImageValidator;
 use App\UI\Admin\AdminPresenter;
@@ -33,6 +35,7 @@ use App\UI\Admin\Form\Babysitter\BabysitterProfile\BabysitterProfileFormFactory;
 use App\UI\Admin\Form\Babysitter\BabysitterWorkProfile\BabysitterWorkProfileFormFactory;
 use Nette\Application\Responses\FileResponse;
 use Nette\Application\UI\Form;
+use Nette\Database\Explorer;
 use Nette\Http\FileUpload;
 use Nette\Utils\ArrayHash;
 use Nette\Utils\FileSystem;
@@ -68,6 +71,8 @@ class BabysitterPresenter extends AdminPresenter
 		private readonly ImageValidator $imageValidator,
 		private readonly BabysitterPdfService $babysitterPdfService,
 		private readonly ChangeAuditLogger $changeAuditLogger,
+		private readonly Explorer $database,
+		private readonly TurnusInvoicePaymentStatusService $turnusInvoicePaymentStatusService,
 	) {
 		parent::__construct();
 	}
@@ -152,22 +157,15 @@ class BabysitterPresenter extends AdminPresenter
 		$this->template->canManageBabysitter = $this->getUser()->isAllowed(Resource::BABYSITTER->value);
 		$this->template->canOpenFamily = $this->getUser()->isAllowed(Resource::FAMILY->value);
 		$this->template->canOpenTurnus = $this->getUser()->isAllowed(Resource::TURNUS->value);
-		$this->template->turnusRows = $this->activeTab === 'main' ? $this->babysitterRepository->findTurnusRowsForBabysitter($id) : [];
+		$turnusRows = $this->activeTab === 'main' ? $this->babysitterRepository->findTurnusRowsForBabysitter($id) : [];
+		$this->template->turnusRows = $this->markTurnusRowsWithInvoiceStatus($turnusRows);
 		$this->template->pdfExists = $this->babysitterPdfService->exists($id);
 		$this->template->pdfGeneratedAt = $this->babysitterPdfService->getGeneratedAt($id);
 	}
 
 	public function handleCreate(): void
 	{
-		if (!$this->getUser()->isAllowed(Resource::BABYSITTER->value)) {
-			$this->error('Prístup zamietnutý', 403);
-		}
-
-		$id = $this->babysitterRepository->createEmptyBabysitter();
-		$this->changeAuditLogger->logCreated('babysitter.main', OpatrovatelkaTableMap::TABLE_NAME, $id, 'Opatrovateľka', [
-			'created_as' => 'babysitter',
-		]);
-		$this->redirect('update', $id);
+		$this->redirect('default');
 	}
 
 	public function handleCreateTurnus(int $babysitterId): void
@@ -244,6 +242,17 @@ class BabysitterPresenter extends AdminPresenter
 			$this->babysitterRepository->findUserSelectOptions(),
 			$this->babysitterRepository->findBlacklistSelectOptions(),
 			$this->babysitterMainFormSucceeded(...),
+		);
+	}
+
+	protected function createComponentCreateBabysitterForm(): Form
+	{
+		$this->assertCanManage();
+
+		return $this->createConfirmedCreateForm(
+			'Pridať novú opatrovateľku',
+			'Naozaj chcete vytvoriť novú opatrovateľku?',
+			$this->createBabysitterFormSucceeded(...),
 		);
 	}
 
@@ -365,6 +374,17 @@ class BabysitterPresenter extends AdminPresenter
 		$this->finishAutosave();
 	}
 
+	private function createBabysitterFormSucceeded(Form $form): void
+	{
+		$this->assertCanManage();
+
+		$id = $this->babysitterRepository->createEmptyBabysitter();
+		$this->changeAuditLogger->logCreated('babysitter.main', OpatrovatelkaTableMap::TABLE_NAME, $id, 'Opatrovateľka', [
+			'created_as' => 'babysitter',
+		]);
+		$this->redirect('update', $id);
+	}
+
 	private function babysitterAddressFormSucceeded(BabysitterAddressForm $form): void
 	{
 		$this->assertCanManage();
@@ -425,6 +445,60 @@ class BabysitterPresenter extends AdminPresenter
 		if (!$this->getUser()->isAllowed(Resource::BABYSITTER->value)) {
 			$this->error('Prístup zamietnutý', 403);
 		}
+	}
+
+	/**
+	 * @param list<array<string, mixed>> $turnusRows
+	 * @return list<array<string, mixed>>
+	 */
+	private function markTurnusRowsWithInvoiceStatus(array $turnusRows): array
+	{
+		$turnusIds = [];
+		foreach ($turnusRows as $turnus) {
+			$turnusId = (int) ($turnus['id'] ?? 0);
+			if ($turnusId > 0) {
+				$turnusIds[] = $turnusId;
+			}
+		}
+		$turnusIds = array_values(array_unique($turnusIds));
+
+		$invoiceRows = [];
+		if ($turnusIds !== []) {
+			$t = TurnusTableMap::TABLE_NAME;
+			$fa = StatusFaTableMap::TABLE_NAME;
+			$placeholders = implode(', ', array_fill(0, count($turnusIds), '?'));
+
+			$sql = "
+				SELECT
+					$t." . TurnusTableMap::COL_ID . " AS id,
+					$t." . TurnusTableMap::COL_INVOICE_STATUS . " AS invoice_status,
+					$fa." . StatusFaTableMap::COL_STATUS . " AS invoice_status_label
+				FROM $t
+				LEFT JOIN $fa ON $fa." . StatusFaTableMap::COL_ID . " = $t." . TurnusTableMap::COL_INVOICE_STATUS . "
+				WHERE $t." . TurnusTableMap::COL_ID . " IN ($placeholders)
+			";
+
+			foreach ($this->database->queryArgs($sql, $turnusIds)->fetchAll() as $row) {
+				$invoiceRows[(int) $row->id] = [
+					'invoiceStatus' => (int) ($row->invoice_status ?? 0),
+					'invoiceStatusLabel' => (string) ($row->invoice_status_label ?? ''),
+				];
+			}
+		}
+
+		foreach ($turnusRows as $index => $turnus) {
+			$invoiceRow = $invoiceRows[(int) ($turnus['id'] ?? 0)] ?? null;
+			$isInvoiceUnpaid = $invoiceRow !== null
+				&& $this->turnusInvoicePaymentStatusService->isInvoiceUnpaid((int) $invoiceRow['invoiceStatus']);
+			$invoiceStatusLabel = trim((string) ($invoiceRow['invoiceStatusLabel'] ?? ''));
+
+			$turnusRows[$index]['isInvoiceUnpaid'] = $isInvoiceUnpaid;
+			$turnusRows[$index]['invoiceTooltip'] = $isInvoiceUnpaid
+				? 'Stav faktúry: ' . ($invoiceStatusLabel !== '' ? $invoiceStatusLabel : 'bez statusu FA')
+				: '';
+		}
+
+		return array_values($turnusRows);
 	}
 
 	private function finishAutosave(): void

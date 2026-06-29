@@ -96,11 +96,7 @@ class TurnusPresenter extends AdminPresenter
 
 	public function handleCreate(): void
 	{
-		$this->assertCanManage();
-
-		$id = $this->turnusRepository->createEmptyTurnus((int) $this->getUser()->getId());
-		$this->changeAuditLogger->logCreated('turnus.update', TurnusTableMap::TABLE_NAME, $id, 'Turnus');
-		$this->redirect('update', $id);
+		$this->redirect('default');
 	}
 
 	public function handleDelete(int $id): void
@@ -152,6 +148,17 @@ class TurnusPresenter extends AdminPresenter
 		);
 	}
 
+	protected function createComponentCreateTurnusForm(): Form
+	{
+		$this->assertCanManage();
+
+		return $this->createConfirmedCreateForm(
+			'Pridať nový turnus',
+			'Naozaj chcete vytvoriť nový turnus?',
+			$this->createTurnusFormSucceeded(...),
+		);
+	}
+
 	protected function createComponentTurnusStatusA1Form(): Form
 	{
 		$turnus = $this->getTurnus();
@@ -177,6 +184,15 @@ class TurnusPresenter extends AdminPresenter
 		$this->tryHandleAutosavePartialRequest();
 		$this->turnusRepository->updateFromForm($form);
 		$this->finishAutosave();
+	}
+
+	private function createTurnusFormSucceeded(Form $form): void
+	{
+		$this->assertCanManage();
+
+		$id = $this->turnusRepository->createEmptyTurnus((int) $this->getUser()->getId());
+		$this->changeAuditLogger->logCreated('turnus.update', TurnusTableMap::TABLE_NAME, $id, 'Turnus');
+		$this->redirect('update', $id);
 	}
 
 	private function turnusStatusA1FormSucceeded(int $id, int $statusA1): void

@@ -52,7 +52,7 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr n:foreach="$turnusRows as $turnus">
+									<tr n:foreach="$turnusRows as $turnus" n:attr="data-bs-toggle: ($turnus['isInvoiceUnpaid'] ?? false) ? 'tooltip', data-bs-title: ($turnus['isInvoiceUnpaid'] ?? false) ? ($turnus['invoiceTooltip'] ?? 'Neuhradená faktúra'), style: ($turnus['isInvoiceUnpaid'] ?? false) ? 'background:#d6f2fa'">
 										<td class="tcenter"><span n:if="$turnus['status'] !== ''" class="badge" style="background-color:{$turnus['statusColor']|noescape}">{$turnus['status']}</span></td>
 										<td class="tcenter">{$turnus['dateFrom']|date:'j.n.Y'}</td>
 										<td class="tcenter">{$turnus['dateTo']|date:'j.n.Y'}</td>

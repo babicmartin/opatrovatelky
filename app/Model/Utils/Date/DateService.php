@@ -65,9 +65,13 @@ class DateService
 		if ($datePart === '0000-00-00' || str_starts_with($datePart, '-0001')) {
 			return null;
 		}
-		$dt = DateTimeImmutable::createFromFormat('!Y-m-d', $datePart);
+
+		$dt = DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', $value);
+		if ($dt === false && preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+$/', $value) === 1) {
+			$dt = DateTimeImmutable::createFromFormat('!Y-m-d H:i:s.u', $value);
+		}
 		if ($dt === false) {
-			$dt = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $value);
+			$dt = DateTimeImmutable::createFromFormat('!Y-m-d', $datePart);
 		}
 		return $dt === false ? null : $dt;
 	}

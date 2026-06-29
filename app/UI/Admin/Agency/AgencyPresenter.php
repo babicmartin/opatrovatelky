@@ -69,13 +69,7 @@ class AgencyPresenter extends AdminPresenter
 
 	public function handleCreate(): void
 	{
-		if (!$this->getUser()->isAllowed(Resource::AGENCY->value)) {
-			$this->error('Prístup zamietnutý', 403);
-		}
-
-		$id = $this->agencyRepository->createEmptyAgency();
-		$this->changeAuditLogger->logCreated('agency.update', AgencyTableMap::TABLE_NAME, $id, 'Agentúra');
-		$this->redirect('update', $id);
+		$this->redirect('default');
 	}
 
 	protected function createComponentAgencyUpdateForm(): Form
@@ -85,6 +79,19 @@ class AgencyPresenter extends AdminPresenter
 			$this->agencyRepository->findCountrySelectOptions(),
 			$this->agencyRepository->findStatusSelectOptions(),
 			$this->agencyUpdateFormSucceeded(...),
+		);
+	}
+
+	protected function createComponentCreateAgencyForm(): Form
+	{
+		if (!$this->getUser()->isAllowed(Resource::AGENCY->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		return $this->createConfirmedCreateForm(
+			'Pridať novú agentúru',
+			'Naozaj chcete vytvoriť novú agentúru?',
+			$this->createAgencyFormSucceeded(...),
 		);
 	}
 
@@ -103,6 +110,17 @@ class AgencyPresenter extends AdminPresenter
 		$this->tryHandleAutosavePartialRequest();
 		$this->agencyRepository->updateFromForm($form);
 		$this->finishAutosave();
+	}
+
+	private function createAgencyFormSucceeded(Form $form): void
+	{
+		if (!$this->getUser()->isAllowed(Resource::AGENCY->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		$id = $this->agencyRepository->createEmptyAgency();
+		$this->changeAuditLogger->logCreated('agency.update', AgencyTableMap::TABLE_NAME, $id, 'Agentúra');
+		$this->redirect('update', $id);
 	}
 
 	/**

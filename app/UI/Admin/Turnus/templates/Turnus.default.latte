@@ -14,7 +14,9 @@
 
 {block content}
 	{if $canManageTurnus}
-		<a href="{link create!}" class="btn btn-success btn-sm" style="margin:0 0 20px 0;">Pridať nový turnus</a>
+		{form createTurnusForm}
+			{input create}
+		{/form}
 	{/if}
 
 	<div class="row mt-2 mb-4" style="border:1px solid #E2C2DA; background:#E2C2DA; padding:5px 10px 10px;">

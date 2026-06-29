@@ -5,8 +5,13 @@
 {varType list<int> $editableUserIds}
 {varType string $userImagesPath}
 {varType string $emptyUserImagePath}
+{varType bool $canCreateUser}
 
-	<a n:if="$user->isAllowed('userManagement')" n:href="create!" class="btn btn-success btn-sm">Pridať nového užívateľa</a>
+	{if $canCreateUser}
+		{form createUserForm}
+			{input create}
+		{/form}
+	{/if}
 
 	<div class="space20"></div>
 	<div class="divone" n:if="count($users) > 0">

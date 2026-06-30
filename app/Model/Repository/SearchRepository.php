@@ -2,6 +2,8 @@
 
 namespace App\Model\Repository;
 
+use App\Model\DataProvider\Directory\DirectoryProvider;
+use App\Model\DataProvider\Directory\StorageDirProvider;
 use App\Model\Table\AgencyTableMap;
 use App\Model\Table\CountryTableMap;
 use App\Model\Table\FamilyTableMap;
@@ -23,8 +25,13 @@ class SearchRepository
 	public const int TYPE_AGENCY = 4;
 	public const int TYPE_FAMILY_CONTACT = 5;
 
+	private const string BABYSITTER_IMAGE_DIR = 'img/opatrovatelka';
+	private const string EMPTY_IMAGE_PATH = 'img/empty.jpg';
+
 	public function __construct(
 		private readonly Explorer $database,
+		private readonly DirectoryProvider $directoryProvider,
+		private readonly StorageDirProvider $storageDirProvider,
 	) {
 	}
 
@@ -105,9 +112,26 @@ class SearchRepository
 				'statusLabel' => (string) ($row->status_label ?? ''),
 				'statusColor' => (string) ($row->status_color ?? ''),
 				'image' => (string) ($row->image ?? ''),
+				'imagePath' => $this->resolveBabysitterImagePath((string) ($row->image ?? '')),
 			],
 			$this->database->query($sql, $like, $like, $like)->fetchAll(),
 		);
+	}
+
+	private function resolveBabysitterImagePath(string $image): string
+	{
+		if ($image === '') {
+			return self::EMPTY_IMAGE_PATH;
+		}
+
+		foreach ([self::BABYSITTER_IMAGE_DIR, $this->storageDirProvider->getUserImages()] as $imageDir) {
+			$relativePath = $imageDir . '/' . $image;
+			if (is_file($this->directoryProvider->getRootDir() . '/www/' . $relativePath)) {
+				return $relativePath;
+			}
+		}
+
+		return self::EMPTY_IMAGE_PATH;
 	}
 
 	/**

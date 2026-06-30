@@ -29,10 +29,9 @@
 	</span>
 {/define}
 
-{define babysitterImage, string $image}
+{define babysitterImage, string $imagePath}
 	<span class="header-avatar1">
-		<img n:if="$image !== ''" src="{$basePath}/img/opatrovatelka/{$image}" alt="img" style="height:26px; width:auto;" class="rounded-circle">
-		<img n:if="$image === ''" src="{$basePath}/img/empty.jpg" alt="img" style="width:26px; height:26px" class="rounded-circle">
+		<img src="{$basePath}/{$imagePath}" alt="img" style="height:26px; width:auto;" class="rounded-circle">
 	</span>
 {/define}
 
@@ -68,7 +67,7 @@
 			<tbody>
 				<tr n:foreach="$rows as $row">
 					<td class="tcenter">{$row['clientNumber']}</td>
-					<td class="tcenter">{include babysitterImage, $row['image']}</td>
+					<td class="tcenter">{include babysitterImage, $row['imagePath']}</td>
 					<td><a href="{plink :Admin:Babysitter:update, id: $row['id']}" class="titleLink">{$row['surname']} {$row['name']}</a></td>
 					<td class="tcenter">{$row['age']}</td>
 					<td class="tcenter"><a href="{plink :Admin:Babysitter:default, gender: $row['genderId']}" class="filterLink">{$row['genderLabel']}</a></td>

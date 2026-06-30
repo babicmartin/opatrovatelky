@@ -4,6 +4,7 @@ namespace App\Model\Repository;
 
 use App\Model\Form\DTO\Admin\Family\FamilyAddress\FamilyAddressForm;
 use App\Model\Form\DTO\Admin\Family\FamilyInfo\FamilyInfoForm;
+use App\Model\Form\DTO\Admin\Family\FamilyProjectInfo\FamilyProjectInfoForm;
 use App\Model\Form\DTO\Admin\Family\FamilyShortInfo\FamilyShortInfoForm;
 use App\Model\Table\CountryTableMap;
 use App\Model\Table\FamilyTableMap;
@@ -166,6 +167,15 @@ class FamilyRepository extends BaseRepository
 		}
 
 		$this->update($form->id, $data);
+	}
+
+	public function updateProjectInfoFromForm(FamilyProjectInfoForm $form): void
+	{
+		$this->update($form->id, [
+			FamilyTableMap::COL_PROJECT_DESCRIPTION => $form->projectDescription,
+			FamilyTableMap::COL_PROJECT_POSITIONS => $form->projectPositions,
+			FamilyTableMap::COL_PROJECT_AVAILABLE_POSITIONS => $form->projectAvailablePositions,
+		]);
 	}
 
 	public function updateAddressFromForm(FamilyAddressForm $form): void
@@ -544,6 +554,7 @@ class FamilyRepository extends BaseRepository
 		$options = [0 => '---'];
 		$rows = $this->database->table(UserTableMap::TABLE_NAME)
 			->where(UserTableMap::COL_ACTIVE, 1)
+			->where(UserTableMap::COL_PERMISSION . ' < ?', 10)
 			->order(UserTableMap::COL_SECOND_NAME . ' ASC, ' . UserTableMap::COL_NAME . ' ASC');
 
 		foreach ($rows as $row) {

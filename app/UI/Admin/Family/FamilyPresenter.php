@@ -5,6 +5,7 @@ namespace App\UI\Admin\Family;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Form\DTO\Admin\Family\FamilyAddress\FamilyAddressForm;
 use App\Model\Form\DTO\Admin\Family\FamilyInfo\FamilyInfoForm;
+use App\Model\Form\DTO\Admin\Family\FamilyProjectInfo\FamilyProjectInfoForm;
 use App\Model\Form\DTO\Admin\Family\FamilyShortInfo\FamilyShortInfoForm;
 use App\Model\Repository\FamilyRepository;
 use App\Model\Repository\FamilyProposalRepository;
@@ -19,6 +20,7 @@ use App\UI\Admin\Control\Family\FamilyList\FamilyListPresenterTrait;
 use App\UI\Admin\Control\Filter\AlphabetFilter\AlphabetFilterPresenterTrait;
 use App\UI\Admin\Form\Family\FamilyAddress\FamilyAddressFormFactory;
 use App\UI\Admin\Form\Family\FamilyInfo\FamilyInfoFormFactory;
+use App\UI\Admin\Form\Family\FamilyProjectInfo\FamilyProjectInfoFormFactory;
 use App\UI\Admin\Form\Family\FamilyShortInfo\FamilyShortInfoFormFactory;
 use Nette\Application\UI\Form;
 
@@ -38,6 +40,7 @@ class FamilyPresenter extends AdminPresenter
 		private readonly FamilyRepository $familyRepository,
 		private readonly FamilyProposalRepository $familyProposalRepository,
 		private readonly FamilyInfoFormFactory $familyInfoFormFactory,
+		private readonly FamilyProjectInfoFormFactory $familyProjectInfoFormFactory,
 		private readonly FamilyAddressFormFactory $familyAddressFormFactory,
 		private readonly FamilyShortInfoFormFactory $familyShortInfoFormFactory,
 		private readonly FamilyDocumentsControlFactory $familyDocumentsControlFactory,
@@ -231,6 +234,14 @@ class FamilyPresenter extends AdminPresenter
 		);
 	}
 
+	protected function createComponentFamilyProjectInfoForm(): Form
+	{
+		return $this->familyProjectInfoFormFactory->create(
+			$this->getFamily(),
+			$this->familyProjectInfoFormSucceeded(...),
+		);
+	}
+
 	protected function createComponentFamilyAddressForm(): Form
 	{
 		return $this->familyAddressFormFactory->create(
@@ -259,6 +270,17 @@ class FamilyPresenter extends AdminPresenter
 
 		$this->tryHandleAutosavePartialRequest();
 		$this->familyRepository->updateInfoFromForm($form);
+		$this->finishAutosave();
+	}
+
+	private function familyProjectInfoFormSucceeded(FamilyProjectInfoForm $form): void
+	{
+		if (!$this->getUser()->isAllowed(Resource::FAMILY->value)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
+		$this->tryHandleAutosavePartialRequest();
+		$this->familyRepository->updateProjectInfoFromForm($form);
 		$this->finishAutosave();
 	}
 

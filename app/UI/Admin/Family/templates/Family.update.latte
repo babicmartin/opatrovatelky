@@ -29,32 +29,28 @@
 					{include shortInfo}
 				</div>
 
-				<div class="col-xl-10 col-md-12">
+				<div class="col-xl-2 col-md-12">
 					{form familyInfoForm}
-						<div class="row">
-							<div class="col-xl-3 col-md-12">
-								{include infoForm}
-							</div>
-
-							<div class="col-xl-9 col-md-12">
-								{include projectInfo}
-							</div>
-						</div>
+						{include infoForm}
 					{/form}
+				</div>
 
-					<div class="row">
-						<div class="offset-xl-3 col-xl-9 col-md-12">
-							<div class="divone">
-								<h3 style="font-size:18px; margin:0 0 15px;">{if (int) $family['type'] === 1}Evidencia opatrovania{else}Evidencia pracovných turnusov{/if}</h3>
+				<div class="col-xl-8 col-md-12">
+					{if (int) $family['type'] === 2}
+						{form familyProjectInfoForm}
+							{include projectInfo}
+						{/form}
+					{/if}
 
-								{form createFamilyTurnusForm}
-									{input create}
-								{/form}
+					<div class="divone">
+						<h3 style="font-size:18px; margin:0 0 15px;">{if (int) $family['type'] === 1}Evidencia opatrovania{else}Evidencia pracovných turnusov{/if}</h3>
 
-								{include turnusTable, rows: $turnusRowsWithoutDate}
-								{include turnusTable, rows: $turnusRowsWithDate}
-							</div>
-						</div>
+						{form createFamilyTurnusForm}
+							{input create}
+						{/form}
+
+						{include turnusTable, rows: $turnusRowsWithoutDate}
+						{include turnusTable, rows: $turnusRowsWithDate}
 					</div>
 				</div>
 			</div>

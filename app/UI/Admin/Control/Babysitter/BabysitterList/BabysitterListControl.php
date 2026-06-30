@@ -2,6 +2,8 @@
 
 namespace App\UI\Admin\Control\Babysitter\BabysitterList;
 
+use App\Model\DataProvider\Directory\DirectoryProvider;
+use App\Model\DataProvider\Directory\StorageDirProvider;
 use App\Model\Factory\PaginatorFactory;
 use App\Model\Repository\BabysitterRepository;
 use App\Model\Utils\Paginator\Paginator;
@@ -10,6 +12,8 @@ use Nette\Application\UI\Control;
 class BabysitterListControl extends Control
 {
 	private const int ITEMS_PER_PAGE = 50;
+	private const string BABYSITTER_IMAGE_DIR = 'img/opatrovatelka';
+	private const string EMPTY_IMAGE_PATH = 'img/empty.jpg';
 
 	private int $page = 1;
 
@@ -39,6 +43,8 @@ class BabysitterListControl extends Control
 	public function __construct(
 		private readonly BabysitterRepository $babysitterRepository,
 		private readonly PaginatorFactory $paginatorFactory,
+		private readonly DirectoryProvider $directoryProvider,
+		private readonly StorageDirProvider $storageDirProvider,
 	) {
 	}
 
@@ -92,7 +98,7 @@ class BabysitterListControl extends Control
 		if ($this->rows === null) {
 			$pageCount = 1;
 			$totalCount = 0;
-			$this->rows = $this->babysitterRepository->findBabysitterRows(
+			$this->rows = $this->withImagePaths($this->babysitterRepository->findBabysitterRows(
 				$this->page,
 				self::ITEMS_PER_PAGE,
 				$this->countryId,
@@ -106,11 +112,40 @@ class BabysitterListControl extends Control
 				$this->firstLetter,
 				$pageCount,
 				$totalCount,
-			);
+			));
 			$this->totalCount = max(0, $totalCount);
 		}
 
 		return $this->rows;
+	}
+
+	/**
+	 * @param list<array<string, mixed>> $rows
+	 * @return list<array<string, mixed>>
+	 */
+	private function withImagePaths(array $rows): array
+	{
+		foreach ($rows as $index => $row) {
+			$rows[$index]['imagePath'] = $this->resolveImagePath((string) ($row['image'] ?? ''));
+		}
+
+		return $rows;
+	}
+
+	private function resolveImagePath(string $image): string
+	{
+		if ($image === '') {
+			return self::EMPTY_IMAGE_PATH;
+		}
+
+		foreach ([self::BABYSITTER_IMAGE_DIR, $this->storageDirProvider->getUserImages()] as $imageDir) {
+			$relativePath = $imageDir . '/' . $image;
+			if (is_file($this->directoryProvider->getRootDir() . '/www/' . $relativePath)) {
+				return $relativePath;
+			}
+		}
+
+		return self::EMPTY_IMAGE_PATH;
 	}
 
 	private function createPaginator(): Paginator

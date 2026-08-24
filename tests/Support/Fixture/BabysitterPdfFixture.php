@@ -52,6 +52,7 @@ final class BabysitterPdfFixture
 			driverLicenceGerman: 'Klasse B',
 			readyDriveGerman: 'Ja',
 			educationGerman: 'Mittelschule',
+			courseGerman: 'Ja',
 			languageGerman: 'Gut',
 			languageStars: 4,
 			diseases: [

@@ -47,6 +47,7 @@ class BabysitterPdfRepository extends BaseRepository
 			driverLicenceGerman: $this->findColumnValue(SelectYesNoTableMap::TABLE_NAME, (int) $babysitter['drivingLicence'], SelectYesNoTableMap::COL_GERMAN),
 			readyDriveGerman: $this->findColumnValue(SelectYesNoTableMap::TABLE_NAME, (int) $babysitter['readyDrive'], SelectYesNoTableMap::COL_GERMAN),
 			educationGerman: $this->findColumnValue(SelectEducationTableMap::TABLE_NAME, (int) $babysitter['education'], SelectEducationTableMap::COL_GERMAN),
+			courseGerman: $this->findColumnValue(SelectYesNoTableMap::TABLE_NAME, (int) $babysitter['course'], SelectYesNoTableMap::COL_GERMAN),
 			languageGerman: $language['german'],
 			languageStars: $language['stars'],
 			diseases: $this->findDiseases(),

@@ -155,9 +155,13 @@
 		<div class="pdfBlock1Box3">
 			<div><img alt="icon" src="IMAGES/ikona-certifikat.png" class="pdfBlock1Icon"></div>
 		</div>
-		<div class="pdfBlock1Box4">
+		<div class="pdfBlock1Box5">
 			<div class="pdfBlock1Box2Text5">DE-14</div>
-			<div class="pdfBlock1Box2Text4">Pflegekurs 2020</div>
+			<div class="pdfBlock1Box2Text6">Pflegekurs 2020</div>
+		</div>
+		<div class="pdfBlock1Box5">
+			<div class="pdfBlock1Box2Text5">Pflegekurs</div>
+			<div class="pdfBlock1Box2Text6">Ja</div>
 		</div>
 	</div>
 	<div class="pdfOverflowMain pt10">

@@ -18,6 +18,7 @@ final readonly class BabysitterPdfData
 		public string $driverLicenceGerman,
 		public string $readyDriveGerman,
 		public string $educationGerman,
+		public string $courseGerman,
 		public string $languageGerman,
 		public int $languageStars,
 		public array $diseases,

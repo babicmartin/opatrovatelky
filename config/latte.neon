@@ -1,6 +1,6 @@
 parameters:
     latteVariable:
-        cssVersion: 2
+        cssVersion: 3
         jsVersion: 1
 
 services:

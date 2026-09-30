@@ -454,3 +454,36 @@ body.msearch-open {
 .pf-turnus-toggle[aria-expanded="true"] .pf-arrow--down { display: none; }
 .pf-kpi.pf-kpi--current, .pf-kpi.pf-kpi--current:hover { border-color: #8A2062; box-shadow: 0 0 0 2px #8A2062; background: #fbf4f8; }
 .pf-kpi.pf-kpi--current .pf-kpi-label { color: #8A2062; font-weight: 600; }
+
+/* mobile menu toggler – white on the purple navbar */
+.mainMenu .navbar-toggler {
+	border: 0;
+	box-shadow: none;
+}
+
+.mainMenu .navbar-toggler-icon {
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23fff' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.navbar-toggler-label {
+	color: #fff;
+	font-size: 18px;
+}
+
+/* toolbar icons float right – on mobile keep page content below them */
+@media (max-width: 1199.98px) {
+	.admin-toolbar-row::after {
+		content: "";
+		display: table;
+		clear: both;
+	}
+
+	.admin-toolbar-row {
+		margin: 12px 0 2px;
+	}
+
+	/* pages without a title (Home) render an empty h1 with 20px margins */
+	h1:empty {
+		display: none;
+	}
+}

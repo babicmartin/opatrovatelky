@@ -1,0 +1,19 @@
+{varType array $partner}
+{varType App\Model\Enum\Partner\EngagementType $type}
+{varType int|null $familyId}
+{varType string|null $familyName}
+{varType bool $canOpenFamily}
+
+{block pageTitle}
+	Partner {$partner['name']}
+	<small class="pf-subtitle">{$type->forcesLabel()} – {if $familyName !== null}rodina {$familyName}{else}všetky rodiny{/if}</small>
+{/block}
+
+{block content}
+	<a href="{plink :Admin:Partner:update, id: $partner['id']}" class="btn btn-sm btn-success">Detail partnera</a>
+	<a href="{plink :Admin:PartnerFamily:default, id: $partner['id']}" class="btn btn-sm btn-success">Zoznam rodín partnera</a>
+
+	<div class="space20">&nbsp;</div>
+
+	{control partnerBabysitterDashboard, $familyName}
+{/block}

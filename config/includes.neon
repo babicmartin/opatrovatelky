@@ -36,6 +36,8 @@ includes:
     - control/projectList.neon
     - control/partnerList.neon
     - control/partnerDocuments.neon
+    - control/partnerFamilyList.neon
+    - control/partnerBabysitterDashboard.neon
     - control/agencyList.neon
     - control/agencyDocuments.neon
     - control/todoActiveList.neon

@@ -8,6 +8,16 @@ use Tracy\Debugger;
 
 class SearchControl extends Control
 {
+	private const array MOBILE_TYPE_ORDER = [
+		SearchRepository::TYPE_BABYSITTER,
+		SearchRepository::TYPE_FAMILY,
+		SearchRepository::TYPE_FAMILY_CONTACT,
+		SearchRepository::TYPE_PARTNER,
+		SearchRepository::TYPE_AGENCY,
+	];
+
+	private const int MOBILE_PREVIEW_LIMIT = 5;
+
 	public function __construct(
 		private readonly SearchRepository $searchRepository,
 	) {
@@ -45,6 +55,60 @@ class SearchControl extends Control
 		$html = (string) ob_get_clean();
 
 		$this->getPresenter()->sendJson(['html' => $html]);
+	}
+
+	/**
+	 * Mobile search: without type searches all types at once (grouped sections), with type only that one.
+	 */
+	public function handleSearchMobile(string $term = '', ?int $type = null): void
+	{
+		$term = trim($term);
+		$types = $type === null ? self::MOBILE_TYPE_ORDER : [$this->normalizeType($type)];
+
+		$sections = [];
+		$counts = [];
+		foreach ($types as $sectionType) {
+			$rows = $this->searchRepository->search($sectionType, $term);
+			$counts[$sectionType] = count($rows);
+			$sections[] = [
+				'type' => $sectionType,
+				'label' => $this->getMobileLabel($sectionType),
+				'rows' => $rows,
+				'count' => count($rows),
+			];
+		}
+
+		Debugger::log(sprintf(
+			'Mobile search request: type=%s, term="%s", results=%d',
+			$type === null ? 'all' : (string) $type,
+			$term,
+			array_sum($counts),
+		), 'search');
+
+		$template = $this->createTemplate();
+		$template->setFile(__DIR__ . '/templates/SearchResultsMobile.latte');
+		$template->sections = $sections;
+		$template->allMode = $type === null;
+		$template->term = $term;
+		$template->previewLimit = self::MOBILE_PREVIEW_LIMIT;
+
+		ob_start();
+		$template->render();
+		$html = (string) ob_get_clean();
+
+		$this->getPresenter()->sendJson(['html' => $html, 'counts' => $counts]);
+	}
+
+	private function getMobileLabel(int $type): string
+	{
+		return match ($type) {
+			SearchRepository::TYPE_BABYSITTER => 'Opatrovateľky',
+			SearchRepository::TYPE_FAMILY => 'Rodiny',
+			SearchRepository::TYPE_FAMILY_CONTACT => 'Kontaktné osoby',
+			SearchRepository::TYPE_PARTNER => 'Partneri',
+			SearchRepository::TYPE_AGENCY => 'Agentúry',
+			default => 'Výsledky',
+		};
 	}
 
 	private function normalizeType(int $type): int

@@ -1,0 +1,99 @@
+{varType list<array{type: int, label: string, rows: array, count: int}> $sections}
+{varType bool $allMode}
+{varType string $term}
+{varType int $previewLimit}
+
+{define flag, string $image}
+	<img n:if="$image !== ''" src="{$basePath}/img/country/{$image}" alt="" class="msearch-flag">
+{/define}
+
+{define badge, string $label, string $color}
+	<span n:if="$label !== ''" class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$label}</span>
+{/define}
+
+{define companyActions, array $row}
+	<div n:if="$row['phone'] !== '' || $row['email'] !== ''" class="msearch-actions">
+		<a n:if="$row['phone'] !== ''" href="tel:{$row['phone']|replace:' ',''}"><i class="fas fa-phone"></i> {$row['phone']}</a>
+		<a n:if="$row['email'] !== ''" href="mailto:{$row['email']}"><i class="fas fa-envelope"></i> {$row['email']}</a>
+	</div>
+{/define}
+
+{define card, int $type, array $row}
+	<div class="msearch-card">
+		{if $type === 1}
+			<a href="{plink :Admin:Babysitter:update, id: $row['id']}" class="msearch-card-main">
+				<img src="{$basePath}/{$row['imagePath']}" alt="" class="msearch-avatar">
+				<span class="msearch-card-text">
+					<strong>{$row['surname']} {$row['name']}</strong>
+					<span class="msearch-meta">
+						<span n:if="$row['clientNumber'] !== ''">#{$row['clientNumber']}</span>
+						<span n:if="$row['age'] !== '-'">{$row['age']} r.</span>
+						{include flag, $row['countryImage']}
+						{include badge, $row['statusLabel'], $row['statusColor']}
+					</span>
+					<span n:if="$row['agencyName'] !== ''" class="msearch-sub">{$row['agencyName']}</span>
+				</span>
+			</a>
+		{elseif $type === 2}
+			<a href="{plink :Admin:Family:update, id: $row['id']}" class="msearch-card-main">
+				<span class="msearch-card-text">
+					<strong>{$row['surname']} {$row['name']}</strong>
+					<span class="msearch-meta">
+						<span n:if="$row['clientNumber'] !== ''">#{$row['clientNumber']}</span>
+						{include flag, $row['countryImage']}
+						{include badge, $row['statusLabel'], $row['statusColor']}
+						{include badge, $row['userAcronym'], $row['userColor']}
+					</span>
+					<span n:if="$row['partnerName'] !== ''" class="msearch-sub">{$row['partnerName']}</span>
+				</span>
+			</a>
+		{elseif $type === 5}
+			<a href="{plink :Admin:Family:update, id: $row['id']}" class="msearch-card-main">
+				<span class="msearch-card-text">
+					<strong>{$row['personSurname']} {$row['personName']}</strong>
+					<span class="msearch-meta">
+						<span>Rodina: {$row['surname']} {$row['name']}</span>
+						<span n:if="$row['clientNumber'] !== ''">#{$row['clientNumber']}</span>
+						{include badge, $row['statusLabel'], $row['statusColor']}
+					</span>
+				</span>
+			</a>
+		{elseif $type === 3 || $type === 4}
+			{var $destination = $type === 3 ? ':Admin:Partner:update' : ':Admin:Agency:update'}
+			<a href="{plink $destination, id: $row['id']}" class="msearch-card-main">
+				<span class="msearch-card-text">
+					<strong>{$row['name']}</strong>
+					<span class="msearch-meta">
+						{include flag, $row['countryImage']}
+						{include badge, $row['statusLabel'], $row['statusColor']}
+					</span>
+				</span>
+			</a>
+			{include companyActions, $row}
+		{/if}
+	</div>
+{/define}
+
+{var $total = array_sum(array_column($sections, 'count'))}
+
+{if $total === 0}
+	<p class="msearch-empty">Nič sa nenašlo pre „{$term}“.</p>
+{elseif $allMode}
+	{foreach $sections as $section}
+		<section n:if="$section['count'] > 0" class="msearch-section">
+			<h2 class="msearch-section-title">{$section['label']} <span>{$section['count']}</span></h2>
+			{foreach array_slice($section['rows'], 0, $previewLimit) as $row}
+				{include card, $section['type'], $row}
+			{/foreach}
+			<button n:if="$section['count'] > $previewLimit" type="button" class="msearch-more" data-show-type="{$section['type']}">
+				Zobraziť všetky ({$section['count']}) <i class="fas fa-arrow-right"></i>
+			</button>
+		</section>
+	{/foreach}
+{else}
+	{foreach $sections as $section}
+		{foreach $section['rows'] as $row}
+			{include card, $section['type'], $row}
+		{/foreach}
+	{/foreach}
+{/if}

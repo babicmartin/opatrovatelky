@@ -20,6 +20,7 @@ final class RouterFactory
             ->addRoute('logout/', 'Login:logout');
 
         $router->withModule('Admin')
+            ->addRoute('partner-family[/<action>[/<id>]]', 'PartnerFamily:default')
             ->addRoute('partner[/<action>[/<id>]]', 'Partner:default')
             ->addRoute('agency[/<action>[/<id>]]', 'Agency:default')
             ->addRoute('missing-registry[/<action>[/<id>]]', 'MissingRegistry:default')

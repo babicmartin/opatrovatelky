@@ -24,6 +24,20 @@ final class AuthorizatorFactoryTest extends TestCase
 		self::assertTrue($acl->isAllowed(UserRole::DEALER_JUNIOR->value, Resource::FAMILY->value, 'default'));
 	}
 
+	public function testPartnerFamilyOverviewIsOnlyForAdminAndCeo(): void
+	{
+		$acl = (new AuthorizatorFactory(new StaticPageRepository([
+			$this->page('partneri', 2),
+		])))->create();
+
+		self::assertTrue($acl->isAllowed(UserRole::ADMIN->value, Resource::PARTNER_FAMILY->value, 'default'));
+		self::assertTrue($acl->isAllowed(UserRole::CEO->value, Resource::PARTNER_FAMILY->value, 'default'));
+		self::assertFalse($acl->isAllowed(UserRole::DEALER->value, Resource::PARTNER_FAMILY->value, 'default'));
+		self::assertFalse($acl->isAllowed(UserRole::DEALER_JUNIOR->value, Resource::PARTNER_FAMILY->value, 'default'));
+		// dealers still see the partner itself
+		self::assertTrue($acl->isAllowed(UserRole::DEALER->value, Resource::PARTNER->value, 'default'));
+	}
+
 	private function page(string $url, int $permission): PageEntity
 	{
 		return new PageEntity(

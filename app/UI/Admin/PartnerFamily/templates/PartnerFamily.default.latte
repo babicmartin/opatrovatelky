@@ -1,0 +1,11 @@
+{varType array $partner}
+
+{block pageTitle}Partner {$partner['name']} – zoznam rodín{/block}
+
+{block content}
+	<a href="{plink :Admin:Partner:update, id: $partner['id']}" class="btn btn-sm btn-success">Detail partnera</a>
+
+	<div class="space20">&nbsp;</div>
+
+	{control partnerFamilyList}
+{/block}

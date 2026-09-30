@@ -6,5 +6,36 @@
 	<input type="text" class="form-control search" data-id="4" data-search-url="{link search!}" data-type-param="{$control->getParameterId('type')}" data-term-param="{$control->getParameterId('term')}" placeholder="Agentúry" autocomplete="off">
 </div>
 <div class="col-6 col-md-10 col-sm-8 d-xl-none">
-	<input type="text" class="form-control search" data-id="2" data-search-url="{link search!}" data-type-param="{$control->getParameterId('type')}" data-term-param="{$control->getParameterId('term')}" placeholder="Rodiny" autocomplete="off">
+	<button type="button" class="msearch-trigger" data-msearch-open aria-label="Vyhľadávanie">
+		<i class="fas fa-magnifying-glass"></i>
+		<span>Hľadať…</span>
+	</button>
+
+	<div id="mobileSearch" class="msearch" role="dialog" aria-modal="true" aria-label="Vyhľadávanie" hidden
+		data-search-url="{link searchMobile!}"
+		data-type-param="{$control->getParameterId('type')}"
+		data-term-param="{$control->getParameterId('term')}">
+		<div class="msearch-head">
+			<div class="msearch-bar">
+				<button type="button" class="msearch-back" data-msearch-close aria-label="Zavrieť"><i class="fas fa-arrow-left"></i></button>
+				<div class="msearch-field">
+					<input type="search" class="msearch-input" placeholder="Meno, priezvisko, číslo klienta…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+					<span class="msearch-spinner" aria-hidden="true"></span>
+					<button type="button" class="msearch-clear" aria-label="Vymazať" hidden><i class="fas fa-xmark"></i></button>
+				</div>
+			</div>
+			<div class="msearch-chips" role="tablist">
+				<button type="button" class="msearch-chip active" data-type="">Všetko</button>
+				<button type="button" class="msearch-chip" data-type="1">Opatrovateľky <span class="msearch-count"></span></button>
+				<button type="button" class="msearch-chip" data-type="2">Rodiny <span class="msearch-count"></span></button>
+				<button type="button" class="msearch-chip" data-type="5">Kont. osoby <span class="msearch-count"></span></button>
+				<button type="button" class="msearch-chip" data-type="3">Partneri <span class="msearch-count"></span></button>
+				<button type="button" class="msearch-chip" data-type="4">Agentúry <span class="msearch-count"></span></button>
+			</div>
+		</div>
+		<div class="msearch-body">
+			<div class="msearch-results"></div>
+			<p class="msearch-hint">Zadajte aspoň 3 znaky.</p>
+		</div>
+	</div>
 </div>

@@ -1,0 +1,69 @@
+{varType int $partnerId}
+{varType App\Model\DTO\Partner\PartnerFamilyOverview $overview}
+{varType App\Model\Enum\Partner\EngagementType[] $types}
+{varType bool $canOpenFamily}
+
+{define statusBadge, string $label, string $color}
+	<span n:if="$label !== ''" class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$label}</span>
+{/define}
+
+{define countryImage, string $image}
+	<span class="header-avatar1">
+		<img n:if="$image !== ''" src="{$basePath}/img/country/{$image}" alt="img" style="height:20px; width:auto;" class="">
+		<img n:if="$image === ''" src="{$basePath}/img/empty.jpg" alt="img" style="width:20px; height:20px" class="">
+	</span>
+{/define}
+
+{define countLink, App\Model\DTO\Partner\EngagementCounts $counts, App\Model\Enum\Partner\EngagementType $type, ?int $familyId}
+	{var $count = $counts->get($type)}
+	<a n:if="$count > 0" href="{plink :Admin:PartnerFamily:babysitters, id: $partnerId, type: $type->value, family: $familyId}" class="filterLink">{$count}</a>
+	<span n:if="$count === 0">0</span>
+{/define}
+
+<div class="tableone">
+	<div class="tableone-header">
+		<h3 class="tableone-title">Zoznam rodín ({count($overview->families)})</h3>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped card-table table-vcenter text-nowrap">
+			<thead>
+				<tr class="thead">
+					<th class="tcenter w50"></th>
+					<th>Meno</th>
+					<th n:foreach="$types as $type" class="tcenter w90">{$type->label()}</th>
+					<th class="tcenter">Krajina</th>
+					<th class="tcenter w90">Status</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr n:foreach="$overview->families as $row">
+					<td class="tcenter">{$iterator->counter}.</td>
+					<td>
+						<a n:if="$canOpenFamily" href="{plink :Admin:Family:update, id: $row->id}" class="titleLink">{$row->surname} {$row->name}</a>
+						<span n:if="!$canOpenFamily">{$row->surname} {$row->name}</span>
+					</td>
+					<td n:foreach="$types as $type" class="tcenter">{include countLink, $row->counts, $type, $row->id}</td>
+					<td class="tcenter">{include countryImage, $row->countryImage}</td>
+					<td class="tcenter">{include statusBadge, $row->statusLabel, $row->statusColor}</td>
+					<td class="tcenter">
+						<a n:if="$canOpenFamily" href="{plink :Admin:Family:update, id: $row->id}" class="btn btn-success btn-sm">Upraviť</a>
+					</td>
+				</tr>
+				<tr n:if="$overview->families === []">
+					<td colspan="8" class="tcenter">Partner nemá žiadne rodiny</td>
+				</tr>
+			</tbody>
+			<tfoot n:if="$overview->families !== []">
+				<tr>
+					<td></td>
+					<td>
+						<strong>Spolu za partnera</strong>
+					</td>
+					<td n:foreach="$types as $type" class="tcenter">{include countLink, $overview->summary, $type, null}</td>
+					<td colspan="3"></td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+</div>

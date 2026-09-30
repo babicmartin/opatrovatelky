@@ -2,6 +2,7 @@
 
 namespace App\UI\Admin;
 
+use App\Model\Latte\LatteDefaultVariables;
 use App\Model\Security\SecurityAuditLogger;
 use App\Model\Service\Autosave\AutosaveFieldUpdateService;
 use App\Model\Table\FileTableMap;
@@ -36,6 +37,7 @@ abstract class AdminPresenter extends Presenter
 	private Explorer $database;
 	private LoggerInterface $logger;
 	private ConfirmedCreateFormFactory $confirmedCreateFormFactory;
+	private LatteDefaultVariables $latteDefaultVariables;
 
 	public function injectAutosaveFieldUpdateService(AutosaveFieldUpdateService $autosaveFieldUpdateService): void
 	{
@@ -60,6 +62,11 @@ abstract class AdminPresenter extends Presenter
 	public function injectConfirmedCreateFormFactory(ConfirmedCreateFormFactory $confirmedCreateFormFactory): void
 	{
 		$this->confirmedCreateFormFactory = $confirmedCreateFormFactory;
+	}
+
+	public function injectLatteDefaultVariables(LatteDefaultVariables $latteDefaultVariables): void
+	{
+		$this->latteDefaultVariables = $latteDefaultVariables;
 	}
 
 	protected function getResource(): ?string
@@ -93,6 +100,8 @@ abstract class AdminPresenter extends Presenter
 
 	protected function beforeRender(): void
 	{
+		$this->template->cssVersion = $this->latteDefaultVariables->getCssVersion();
+		$this->template->jsVersion = $this->latteDefaultVariables->getJsVersion();
 	}
 
 	protected function createConfirmedCreateForm(

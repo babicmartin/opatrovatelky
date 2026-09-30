@@ -20,5 +20,8 @@ services:
 	- App\Model\Service\Audit\ChangeAuditLogger
 	- App\Model\Service\Autosave\AutosaveFieldUpdateService
 	- App\Model\Service\Pdf\BabysitterPdfService
+	- App\Model\Service\Partner\TurnusEngagementClassifier
+	- App\Model\Service\Partner\PartnerEngagementCalculator
+	- App\Model\Service\Partner\PartnerFamilyEngagementService
 	- App\Model\Service\Turnus\TurnusInvoicePaymentStatusService
 	- App\Model\Service\Video\VideoMetadataReader

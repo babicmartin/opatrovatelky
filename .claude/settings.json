@@ -1,5 +1,18 @@
 {
   "enabledPlugins": {
     "php-fixer@nette": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "php \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint-php.php\""
+          }
+        ]
+      }
+    ]
   }
 }

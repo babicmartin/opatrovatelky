@@ -62,6 +62,7 @@ class PartnerPresenter extends AdminPresenter
 		$this->template->partner = $this->partner;
 		$this->template->canManagePartner = $this->getUser()->isAllowed(Resource::PARTNER->value);
 		$this->template->canOpenFamily = $this->getUser()->isAllowed(Resource::FAMILY->value);
+		$this->template->canOpenPartnerFamily = $this->getUser()->isAllowed(Resource::PARTNER_FAMILY->value);
 		$this->template->familyRows = $this->partnerRepository->findFamiliesForPartner($id);
 	}
 

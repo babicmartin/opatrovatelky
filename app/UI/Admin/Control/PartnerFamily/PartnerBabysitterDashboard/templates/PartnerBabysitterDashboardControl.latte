@@ -1,0 +1,141 @@
+{varType int $partnerId}
+{varType int|null $familyId}
+{varType string|null $familyName}
+{varType App\Model\DTO\Partner\PartnerBabysitterDashboard $dashboard}
+{varType App\Model\Enum\Partner\EngagementType[] $types}
+{varType bool $canOpenFamily}
+{varType bool $canOpenBabysitter}
+{varType bool $canOpenTurnus}
+
+{define statusBadge, string $label, string $color}
+	<span n:if="$label !== ''" class="badge" n:attr="style: $color !== '' ? 'background-color:' . $color">{$label}</span>
+{/define}
+
+{define engagementBadge, App\Model\Enum\Partner\EngagementType $engagement}
+	{include statusBadge, $engagement->babysitterLabel(), $engagement === App\Model\Enum\Partner\EngagementType::ACTIVE ? '#198754' : '#6c757d'}
+{/define}
+
+
+<div class="pf-kpis">
+	<a n:foreach="$types as $filterType"
+		href="{plink :Admin:PartnerFamily:babysitters, id: $partnerId, type: $filterType->value, family: $familyId}"
+		n:class="'pf-kpi', 'pf-kpi--link', 'pf-kpi--' . $filterType->value, $dashboard->type === $filterType ? 'pf-kpi--current'">
+		<span class="pf-kpi-value">{$dashboard->counts->get($filterType)}</span>
+		<span class="pf-kpi-label">{$filterType->label()}</span>
+	</a>
+
+	<div class="pf-kpi">
+		<span class="pf-kpi-value">{$dashboard->countedTurnusCount}</span>
+		<span class="pf-kpi-label">Turnusy</span>
+	</div>
+	<div class="pf-kpi">
+		<span class="pf-kpi-value">{$dashboard->workedDays}</span>
+		<span class="pf-kpi-label">Odpracované dni</span>
+	</div>
+	<div class="pf-kpi pf-kpi--storno">
+		<span class="pf-kpi-value">{$dashboard->stornoTurnusCount}</span>
+		<span class="pf-kpi-label">Storno (nezapočítané)</span>
+	</div>
+</div>
+
+<div class="pf-kpi-note">
+	<div>Turnusy, dni a storno sa vzťahujú na zobrazené opatrovateľky ({$dashboard->type->label()|lower}).</div>
+	<div>Aktívna = plánovaný alebo prebiehajúci turnus.</div>
+	<div>Ukončená = všetky turnusy skončili.</div>
+</div>
+
+<div class="space20">&nbsp;</div>
+
+<div n:if="$dashboard->babysitters !== []" class="tableone">
+	<div class="tableone-header">
+		<h3 class="tableone-title">Zoznam síl ({count($dashboard->babysitters)})</h3>
+	</div>
+	<div class="table-responsive">
+		<table class="table card-table table-vcenter text-nowrap">
+			<thead>
+				<tr class="thead">
+					<th class="tcenter w50"></th>
+					<th>Opatrovateľka</th>
+					<th n:if="$familyId === null">Rodina</th>
+					<th class="tcenter w90">Stav</th>
+					<th class="tcenter w90">Turnusy</th>
+					<th class="tcenter">Odpracované dni</th>
+					<th class="tcenter">Možnosti</th>
+				</tr>
+			</thead>
+			<tbody>
+				{foreach $dashboard->babysitters as $babysitter}
+					<tr>
+						<td class="tcenter">{$iterator->counter}.</td>
+						<td>
+							<a n:if="$canOpenBabysitter" href="{plink :Admin:Babysitter:update, id: $babysitter->babysitterId}" class="titleLink">{$babysitter->name}</a>
+							<span n:if="!$canOpenBabysitter">{$babysitter->name}</span>
+						</td>
+						<td n:if="$familyId === null">
+							{foreach $babysitter->families as $id => $name}
+								<a n:if="$canOpenFamily" href="{plink :Admin:Family:update, id: $id}" class="filterLink">{$name}</a>
+								<span n:if="!$canOpenFamily">{$name}</span>{sep}, {/sep}
+							{/foreach}
+						</td>
+						<td class="tcenter">{include engagementBadge, $babysitter->engagement}</td>
+						<td class="tcenter">
+							<a href="#pf-turnus-{$babysitter->babysitterId}" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="pf-turnus-{$babysitter->babysitterId}" class="filterLink pf-turnus-toggle" title="Zobraziť turnusy">
+								<span class="pf-turnus-count">{$babysitter->countedTurnusCount}</span>
+								<span class="pf-arrow pf-arrow--down"><i class="fa-solid fa-chevron-down"></i></span>
+								<span class="pf-arrow pf-arrow--up"><i class="fa-solid fa-chevron-up"></i></span>
+							</a>
+						</td>
+						<td class="tcenter">{$babysitter->workedDays}</td>
+						<td class="tcenter"><a n:if="$canOpenBabysitter" href="{plink :Admin:Babysitter:update, id: $babysitter->babysitterId}" class="btn btn-success btn-sm">Detail</a></td>
+					</tr>
+					<tr class="collapse pf-turnus-row" id="pf-turnus-{$babysitter->babysitterId}">
+						<td></td>
+						<td colspan="{$familyId === null ? 6 : 5}">
+							<div class="pf-turnus-box">
+								<div class="pf-turnus-box-title">Turnusy – {$babysitter->name} ({count($babysitter->turnusRows)})</div>
+								<table class="table card-table table-vcenter text-nowrap pf-turnus-table">
+									<thead>
+										<tr>
+											<th class="pf-col-status">Status</th>
+											<th class="pf-col-date">Od</th>
+											<th class="pf-col-date">Do</th>
+											<th class="pf-col-days">Odpracované dni</th>
+											<th n:if="$familyId === null">Rodina</th>
+											<th>Možnosti</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr n:foreach="$babysitter->turnusRows as $turnus">
+											<td>
+												{include statusBadge, $turnus->statusLabel, $turnus->statusColor}
+												<span n:if="!$turnus->isCounted()" class="pf-muted">(nezapočítané)</span>
+											</td>
+											<td>{$turnus->dateFrom|date:'j.n.Y'}</td>
+											<td>{$turnus->dateTo|date:'j.n.Y'}</td>
+											<td>{if $turnus->isCounted()}{$turnus->workedDays}{/if}</td>
+											<td n:if="$familyId === null">{$turnus->familyName}</td>
+											<td><a n:if="$canOpenTurnus" href="{plink :Admin:Turnus:update, id: $turnus->id}" class="btn btn-success btn-sm">&gt;</a></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</td>
+					</tr>
+				{/foreach}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div n:if="$dashboard->babysitters === []" class="tableone">
+	<div class="tableone-header">
+		<h3 class="tableone-title">Zoznam síl (0)</h3>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped card-table table-vcenter text-nowrap">
+			<tbody>
+				<tr><td class="tcenter">Žiadne opatrovateľky</td></tr>
+			</tbody>
+		</table>
+	</div>
+</div>

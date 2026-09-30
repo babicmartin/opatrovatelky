@@ -2,12 +2,19 @@
 {varType array $partner}
 {varType bool $canManagePartner}
 {varType bool $canOpenFamily}
+{varType bool $canOpenPartnerFamily}
 {varType array $familyRows}
 
 {block pageTitle}Partner{/block}
 
 {block content}
 	{if $canManagePartner}
+		{if $canOpenPartnerFamily}
+			<a href="{plink :Admin:PartnerFamily:default, id: $id}" class="btn btn-sm btn-success">Zoznam rodín</a>
+
+			<div class="space20">&nbsp;</div>
+		{/if}
+
 		<div class="row">
 			<div class="col-lg-6">
 				{form partnerUpdateForm}

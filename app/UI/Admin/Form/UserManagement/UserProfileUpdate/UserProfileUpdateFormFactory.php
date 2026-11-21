@@ -11,6 +11,7 @@ use Nette\Application\ForbiddenRequestException;
 use Nette\Application\UI\Form;
 use Nette\Security\User;
 use Nette\Utils\ArrayHash;
+use Nette\Utils\Strings;
 
 final class UserProfileUpdateFormFactory
 {
@@ -131,13 +132,21 @@ final class UserProfileUpdateFormFactory
 
 	private function addNewPasswordControls(Form $form, string $submitLabel): void
 	{
-		$form->addPassword('password', 'Nové heslo')
+		$minimumLength = 8;
+		$requirements = [
+			['validator' => Form::MinLength, 'argument' => $minimumLength, 'label' => "Aspoň $minimumLength znakov", 'error' => 'Heslo musí mať aspoň %d znakov.'],
+			['validator' => Form::Pattern, 'argument' => '.*[0-9].*', 'label' => 'Aspoň jedna číslica (0–9)', 'error' => 'Heslo musí obsahovať aspoň jednu číslicu.'],
+			['validator' => Form::Pattern, 'argument' => '.*[^A-Za-z0-9].*', 'label' => 'Aspoň jeden špeciálny znak, napr. !, ? alebo @', 'error' => 'Heslo musí obsahovať aspoň jeden špeciálny znak.'],
+		];
+		$password = $form->addPassword('password', 'Nové heslo')
 			->setRequired('Zadajte heslo.')
-			->addRule(Form::MinLength, 'Heslo musí mať aspoň %d znakov.', 8)
-			->addRule(Form::Pattern, 'Heslo musí obsahovať aspoň jednu číslicu.', '.*[0-9].*')
-			->addRule(Form::Pattern, 'Heslo musí obsahovať aspoň jeden špeciálny znak.', '.*[^A-Za-z0-9].*')
+			->setOption('requirements', $requirements)
+			->setHtmlAttribute('data-password-options', ['trimCharacters' => Strings::TrimCharacters])
 			->setHtmlAttribute('autocomplete', 'new-password')
 			->setHtmlAttribute('class', 'form-control updateInput');
+		foreach ($requirements as $requirement) {
+			$password->addRule($requirement['validator'], $requirement['error'], $requirement['argument']);
+		}
 		$form->addPassword('passwordRepeat', 'Zopakovať heslo')
 			->setRequired('Zopakujte heslo.')
 			->addRule(Form::Equal, 'Heslá sa nezhodujú.', $form['password'])

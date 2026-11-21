@@ -10,6 +10,7 @@ use App\Model\Form\DTO\Admin\UserManagement\UserProfileUpdate\UserAccessUpdateFo
 use App\Model\Form\DTO\Admin\UserManagement\UserProfileUpdate\UserPasswordUpdateForm;
 use App\Model\Form\DTO\Admin\UserManagement\UserProfileUpdate\UserProfileUpdateForm;
 use App\Model\Repository\UserRepository;
+use App\Model\Security\AccountPasswordService;
 use App\Model\Service\Audit\ChangeAuditLogger;
 use App\Model\Table\UserTableMap;
 use App\Model\Utils\Validator\ImageValidator;
@@ -17,8 +18,10 @@ use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Form\UserManagement\UserProfileUpdate\UserProfileUpdateFormFactory;
 use Nette\Application\UI\Form;
 use Nette\Database\Table\ActiveRow;
+use Nette\Forms\Controls\TextInput;
 use Nette\Http\FileUpload;
 use Nette\Security\Passwords;
+use Nette\Security\SimpleIdentity;
 use Nette\Utils\ArrayHash;
 use Nette\Utils\FileSystem;
 use Nette\Utils\Random;
@@ -32,6 +35,7 @@ final class UserManagementPresenter extends AdminPresenter
 		private readonly UserRepository $userRepository,
 		private readonly UserProfileUpdateFormFactory $userProfileUpdateFormFactory,
 		private readonly Passwords $passwords,
+		private readonly AccountPasswordService $accountPasswords,
 		private readonly DirectoryProvider $directoryProvider,
 		private readonly StorageDirProvider $storageDirProvider,
 		private readonly ImageValidator $imageValidator,
@@ -63,8 +67,7 @@ final class UserManagementPresenter extends AdminPresenter
 		));
 		$this->template->userImagesPath = $this->storageDirProvider->getUserImages();
 		$this->template->emptyUserImagePath = $this->storageDirProvider->getUserImagesEmpty();
-		$this->template->canCreateUser = $this->getUser()->isAllowed(Resource::USER_MANAGEMENT->value)
-			&& $this->canManageOtherUsers();
+		$this->template->canCreateUser = $this->canManageOtherUsers();
 	}
 
 	public function actionUpdate(?int $id = null): void
@@ -79,6 +82,7 @@ final class UserManagementPresenter extends AdminPresenter
 		$image = (string) ($user->{UserTableMap::COL_IMAGE} ?? '');
 
 		$this->template->profileUser = $this->createUserTemplateData($user);
+		$this->template->ownProfile = $userId === $this->getUser()->getId();
 		$this->template->canEditAccess = $this->canEditAccess($permission);
 		$this->template->imagePath = $image !== ''
 			? $this->storageDirProvider->getUserImages() . '/' . $image
@@ -130,9 +134,19 @@ final class UserManagementPresenter extends AdminPresenter
 
 	protected function createComponentUserPasswordUpdateForm(): Form
 	{
+		if ($this->getEditableUserId() !== $this->getUser()->getId()) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+
 		return $this->userProfileUpdateFormFactory->createPasswordForm(
 			$this->userPasswordUpdateFormSucceeded(...),
 		);
+	}
+
+	protected function createComponentUserPasswordResetForm(): Form
+	{
+		$this->requirePasswordResetPermission();
+		return $this->userProfileUpdateFormFactory->createPasswordResetForm($this->userPasswordResetFormSucceeded(...));
 	}
 
 	protected function createComponentUserImageUpdateForm(): Form
@@ -195,18 +209,50 @@ final class UserManagementPresenter extends AdminPresenter
 		$this->redirect('this');
 	}
 
-	private function userPasswordUpdateFormSucceeded(UserPasswordUpdateForm $form): void
+	private function userPasswordUpdateFormSucceeded(Form $form, UserPasswordUpdateForm $values): void
 	{
 		$userId = $this->getEditableUserId();
-		$user = $this->getCurrentUserRow();
-		if (!$this->canEditUser($userId, (int) $user->{UserTableMap::COL_PERMISSION})) {
+		$identity = $this->getUser()->getIdentity();
+		if (!$identity instanceof SimpleIdentity || $identity->getId() !== $userId) {
 			$this->error('Prístup zamietnutý', 403);
 		}
 
-		$this->userRepository->updatePasswordHash($userId, $this->passwords->hash($form->getPassword()));
+		$version = $this->accountPasswords->changeOwnPassword($userId, $values->currentPassword, $values->getPassword());
+		if ($version === null) {
+			$currentPassword = $form['currentPassword'];
+			assert($currentPassword instanceof TextInput);
+			$currentPassword->addError('Aktuálne heslo nie je správne.');
+			return;
+		}
 
-		$this->flashMessage('Heslo bolo uložené.', 'success');
+		$data = $identity->getData();
+		$data['sessionVersion'] = $version;
+		$this->getUser()->login(new SimpleIdentity($userId, $identity->getRoles(), $data));
+		$this->flashMessage('Heslo bolo zmenené. Ostatné zariadenia sa musia znova prihlásiť.', 'success');
 		$this->redirect('this');
+	}
+
+	private function userPasswordResetFormSucceeded(Form $form, #[\SensitiveParameter] string $newPassword): void
+	{
+		$permission = $this->requirePasswordResetPermission();
+		$actorId = $this->getUser()->getId();
+		if (!is_int($actorId) || !$this->accountPasswords->resetPassword($actorId, $this->getEditableUserId(), $permission, $newPassword)) {
+			$form->addError('Účet sa medzičasom zmenil. Obnovte stránku.');
+			return;
+		}
+
+		$this->flashMessage('Heslo bolo resetované. Používateľ sa musí znova prihlásiť.', 'success');
+		$this->redirect('this');
+	}
+
+	private function requirePasswordResetPermission(): int
+	{
+		$userId = $this->getEditableUserId();
+		$permission = (int) $this->getCurrentUserRow()->{UserTableMap::COL_PERMISSION};
+		if ($this->getUser()->getId() === $userId || !$this->canEditUser($userId, $permission)) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+		return $permission;
 	}
 
 	private function userImageUpdateFormSucceeded(Form $form, ArrayHash $values): void
@@ -253,6 +299,13 @@ final class UserManagementPresenter extends AdminPresenter
 		if ($context === 'user.access') {
 			if (!$this->canEditAccess($permission)) {
 				$this->sendAutosavePartialError(403, 'Prístup zamietnutý.');
+			}
+			$request = $this->getHttpRequest();
+			if ($request->getPost('__autosave_field') === 'permission') {
+				$value = $request->getPost('__autosave_value');
+				if (!is_string($value) || !isset($this->userRepository->findPermissionOptions($this->isAdmin())[$value])) {
+					$this->sendAutosavePartialError(403, 'Prístup zamietnutý.');
+				}
 			}
 			return;
 		}

@@ -17,6 +17,7 @@ class UserEntity extends BaseEntity
         public ?string $color,
         public ?int $active,
         public ?string $image,
+		public readonly int $sessionVersion,
     ) {
     }
 

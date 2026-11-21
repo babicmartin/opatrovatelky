@@ -15,6 +15,7 @@ class UserTableMap extends BaseTableMap
     public const string COL_ACRONYM = 'acronym';
     public const string COL_EMAIL = 'email';
     public const string COL_PASSWORD = 'password';
+	public const string COL_SESSION_VERSION = 'session_version';
     public const string COL_PERMISSION = 'permission';
     public const string COL_COLOR = 'color';
     public const string COL_ACTIVE = 'active';

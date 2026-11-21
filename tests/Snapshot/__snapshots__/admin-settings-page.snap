@@ -8,15 +8,15 @@
 	<title>4MS - administrácia</title>
 
 	<link rel="icon" href="/assets/images/brand/favicon.ico" type="image/x-icon">
-	<link id="style" href="/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-	<link href="/assets/css/main.css" rel="stylesheet">
-	<link href="/assets/css/custom.css" rel="stylesheet">
-	<link href="/assets/css/pdf.css" rel="stylesheet">
+	<link id="style" href="/assets/plugins/bootstrap/css/bootstrap.min.css?***" rel="stylesheet">
+	<link href="/assets/css/main.css?***" rel="stylesheet">
+	<link href="/assets/css/custom.css?***" rel="stylesheet">
+	<link href="/assets/css/pdf.css?***" rel="stylesheet">
 
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0/dist/themes/light.css">
 	<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0/dist/shoelace.js"></script>
 
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/js/all.min.js" integrity="sha512-rpLlll167T5LJHwp0waJCh3ZRf7pO6IT1+LZOhAyP6phAirwchClbTZV3iqL3BMrVxIYRbzGTpli4rfxsCK6Vw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
@@ -51,7 +51,38 @@
 	<input type="text" class="form-control search" data-id="4" data-search-url="/settings?do=search-search" data-type-param="search-type" data-term-param="search-term" placeholder="Agentúry" autocomplete="off">
 </div>
 <div class="col-6 col-md-10 col-sm-8 d-xl-none">
-	<input type="text" class="form-control search" data-id="2" data-search-url="/settings?do=search-search" data-type-param="search-type" data-term-param="search-term" placeholder="Rodiny" autocomplete="off">
+	<button type="button" class="msearch-trigger" data-msearch-open aria-label="Vyhľadávanie">
+		<i class="fas fa-magnifying-glass"></i>
+		<span>Hľadať…</span>
+	</button>
+
+	<div id="mobileSearch" class="msearch" role="dialog" aria-modal="true" aria-label="Vyhľadávanie" hidden
+		data-search-url="/settings?do=search-searchMobile"
+		data-type-param="search-type"
+		data-term-param="search-term">
+		<div class="msearch-head">
+			<div class="msearch-bar">
+				<button type="button" class="msearch-back" data-msearch-close aria-label="Zavrieť"><i class="fas fa-arrow-left"></i></button>
+				<div class="msearch-field">
+					<input type="search" class="msearch-input" placeholder="Meno, priezvisko, číslo klienta…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+					<span class="msearch-spinner" aria-hidden="true"></span>
+					<button type="button" class="msearch-clear" aria-label="Vymazať" hidden><i class="fas fa-xmark"></i></button>
+				</div>
+			</div>
+			<div class="msearch-chips" role="tablist">
+				<button type="button" class="msearch-chip active" data-type="">Všetko</button>
+				<button type="button" class="msearch-chip" data-type="1">Opatrovateľky <span class="msearch-count"></span></button>
+				<button type="button" class="msearch-chip" data-type="2">Rodiny <span class="msearch-count"></span></button>
+				<button type="button" class="msearch-chip" data-type="5">Kont. osoby <span class="msearch-count"></span></button>
+				<button type="button" class="msearch-chip" data-type="3">Partneri <span class="msearch-count"></span></button>
+				<button type="button" class="msearch-chip" data-type="4">Agentúry <span class="msearch-count"></span></button>
+			</div>
+		</div>
+		<div class="msearch-body">
+			<div class="msearch-results"></div>
+			<p class="msearch-hint">Zadajte aspoň 3 znaky.</p>
+		</div>
+	</div>
 </div>
 			<div class="col-xl-2 col-md-1 offset-md-0 col-sm-2 offset-sm-0 col-3">
 				<div class="logout fright">
@@ -76,7 +107,7 @@
 			<nav class="navbar navbar-expand-lg navbar-light mainMenu">
 				<div class="container-fluid">
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-						<span class="navbar-toggler-icon"></span> <span style="color:black; font-size:18px;">MENU</span>
+						<span class="navbar-toggler-icon"></span> <span class="navbar-toggler-label">MENU</span>
 					</button>
 					<div class="collapse navbar-collapse" id="navbarNav">
 <ul class="navbar-nav" style="margin-right: 0px;">
@@ -97,7 +128,7 @@
 	</div>
 
 	<div class="container-fluid" style="max-width:1500px;">
-<div class="fright">
+		<div class="admin-toolbar-row"><div class="fright">
 	<div data-bs-toggle="tooltip" data-bs-title="Údaje o projektoch" class="float-end">
 		<button type="button" class="admin-toolbar-icon" data-bs-toggle="offcanvas" data-bs-target="#projectStatsOffcanvas" aria-controls="projectStatsOffcanvas" aria-label="Údaje o projektoch">
 			<svg class="admin-toolbar-icon-symbol" aria-hidden="true" focusable="false" viewBox="0 0 640 512">
@@ -140,6 +171,7 @@
 			</svg>
 		</a>
 	</div>
+</div>
 </div>
 
 		<div id="searchResults"></div>
@@ -234,22 +266,19 @@
 	<a href="#top" id="back-to-top"><i class="fe fe-chevron-up"></i></a>
 
 	<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-	<script src="/assets/plugins/bootstrap/popper.min.js"></script>
-	<script src="/assets/plugins/bootstrap/js/bootstrap.min.js"></script>
-	<script src="/assets/plugins/sidemenu/sidemenu.js"></script>
-	<script src="/assets/plugins/p-scrollbar/p-scrollbar.js"></script>
-	<script src="/assets/plugins/p-scrollbar/p-scroll1.js"></script>
-	<script src="/assets/plugins/p-scrollbar/p-scroll.js"></script>
-	<script src="/assets/plugins/datatables/DataTables/js/jquery.dataTables.js"></script>
-	<script src="/assets/plugins/datatables/DataTables/js/dataTables.bootstrap5.js"></script>
-	<script src="/assets/plugins/datatables/Responsive/js/dataTables.responsive.min.js"></script>
-	<script src="/assets/plugins/datatables/Responsive/js/responsive.bootstrap5.min.js"></script>
-	<script src="/assets/plugins/select2/select2.full.min.js"></script>
-	<script src="/assets/js/select2.js"></script>
-	<script src="/assets/plugins/simplebar/js/simplebar.min.js"></script>
-	<script src="/assets/js/themeColors.js"></script>
-	<script src="/assets/js/custom.js"></script>
-	<script src="/js/search.js"></script>
+	<script src="/assets/plugins/bootstrap/popper.min.js?***"></script>
+	<script src="/assets/plugins/bootstrap/js/bootstrap.min.js?***"></script>
+	<script src="/assets/plugins/datatables/DataTables/js/jquery.dataTables.js?***"></script>
+	<script src="/assets/plugins/datatables/DataTables/js/dataTables.bootstrap5.js?***"></script>
+	<script src="/assets/plugins/datatables/Responsive/js/dataTables.responsive.min.js?***"></script>
+	<script src="/assets/plugins/datatables/Responsive/js/responsive.bootstrap5.min.js?***"></script>
+	<script src="/assets/plugins/select2/select2.full.min.js?***"></script>
+	<script src="/assets/js/select2.js?***"></script>
+	<script src="/assets/plugins/simplebar/js/simplebar.min.js?***"></script>
+	<script src="/assets/js/themeColors.js?***"></script>
+	<script src="/assets/js/custom.js?***"></script>
+	<script src="/js/search.js?***"></script>
+	<script src="/js/search-mobile.js?***"></script>
 
 </body>
 </html>

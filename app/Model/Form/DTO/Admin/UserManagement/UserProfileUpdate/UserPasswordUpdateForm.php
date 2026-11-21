@@ -5,7 +5,8 @@ namespace App\Model\Form\DTO\Admin\UserManagement\UserProfileUpdate;
 final readonly class UserPasswordUpdateForm
 {
 	public function __construct(
-		private string $password,
+		#[\SensitiveParameter] private string $password,
+		#[\SensitiveParameter] public string $currentPassword,
 	) {
 	}
 

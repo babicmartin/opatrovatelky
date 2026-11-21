@@ -260,11 +260,12 @@ class TurnusRepository extends BaseRepository
 		]);
 	}
 
-	public function softDelete(int $id): void
+	public function softDelete(int $id): bool
 	{
-		$this->update($id, [
-			TurnusTableMap::COL_DELETED => 1,
-		]);
+		return $this->findAll()
+			->where(TurnusTableMap::COL_ID, $id)
+			->where(TurnusTableMap::COL_DELETED, 0)
+			->update([TurnusTableMap::COL_DELETED => 1]) === 1;
 	}
 
 	/**
@@ -390,11 +391,14 @@ class TurnusRepository extends BaseRepository
 	/**
 	 * @return array<int, string>
 	 */
-	public function findUserSelectOptions(): array
+	public function findUserSelectOptions(int $assignedUserId = 0): array
 	{
 		$options = [0 => '---'];
 		$rows = $this->database->table(UserTableMap::TABLE_NAME)
-			->where(UserTableMap::COL_PERMISSION . ' < ?', 10)
+			->whereOr([
+				UserTableMap::COL_PERMISSION . ' < ?' => 10,
+				UserTableMap::COL_ID => $assignedUserId,
+			])
 			->order(UserTableMap::COL_SECOND_NAME . ' ASC');
 
 		foreach ($rows as $row) {

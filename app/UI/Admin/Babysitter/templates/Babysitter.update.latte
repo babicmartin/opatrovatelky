@@ -8,6 +8,7 @@
 {varType array $turnusRows}
 {varType bool $pdfExists}
 {varType ?\DateTimeImmutable $pdfGeneratedAt}
+{varType ?\DateTimeImmutable $hhsGeneratedAt}
 {varType string $profileImagePath}
 
 {block pageTitle}{$pageTitleText}{/block}
@@ -22,6 +23,7 @@
 		<a href="{plink :Admin:Babysitter:update, id: $id, tab: 'documents'}" class="btn btn-sm btn-success">Dokumenty</a>
 		<a n:if="(int) $babysitter['type'] === 1" href="{plink :Admin:Babysitter:update, id: $id, tab: 'pdf'}" class="btn btn-sm btn-success">PDF</a>
 		<a href="{plink :Admin:Babysitter:update, id: $id, tab: 'video'}" class="btn btn-sm btn-success">Video</a>
+		<a n:if="(int) $babysitter['type'] === 1" href="{plink :Admin:Babysitter:update, id: $id, tab: 'hhs'}" class="btn btn-sm btn-success">Partnerské údaje HHS</a>
 
 		<div class="space20">&nbsp;</div>
 
@@ -166,6 +168,36 @@
 					{/form}
 				</div>
 			</div>
+		{elseif $activeTab === 'hhs'}
+			<div class="row">
+				<div class="col-xl-2">{include shortInfo}</div>
+				<div class="col-xl-10">
+					{form hhsForm}
+						<div class="row">
+							<div class="col-12 col-lg-4">
+								<div class="divone">
+									<div class="mb10">{label hhs_start_date class => 'inputLabel' /}{input hhs_start_date}</div>
+									<div class="mb10">{label hhs_night_work class => 'inputLabel' /}{input hhs_night_work}</div>
+									<div class="mb10">{label hhs_additional_notes class => 'inputLabel' /}{input hhs_additional_notes rows => 8}</div>
+								</div>
+							</div>
+							<div class="col-12 col-lg-4">
+								<div class="divone">
+									<div class="mb10">{label hhs_monthly_costs class => 'inputLabel' /}{input hhs_monthly_costs}</div>
+									<div class="mb10">{label hhs_travel_costs class => 'inputLabel' /}{input hhs_travel_costs}</div>
+									<div class="mb10">{label hhs_holiday_supplement class => 'inputLabel' /}{input hhs_holiday_supplement}</div>
+								</div>
+							</div>
+							<div class="col-12 col-lg-4">
+								<div class="divone">
+									<div class="mb10">{label hhs_created_by_name class => 'inputLabel' /}{input hhs_created_by_name}</div>
+									<div class="mb10">{label hhs_contact_phone class => 'inputLabel' /}{input hhs_contact_phone}</div>
+								</div>
+							</div>
+						</div>
+					{/form}
+				</div>
+			</div>
 		{elseif $activeTab === 'profil'}
 			<div class="row">
 				<div class="col-xl-2 d-none d-xl-block">{include shortInfo}</div>
@@ -253,7 +285,7 @@
 						{/form}
 					</div>
 				</div>
-				<div class="col-xl-8 col-md-12">
+				<div n:class="(int) $babysitter['type'] === 1 ? col-xl-4 : col-xl-8, col-md-12">
 					<div class="divone">
 						<h3 style="font-size:18px; margin:0 0 15px;">Pdf</h3>
 						<a href="{link generatePdf!, id: $id}" id="pdfGenerateBtn" class="btn btn-success btn-sm">
@@ -270,6 +302,23 @@
 								</div>
 							</div>
 						{/if}
+					</div>
+				</div>
+				<div n:if="(int) $babysitter['type'] === 1" class="col-xl-4 col-md-12">
+					<div class="divone">
+						<h3 style="font-size:18px; margin:0 0 15px;">Prezentácia pre HHS</h3>
+						{form generateHhsPresentationForm}
+							<div n:foreach="$form->getErrors() as $error" class="alert alert-danger">{$error}</div>
+							<button n:name="generate" class="btn btn-success btn-sm">
+								{if $hhsGeneratedAt}Aktualizovať prezentáciu pre HHS{else}Vytvoriť prezentáciu pre HHS{/if}
+							</button>
+						{/form}
+						<div n:if="$hhsGeneratedAt" style="margin-top:20px;">
+							<a n:href="downloadHhsPresentation!, id: $id" title="Stiahnuť prezentáciu (.pptx)">
+								<img src="{$basePath}/assets/img/pptx.png" style="margin:20px; height:100px;" alt="Stiahnuť prezentáciu (.pptx)">
+							</a>
+							<div class="text-muted">Naposledy vygenerované: {$hhsGeneratedAt|date:'d.m.Y H:i'}</div>
+						</div>
 					</div>
 				</div>
 			</div>

@@ -11,6 +11,7 @@ use App\Model\Utils\Date\DateService;
 use App\Model\Utils\Paginator\Paginator;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Form\ConfirmedCreateFormFactory;
+use App\UI\Admin\Form\ConfirmedDeleteFormFactory;
 use App\UI\Admin\Form\MissingRegistry\MissingRegistryFormFactory;
 use Nette\Application\UI\Control;
 use Nette\Application\UI\Form;
@@ -37,6 +38,7 @@ class MissingRegistryListControl extends Control
 		private readonly MissingRegistryFormFactory $missingRegistryFormFactory,
 		private readonly DateService $dateService,
 		private readonly ConfirmedCreateFormFactory $confirmedCreateFormFactory,
+		private readonly ConfirmedDeleteFormFactory $confirmedDeleteFormFactory,
 		private readonly ChangeAuditLogger $changeAuditLogger,
 	) {
 	}
@@ -63,11 +65,21 @@ class MissingRegistryListControl extends Control
 		$this->redirect('this');
 	}
 
-	public function handleDelete(int $id): void
+	/** @return Multiplier<Form> */
+	protected function createComponentDeleteRegistryForm(): Multiplier
 	{
-		$this->missingRegistryRepository->softDelete($id);
-		$this->changeAuditLogger->logDeleted('missingRegistry.row', MissingRegistryTableMap::TABLE_NAME, $id, 'Neprítomnosť');
-		$this->redirect('this');
+		return new Multiplier(function (string $id): Form {
+			if (!ctype_digit($id)) {
+				$this->error('Evidencia neexistuje.');
+			}
+
+			return $this->confirmedDeleteFormFactory->create(
+				'Naozaj chcete odstrániť evidenciu neprítomnosti?',
+				function () use ($id): void {
+					$this->deleteRegistryFormSucceeded((int) $id);
+				},
+			);
+		});
 	}
 
 	/**
@@ -103,6 +115,16 @@ class MissingRegistryListControl extends Control
 	{
 		$id = $this->missingRegistryRepository->createEmpty();
 		$this->changeAuditLogger->logCreated('missingRegistry.row', MissingRegistryTableMap::TABLE_NAME, $id, 'Neprítomnosť');
+		$this->redirect('this');
+	}
+
+	private function deleteRegistryFormSucceeded(int $id): void
+	{
+		if ($this->findRowForForm($id) === null || !$this->missingRegistryRepository->softDelete($id)) {
+			$this->error('Evidencia neexistuje.');
+		}
+
+		$this->changeAuditLogger->logDeleted('missingRegistry.row', MissingRegistryTableMap::TABLE_NAME, $id, 'Neprítomnosť');
 		$this->redirect('this');
 	}
 

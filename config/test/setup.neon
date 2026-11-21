@@ -1,2 +1,12 @@
 parameters:
 	baseUrl: 'http://opatrovatelky.test'
+	storageDir:
+		privateDocuments: temp/test/private/documents
+		privateVideos: temp/test/private/videos
+		babysitterHhsPpt: temp/test/export/babysitter/ppt
+		babysitterPdf: temp/test/export/babysitter/pdf
+
+services:
+	latte.latteFactory:
+		setup:
+			- setAutoRefresh(true)

@@ -101,31 +101,50 @@ final class UserProfileUpdateFormFactory
 		return $form;
 	}
 
-	/**
-	 * @param callable(UserPasswordUpdateForm): void $onSuccess
-	 */
+	/** @param callable(Form, UserPasswordUpdateForm): void $onSuccess */
 	public function createPasswordForm(callable $onSuccess): Form
 	{
 		$form = $this->baseFormFactory->create();
+		$form->addPassword('currentPassword', 'Aktuálne heslo')
+			->setRequired('Zadajte aktuálne heslo.')
+			->setHtmlAttribute('autocomplete', 'current-password')
+			->setHtmlAttribute('class', 'form-control updateInput');
+		$this->addNewPasswordControls($form, 'Zmeniť heslo');
 
-		$form->addPassword('password', 'Heslo')
+		$form->onSuccess[] = static function (Form $form, ArrayHash $values) use ($onSuccess): void {
+			$onSuccess($form, new UserPasswordUpdateForm((string) $values->password, (string) $values->currentPassword));
+		};
+		return $form;
+	}
+
+	/** @param callable(Form, string): void $onSuccess */
+	public function createPasswordResetForm(callable $onSuccess): Form
+	{
+		$form = $this->baseFormFactory->create();
+		$this->addNewPasswordControls($form, 'Resetovať heslo');
+
+		$form->onSuccess[] = static function (Form $form, ArrayHash $values) use ($onSuccess): void {
+			$onSuccess($form, (string) $values->password);
+		};
+		return $form;
+	}
+
+	private function addNewPasswordControls(Form $form, string $submitLabel): void
+	{
+		$form->addPassword('password', 'Nové heslo')
 			->setRequired('Zadajte heslo.')
 			->addRule(Form::MinLength, 'Heslo musí mať aspoň %d znakov.', 8)
 			->addRule(Form::Pattern, 'Heslo musí obsahovať aspoň jednu číslicu.', '.*[0-9].*')
 			->addRule(Form::Pattern, 'Heslo musí obsahovať aspoň jeden špeciálny znak.', '.*[^A-Za-z0-9].*')
+			->setHtmlAttribute('autocomplete', 'new-password')
 			->setHtmlAttribute('class', 'form-control updateInput');
 		$form->addPassword('passwordRepeat', 'Zopakovať heslo')
 			->setRequired('Zopakujte heslo.')
 			->addRule(Form::Equal, 'Heslá sa nezhodujú.', $form['password'])
+			->setHtmlAttribute('autocomplete', 'new-password')
 			->setHtmlAttribute('class', 'form-control updateInput');
-		$form->addSubmit('save', 'Uložiť nové heslo')
+		$form->addSubmit('save', $submitLabel)
 			->setHtmlAttribute('class', 'btn btn-success btn-sm');
-
-		$form->onSuccess[] = function (Form $form, ArrayHash $values) use ($onSuccess): void {
-			$onSuccess(new UserPasswordUpdateForm((string) $values->password));
-		};
-
-		return $form;
 	}
 
 	/**

@@ -225,7 +225,7 @@ final class AdminSupportingFormFactoryTest extends DatabaseTestCase
 		], [5 => 'CEO'], [1 => 'Aktívny', 2 => 'Neaktívny'], function (UserAccessUpdateForm $form) use (&$accessDto): void {
 			$accessDto = $form;
 		});
-		$passwordForm = $factory->createPasswordForm(function (UserPasswordUpdateForm $form) use (&$passwordDto): void {
+		$passwordForm = $factory->createPasswordForm(function (Form $passwordForm, UserPasswordUpdateForm $form) use (&$passwordDto): void {
 			$passwordDto = $form;
 		});
 		$imageForm = $factory->createImageForm(function () use (&$imageSubmitted): void {
@@ -265,16 +265,18 @@ final class AdminSupportingFormFactoryTest extends DatabaseTestCase
 		self::assertFalse($imageSubmitted);
 		self::assertNotEmpty($imageForm->getErrors());
 
-		$validPasswordForm = $factory->createPasswordForm(function (UserPasswordUpdateForm $form) use (&$passwordDto): void {
+		$validPasswordForm = $factory->createPasswordForm(function (Form $passwordForm, UserPasswordUpdateForm $form) use (&$passwordDto): void {
 			$passwordDto = $form;
 		});
 		$this->submit($validPasswordForm, [
+			'currentPassword' => 'original-password',
 			'password' => 'Strong123!',
 			'passwordRepeat' => 'Strong123!',
 		]);
 
 		self::assertInstanceOf(UserPasswordUpdateForm::class, $passwordDto);
 		self::assertSame('Strong123!', $passwordDto->getPassword());
+		self::assertSame('original-password', $passwordDto->currentPassword);
 	}
 
 	public function testAclProtectedFactoriesDenyUnauthorizedUsers(): void

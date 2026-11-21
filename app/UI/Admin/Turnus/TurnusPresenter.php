@@ -11,6 +11,7 @@ use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Control\Turnus\TurnusDocuments\TurnusDocumentsControl;
 use App\UI\Admin\Control\Turnus\TurnusDocuments\TurnusDocumentsControlFactory;
 use App\UI\Admin\Control\Turnus\TurnusList\TurnusListPresenterTrait;
+use App\UI\Admin\Form\ConfirmedDeleteFormFactory;
 use App\UI\Admin\Form\Turnus\TurnusUpdate\TurnusUpdateFormFactory;
 use DateTimeImmutable;
 use Nette\Application\UI\Form;
@@ -46,6 +47,7 @@ class TurnusPresenter extends AdminPresenter
 		private readonly TurnusUpdateFormFactory $turnusUpdateFormFactory,
 		private readonly TurnusDocumentsControlFactory $turnusDocumentsControlFactory,
 		private readonly ChangeAuditLogger $changeAuditLogger,
+		private readonly ConfirmedDeleteFormFactory $confirmedDeleteFormFactory,
 	) {
 		parent::__construct();
 	}
@@ -99,16 +101,6 @@ class TurnusPresenter extends AdminPresenter
 		$this->redirect('default');
 	}
 
-	public function handleDelete(int $id): void
-	{
-		$this->assertCanManage();
-
-		$this->turnusRepository->softDelete($id);
-		$this->changeAuditLogger->logDeleted('turnus.update', TurnusTableMap::TABLE_NAME, $id, 'Turnus');
-		$this->flashMessage('Turnus bol odstránený.', 'success');
-		$this->redirect('default');
-	}
-
 	public function actionSelectMonth(): void
 	{
 		$this->template->years = range($this->getCurrentYear(), self::FIRST_MONTH_YEAR);
@@ -135,7 +127,7 @@ class TurnusPresenter extends AdminPresenter
 			$this->turnusRepository->findStatusOptions(),
 			$this->turnusRepository->findFamilySelectOptions(),
 			$this->turnusRepository->findBabysitterSelectOptions(),
-			$this->turnusRepository->findUserSelectOptions(),
+			$this->turnusRepository->findUserSelectOptions((int) $turnus['userId']),
 			$this->turnusRepository->findAgencySelectOptions(),
 			$this->turnusRepository->findPartnerSelectOptions(),
 			$this->turnusRepository->findWorkingStatusSelectOptions(),
@@ -167,6 +159,14 @@ class TurnusPresenter extends AdminPresenter
 			$turnus,
 			$this->turnusRepository->findStatusA1SelectOptions(),
 			$this->turnusStatusA1FormSucceeded(...),
+		);
+	}
+
+	protected function createComponentDeleteTurnusForm(): Form
+	{
+		return $this->confirmedDeleteFormFactory->create(
+			'Naozaj chcete odstrániť turnus?',
+			$this->deleteTurnusFormSucceeded(...),
 		);
 	}
 
@@ -205,6 +205,18 @@ class TurnusPresenter extends AdminPresenter
 		$this->tryHandleAutosavePartialRequest();
 		$this->turnusRepository->updateStatusA1($id, $statusA1);
 		$this->finishAutosave();
+	}
+
+	private function deleteTurnusFormSucceeded(): void
+	{
+		$this->assertCanManage();
+		if (!$this->turnusRepository->softDelete($this->turnusId)) {
+			$this->error('Turnus neexistuje.', 404);
+		}
+
+		$this->changeAuditLogger->logDeleted('turnus.update', TurnusTableMap::TABLE_NAME, $this->turnusId, 'Turnus');
+		$this->flashMessage('Turnus bol odstránený.', 'success');
+		$this->redirect('default');
 	}
 
 	/**

@@ -255,6 +255,23 @@ final class TurnusRepositoryTest extends DatabaseTestCase
 		self::assertSame('Opatrovanie', $repository->findWorkPositionSelectOptions()[1]);
 	}
 
+	public function testAssigneeOptionsIncludeOnlyTheCurrentlyAssignedAdmin(): void
+	{
+		$assignedId = TestDatabase::createUser();
+		$otherId = TestDatabase::createUser([UserTableMap::COL_EMAIL => 'other.admin@example.test']);
+		$dealerId = TestDatabase::createUser([
+			UserTableMap::COL_EMAIL => 'dealer@example.test',
+			UserTableMap::COL_PERMISSION => 3,
+		]);
+
+		$repository = $this->repository();
+		self::assertArrayNotHasKey($assignedId, $repository->findUserSelectOptions());
+		$options = $repository->findUserSelectOptions($assignedId);
+		self::assertArrayHasKey($assignedId, $options);
+		self::assertArrayHasKey($dealerId, $options);
+		self::assertArrayNotHasKey($otherId, $options);
+	}
+
 	private function repository(): TurnusRepository
 	{
 		return $this->getContainer()->getByType(TurnusRepository::class);

@@ -259,11 +259,12 @@ class BabysitterVideosControl extends Control
 
 		$form->onError[] = function (Form $form): void {
 			$upload = $this->getUploadFromForm($form);
+			$errors = array_map(strval(...), $form->getErrors());
 			$message = $this->getPostLimitErrorMessage()
 				?? ($upload instanceof FileUpload ? $this->getUploadErrorMessage($upload) : null)
-				?? ($form->getErrors()[0] ?? 'Video sa nepodarilo nahrať.');
+				?? ($errors[0] ?? 'Video sa nepodarilo nahrať.');
 			$this->logUploadFailure('form_validation_failed', $message, $upload, [
-				'formErrors' => $form->getErrors(),
+				'formErrors' => $errors,
 			]);
 
 			if ($this->getPresenter()->isAjax()) {

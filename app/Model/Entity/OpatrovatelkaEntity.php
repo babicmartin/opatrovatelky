@@ -64,6 +64,14 @@ class OpatrovatelkaEntity extends BaseEntity
         public ?int $shoeSize,
         public ?string $germanTaxId,
         public ?int $accommodationType,
+        public ?\DateTimeInterface $hhsStartDate = null,
+        public ?int $hhsNightWork = null,
+        public ?string $hhsAdditionalNotes = null,
+        public ?float $hhsMonthlyCosts = null,
+        public ?float $hhsTravelCosts = null,
+        public ?string $hhsHolidaySupplement = null,
+        public ?string $hhsCreatedByName = null,
+        public ?string $hhsContactPhone = null,
     ) {
     }
 

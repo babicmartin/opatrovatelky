@@ -20,11 +20,13 @@ Thumbs.db
 
 # Local configuration
 /config/local.neon
+/workflow/
 
 # Uploads
 /www/uploads/
 /www/documents/
 /www/export/
+/private/export/babysitter/ppt/
 /www/img/opatrovatelka/
 /www/img/users/
 /www/img/profil/

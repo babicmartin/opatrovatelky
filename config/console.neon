@@ -1,6 +1,3 @@
-parameters:
-    consoleMode: true
-
 console:
 	name: Empty project
 	version: '1.0'

@@ -64,4 +64,12 @@ class OpatrovatelkaTableMap extends BaseTableMap
     public const string COL_SHOE_SIZE = 'shoe_size';
     public const string COL_GERMAN_TAX_ID = 'german_tax_id';
     public const string COL_ACCOMMODATION_TYPE = 'accommodation_type';
+    public const string COL_HHS_START_DATE = 'hhs_start_date';
+    public const string COL_HHS_NIGHT_WORK = 'hhs_night_work';
+    public const string COL_HHS_ADDITIONAL_NOTES = 'hhs_additional_notes';
+    public const string COL_HHS_MONTHLY_COSTS = 'hhs_monthly_costs';
+    public const string COL_HHS_TRAVEL_COSTS = 'hhs_travel_costs';
+    public const string COL_HHS_HOLIDAY_SUPPLEMENT = 'hhs_holiday_supplement';
+    public const string COL_HHS_CREATED_BY_NAME = 'hhs_created_by_name';
+    public const string COL_HHS_CONTACT_PHONE = 'hhs_contact_phone';
 }

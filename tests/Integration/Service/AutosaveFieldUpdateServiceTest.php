@@ -17,6 +17,27 @@ use Tests\Support\PHPUnit\DatabaseTestCase;
 
 final class AutosaveFieldUpdateServiceTest extends DatabaseTestCase
 {
+	public function testHhsMonthlyCostsAcceptDecimalCommaAndCanBeCleared(): void
+	{
+		$id = TestDatabase::createBabysitter([OpatrovatelkaTableMap::COL_TYPE => 1]);
+		$table = $this->getDatabase()->table(OpatrovatelkaTableMap::TABLE_NAME);
+		$row = $table->get($id);
+		self::assertNotNull($row);
+		self::assertEquals(3500, $row->hhs_monthly_costs);
+		foreach ([['0,00', true, 0], ['invalid', false, 0], ['', true, null]] as [$value, $success, $expected]) {
+			self::assertSame($success, $this->service()->tryHandleRequest($this->request([
+				'id' => (string) $id,
+				'__autosave_context' => 'babysitter.hhs',
+				'__autosave_field' => 'hhs_monthly_costs',
+				'__autosave_value' => $value,
+			])));
+			$row = $table->get($id);
+			self::assertNotNull($row);
+			$actual = $row->hhs_monthly_costs;
+			self::assertSame($expected, $actual === null ? null : (int) $actual);
+		}
+	}
+
 	public function testTextFieldUpdateChangesSingleColumnAndWritesAudit(): void
 	{
 		$babysitterId = TestDatabase::createBabysitter([

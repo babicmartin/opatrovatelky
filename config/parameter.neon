@@ -8,5 +8,7 @@ parameters:
         privateVideos: private/videos
         documentTypeImages: img/type
         babysitterPdf: private/export/babysitter/pdf
+        babysitterHhsPpt: private/export/babysitter/ppt
+        hhsPresentationTemplate: private/templates/hhs/HHS_Bewerberprofil_4MS.pptx
     url:
         appName: 4MS

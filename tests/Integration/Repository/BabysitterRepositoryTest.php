@@ -191,6 +191,31 @@ final class BabysitterRepositoryTest extends DatabaseTestCase
 		self::assertSame('Nemčina', $repository->findLanguageSelectOptions()[1]);
 	}
 
+	public function testHhsColumnsPopulateBabysitterEntity(): void
+	{
+		$id = TestDatabase::createBabysitter([
+			OpatrovatelkaTableMap::COL_HHS_START_DATE => '2027-03-15',
+			OpatrovatelkaTableMap::COL_HHS_NIGHT_WORK => 0,
+			OpatrovatelkaTableMap::COL_HHS_ADDITIONAL_NOTES => 'Notes',
+		]);
+		$row = $this->getDatabase()->table(OpatrovatelkaTableMap::TABLE_NAME)->get($id);
+		self::assertNotNull($row);
+		$entity = (new \App\Model\Factory\OpatrovatelkaFactory())->createFromActiveRow($row);
+		self::assertInstanceOf(\App\Model\Entity\OpatrovatelkaEntity::class, $entity);
+		self::assertSame('2027-03-15', $entity->hhsStartDate?->format('Y-m-d'));
+		$profile = $this->repository()->findUpdateRow($id);
+		self::assertNotNull($profile);
+		self::assertInstanceOf(\DateTimeImmutable::class, $profile['hhs_start_date']);
+		self::assertSame('2027-03-15', $profile['hhs_start_date']->format('Y-m-d'));
+		self::assertSame(0, $entity->hhsNightWork);
+		self::assertSame('Notes', $entity->hhsAdditionalNotes);
+		self::assertSame(3500.0, $entity->hhsMonthlyCosts);
+		self::assertSame(340.0, $entity->hhsTravelCosts);
+		self::assertSame('100%/Tag', $entity->hhsHolidaySupplement);
+		self::assertSame('Andrea Seyr', $entity->hhsCreatedByName);
+		self::assertSame('07134- 139 3 131', $entity->hhsContactPhone);
+	}
+
 	private function repository(): BabysitterRepository
 	{
 		return $this->getContainer()->getByType(BabysitterRepository::class);

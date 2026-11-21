@@ -7,18 +7,14 @@ use App\Model\Service\Autosave\AutosaveFieldUpdateService;
 use App\Model\Table\ChangeLogTableMap;
 use App\Model\Table\OpatrovatelkaTableMap;
 use App\Model\Table\TurnusTableMap;
-use App\UI\Admin\Turnus\TurnusPresenter;
-use Nette\Application\AbortException;
 use Nette\Application\BadRequestException;
-use Nette\Application\IPresenterFactory;
-use Nette\Application\Request as ApplicationRequest;
-use Nette\Application\Responses\TextResponse;
+use Nette\Application\Responses\RedirectResponse;
 use Nette\Security\AuthenticationException;
 use Nette\Security\User;
 use Tests\Support\Database\TestDatabase;
 use Tests\Support\Http\FakePostRequest;
+use Tests\Support\PHPUnit\ConfirmedFormWorkflowTrait;
 use Tests\Support\PHPUnit\DatabaseTestCase;
-use Tests\Support\PHPUnit\PresenterWorkflowTrait;
 
 /**
  * In-process end-to-end workflows driven through the real DI container, authenticator,
@@ -27,7 +23,7 @@ use Tests\Support\PHPUnit\PresenterWorkflowTrait;
  */
 final class AdminWorkflowE2ETest extends DatabaseTestCase
 {
-	use PresenterWorkflowTrait;
+	use ConfirmedFormWorkflowTrait;
 
 	private const string PASSWORD = 'secret123!';
 
@@ -101,17 +97,20 @@ final class AdminWorkflowE2ETest extends DatabaseTestCase
 	public function testTurnusCreateAndDeleteWorkflowWritesAudit(): void
 	{
 		$userId = $this->loginAs(UserRole::ADMIN);
-		$presenter = $this->bootstrapTurnusPresenter();
 
 		// Create
-		$this->assertRedirects(static fn() => $presenter->handleCreate());
+		$response = $this->submitConfirmedCreate('Admin:Turnus', 'Pridať nový turnus');
+		self::assertInstanceOf(RedirectResponse::class, $response);
 		$turnus = $this->getDatabase()->table(TurnusTableMap::TABLE_NAME)->order(TurnusTableMap::COL_ID . ' DESC')->fetch();
 		self::assertNotNull($turnus);
 		$turnusId = (int) $turnus->{TurnusTableMap::COL_ID};
 		self::assertSame('{"action":"created"}', (string) $this->latestLog()->{ChangeLogTableMap::COL_METADATA});
 
 		// Delete (soft)
-		$this->assertRedirects(static fn() => $presenter->handleDelete($turnusId));
+		$params = ['action' => 'update', 'id' => $turnusId];
+		$post = $this->readDeleteForm($this->renderPresenter('Admin:Turnus', $params), 'frm-deleteTurnusForm');
+		$response = $this->runFormRequest('Admin:Turnus', 'POST', $params, $post);
+		self::assertInstanceOf(RedirectResponse::class, $response);
 		self::assertSame(1, (int) $this->getDatabase()->table(TurnusTableMap::TABLE_NAME)->get($turnusId)?->{TurnusTableMap::COL_DELETED});
 		self::assertSame('{"action":"deleted"}', (string) $this->latestLog()->{ChangeLogTableMap::COL_METADATA});
 		self::assertSame((string) $userId, (string) $this->latestLog()->{ChangeLogTableMap::COL_USER_ID});
@@ -120,35 +119,9 @@ final class AdminWorkflowE2ETest extends DatabaseTestCase
 	protected function tearDown(): void
 	{
 		$this->logout();
+		$this->getContainer()->removeService('http.request');
 
 		parent::tearDown();
-	}
-
-	private function bootstrapTurnusPresenter(): TurnusPresenter
-	{
-		$presenter = $this->getContainer()->getByType(IPresenterFactory::class)->createPresenter('Admin:Turnus');
-		if (!$presenter instanceof TurnusPresenter) {
-			self::fail('Admin:Turnus must be a Turnus presenter.');
-		}
-
-		$presenter->autoCanonicalize = false;
-		$response = $presenter->run(new ApplicationRequest('Admin:Turnus', 'GET', ['action' => 'default']));
-		self::assertInstanceOf(TextResponse::class, $response);
-
-		return $presenter;
-	}
-
-	/**
-	 * @param callable(): void $callback
-	 */
-	private function assertRedirects(callable $callback): void
-	{
-		try {
-			$callback();
-			self::fail('Handler must finish by redirect.');
-		} catch (AbortException) {
-			self::addToAssertionCount(1);
-		}
 	}
 
 	private function latestLog(): \Nette\Database\Table\ActiveRow

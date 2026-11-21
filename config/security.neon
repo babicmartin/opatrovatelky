@@ -13,3 +13,4 @@ services:
 
     - App\Model\Security\LoginRateLimiter
     - App\Model\Security\SecurityAuditLogger
+    - App\Model\Security\AccountPasswordService

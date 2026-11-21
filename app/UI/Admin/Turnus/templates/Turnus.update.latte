@@ -257,9 +257,9 @@
 			<div class="divone">
 				<div>
 					<h3 style="font-size:18px; margin:0 0 15px;">Odstrániť turnus</h3>
-					<a n:if="$canManageTurnus" href="{link delete!, id: $id}" title="Odstrániť" onclick="return confirm('Naozaj chceš odstrániť turnus?');">
-						<img src="{$basePath}/img/icons/x.png" style="height:30px; cursor:pointer;" alt="Odstrániť">
-					</a>
+					{if $canManageTurnus}
+						{form deleteTurnusForm}{input delete}{/form}
+					{/if}
 				</div>
 			</div>
 		</div>

@@ -101,6 +101,18 @@ final class AutosaveFieldUpdateService
 			return true;
 		}
 
+		foreach ($definition['where'] ?? [] as $key => $expected) {
+			if ((string) $row->{$key} !== (string) $expected) {
+				return false;
+			}
+		}
+		if (($definition['stringInput'] ?? false) && !is_string($rawValue)) {
+			return false;
+		}
+		if (isset($definition['pattern']) && $rawValue !== '' && !preg_match($definition['pattern'], (string) $rawValue)) {
+			return false;
+		}
+
 		$column = (string) $definition['column'];
 		$oldDbValue = $row->{$column} ?? null;
 		$newDbValue = $this->normalizeDbValue($definition, $rawValue, $checked);
@@ -114,6 +126,7 @@ final class AutosaveFieldUpdateService
 
 		$this->database->table($definition['table'])
 			->where('id', $entityId)
+			->where($definition['where'] ?? [])
 			->update([$column => $newDbValue]);
 
 		[$oldValueId, $oldValueLabel] = $this->formatAuditValue($definition, $oldDbValue);
@@ -195,6 +208,10 @@ final class AutosaveFieldUpdateService
 	{
 		$valueType = (string) $definition['valueType'];
 		$value = is_scalar($rawValue) ? (string) $rawValue : '';
+
+		if ($value === '' && ($definition['nullable'] ?? false)) {
+			return null;
+		}
 
 		return match ($valueType) {
 			'bool' => $checked !== null ? ($checked ? 1 : 0) : ((int) $value > 0 ? 1 : 0),
@@ -438,6 +455,16 @@ final class AutosaveFieldUpdateService
 				'course' => $this->select(OpatrovatelkaTableMap::COL_COURSE, 'Kurzy', SelectYesNoTableMap::TABLE_NAME, SelectYesNoTableMap::COL_ID, SelectYesNoTableMap::COL_STATUS),
 				'courseDetail' => $this->text(OpatrovatelkaTableMap::COL_COURSE_DETAIL, 'Kurzy - detail'),
 			]),
+			'babysitter.hhs' => $this->context(OpatrovatelkaTableMap::TABLE_NAME, [
+				'hhs_start_date' => $this->date(OpatrovatelkaTableMap::COL_HHS_START_DATE, 'Nástup od'),
+				'hhs_night_work' => $this->text(OpatrovatelkaTableMap::COL_HHS_NIGHT_WORK, 'Práca v noci') + ['pattern' => '~^[01]$~D'],
+				'hhs_additional_notes' => $this->text(OpatrovatelkaTableMap::COL_HHS_ADDITIONAL_NOTES, 'Dodatočné poznámky'),
+				'hhs_monthly_costs' => $this->float(OpatrovatelkaTableMap::COL_HHS_MONTHLY_COSTS, 'Mesačné náklady', nullable: true) + ['pattern' => '~^[0-9]{1,8}(?:[.,][0-9]{1,2})?$~D'],
+				'hhs_travel_costs' => $this->float(OpatrovatelkaTableMap::COL_HHS_TRAVEL_COSTS, 'Cestovné náklady', nullable: true) + ['pattern' => '~^[0-9]{1,8}(?:[.,][0-9]{1,2})?$~D'],
+				'hhs_holiday_supplement' => $this->text(OpatrovatelkaTableMap::COL_HHS_HOLIDAY_SUPPLEMENT, 'Príplatky počas sviatkov'),
+				'hhs_created_by_name' => $this->text(OpatrovatelkaTableMap::COL_HHS_CREATED_BY_NAME, 'Vytvoril'),
+				'hhs_contact_phone' => $this->text(OpatrovatelkaTableMap::COL_HHS_CONTACT_PHONE, 'Telefónny kontakt'),
+			], ['where' => [OpatrovatelkaTableMap::COL_TYPE => 1], 'stringInput' => true, 'nullable' => true]),
 			'babysitter.profile' => $this->context(OpatrovatelkaTableMap::TABLE_NAME, [
 				'smoker' => $this->select(OpatrovatelkaTableMap::COL_SMOKER, 'Fajčiar', SelectSmokerTableMap::TABLE_NAME, SelectSmokerTableMap::COL_ID, SelectSmokerTableMap::COL_SLOVAK),
 				'allergy' => $this->select(OpatrovatelkaTableMap::COL_ALLERGY, 'Alergie', SelectYesNoTableMap::TABLE_NAME, SelectYesNoTableMap::COL_ID, SelectYesNoTableMap::COL_STATUS),
@@ -600,13 +627,15 @@ final class AutosaveFieldUpdateService
 
 	/**
 	 * @param array<string, array<string, mixed>> $fields
+	 * @param array<string, mixed> $defaults
 	 * @return array{fields: array<string, mixed>}
 	 */
-	private function context(string $table, array $fields): array
+	private function context(string $table, array $fields, array $defaults = []): array
 	{
 		foreach ($fields as &$field) {
 			if (($field['valueType'] ?? null) !== 'junction') {
 				$field['table'] = $table;
+				$field += $defaults;
 			}
 		}
 		unset($field);

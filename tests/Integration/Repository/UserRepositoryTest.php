@@ -29,7 +29,7 @@ final class UserRepositoryTest extends DatabaseTestCase
 			'agent.five@example.test',
 			'#445566',
 		));
-		$repository->updatePasswordHash($userId, 'updated-hash');
+		$repository->changePasswordHash($userId, 'updated-hash');
 		$repository->updateImage($userId, 'avatar.png');
 		$repository->updateAccess($userId, 5, 2);
 
@@ -52,6 +52,7 @@ final class UserRepositoryTest extends DatabaseTestCase
 		self::assertSame(2, (int) $userRow->{UserTableMap::COL_ACTIVE});
 		self::assertInstanceOf(UserEntity::class, $userEntity);
 		self::assertSame($userId, $userEntity->getId());
+		self::assertSame(1, $userEntity->sessionVersion);
 		self::assertSame('Agent Five', $repository->findSelectOptions()[$userId]);
 		self::assertArrayNotHasKey($adminId, $repository->findSelectOptions());
 		self::assertArrayNotHasKey(10, $repository->findPermissionOptions(false));

@@ -17,6 +17,7 @@ use App\UI\Admin\Form\ConfirmedCreateFormFactory;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\Presenter;
 use Nette\Database\Explorer;
+use Nette\Http\FetchSite;
 use Nette\Security\IIdentity;
 use Nette\Security\SimpleIdentity;
 use Nette\Security\User as SecurityUser;
@@ -155,19 +156,15 @@ abstract class AdminPresenter extends Presenter
 		$isPartialAutosave = $request->getPost('__autosave_context') !== null
 			|| $request->getPost('__autosave_field') !== null;
 
-		if ($isPartialAutosave && $expectedEntityId !== null && (int) ($request->getPost('id') ?? 0) !== $expectedEntityId) {
-			$this->getHttpResponse()->setCode(400);
-			$this->sendJson(['success' => false, 'message' => 'Neplatný autosave záznam.']);
+		if (!$isPartialAutosave) {
+			return;
 		}
 
-		if ($this->autosaveFieldUpdateService->tryHandleRequest($request)) {
-			$this->sendJson(['success' => true]);
+		if ($expectedEntityId !== null && (int) ($request->getPost('id') ?? 0) !== $expectedEntityId) {
+			$this->sendAutosavePartialError(400, 'Neplatný autosave záznam.');
 		}
 
-		if ($isPartialAutosave) {
-			$this->getHttpResponse()->setCode(400);
-			$this->sendJson(['success' => false, 'message' => 'Autosave hodnotu sa nepodarilo uložiť.']);
-		}
+		$this->handleAutosavePartial();
 	}
 
 	public function handleAutosavePartial(): void
@@ -177,7 +174,7 @@ abstract class AdminPresenter extends Presenter
 			$this->sendAutosavePartialError(400, 'Neplatný autosave request.');
 		}
 
-		if (!$request->isSameSite()) {
+		if (!$request->isFrom([FetchSite::SameSite, FetchSite::SameOrigin])) {
 			$this->sendAutosavePartialError(403, 'Neplatný pôvod requestu.');
 		}
 
@@ -207,7 +204,7 @@ abstract class AdminPresenter extends Presenter
 	{
 		return match ($this->getName()) {
 			'Admin:Agency' => ['agency.update', 'documents.agency'],
-			'Admin:Babysitter' => ['babysitter.main', 'babysitter.address', 'babysitter.education', 'babysitter.profile', 'babysitter.pdf', 'babysitter.workProfile', 'documents.babysitter'],
+			'Admin:Babysitter' => ['babysitter.hhs', 'babysitter.main', 'babysitter.address', 'babysitter.education', 'babysitter.profile', 'babysitter.pdf', 'babysitter.workProfile', 'documents.babysitter'],
 			'Admin:Country' => ['country.update'],
 			'Admin:Family' => ['family.shortInfo', 'family.info', 'family.address', 'documents.family'],
 			'Admin:MissingRegistry' => ['missingRegistry.row'],
@@ -260,6 +257,7 @@ abstract class AdminPresenter extends Presenter
 			'babysitter.main',
 			'babysitter.address',
 			'babysitter.education',
+			'babysitter.hhs',
 			'babysitter.profile',
 			'babysitter.pdf',
 			'babysitter.workProfile',
@@ -307,7 +305,7 @@ abstract class AdminPresenter extends Presenter
 			'remoteAddress' => $request->getRemoteAddress(),
 			'userAgent' => $request->getHeader('User-Agent'),
 			'referer' => $request->getHeader('Referer'),
-			'isSameSite' => $request->isSameSite(),
+			'isSameSite' => $request->isFrom([FetchSite::SameSite, FetchSite::SameOrigin]),
 			'sessionName' => $sessionName,
 			'sessionStarted' => $session->isStarted(),
 			'sessionExistsBeforeStart' => $sessionExistsBeforeStart,

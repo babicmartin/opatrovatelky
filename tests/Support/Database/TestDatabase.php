@@ -38,6 +38,9 @@ final class TestDatabase
 		self::runSqlFile($databasePdo, dirname(__DIR__, 2) . '/../migrations/20260530_create_sn_change_log.sql');
 		self::runSqlFile($databasePdo, dirname(__DIR__, 2) . '/../report/sql/003_create_babysitter_videos.sql');
 
+		self::runSqlFile($databasePdo, dirname(__DIR__, 2) . '/../report/sql/005_add_babysitter_hhs_fields.sql');
+		self::runSqlFile($databasePdo, dirname(__DIR__, 2) . '/../report/sql/006_add_user_session_version.sql');
+		self::runSqlFile($databasePdo, dirname(__DIR__, 2) . '/../report/sql/007_convert_crm_tables_to_innodb.sql');
 		self::$schemaReady = true;
 	}
 

@@ -12,6 +12,7 @@ use App\Model\Table\PermissionTableMap;
 use App\Model\Table\UserTableMap;
 use App\Model\Utils\Date\DateService;
 use Nette\Database\Explorer;
+use Nette\Database\Row;
 use Nette\Database\Table\ActiveRow;
 
 class UserRepository extends BaseRepository
@@ -79,11 +80,28 @@ class UserRepository extends BaseRepository
 			]);
 	}
 
-	public function updatePasswordHash(int $userId, string $passwordHash): int
+	public function lockPasswordState(int $userId): ?Row
 	{
-		return $this->findAll()
-			->where(UserTableMap::COL_ID, $userId)
-			->update([UserTableMap::COL_PASSWORD => $passwordHash]);
+		return $this->database->fetch(
+			'SELECT ' . UserTableMap::COL_PASSWORD . ', ' . UserTableMap::COL_SESSION_VERSION . ', ' . UserTableMap::COL_PERMISSION
+			. ' FROM ' . UserTableMap::TABLE_NAME . ' WHERE ' . UserTableMap::COL_ID . ' = ? FOR UPDATE',
+			$userId,
+		);
+	}
+
+	public function changePasswordHash(int $userId, #[\SensitiveParameter] string $hash): void
+	{
+		$this->findAll()->wherePrimary($userId)->update([
+			UserTableMap::COL_PASSWORD => $hash,
+			UserTableMap::COL_SESSION_VERSION . '+=' => 1,
+		]);
+	}
+
+	public function rehashPassword(int $userId, int $verifiedVersion, #[\SensitiveParameter] string $hash): bool
+	{
+		return $this->findAll()->wherePrimary($userId)
+			->where(UserTableMap::COL_SESSION_VERSION, $verifiedVersion)
+			->update([UserTableMap::COL_PASSWORD => $hash]) === 1;
 	}
 
 	public function updateImage(int $userId, string $image): int

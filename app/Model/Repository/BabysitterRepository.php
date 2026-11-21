@@ -124,6 +124,14 @@ class BabysitterRepository extends BaseRepository
 
 		return [
 			'id' => (int) $row->{OpatrovatelkaTableMap::COL_ID},
+			'hhs_start_date' => $this->dateService->tryCreateFromDb((string) ($row->{OpatrovatelkaTableMap::COL_HHS_START_DATE} ?? '')),
+			'hhs_night_work' => $row->{OpatrovatelkaTableMap::COL_HHS_NIGHT_WORK},
+			'hhs_additional_notes' => $row->{OpatrovatelkaTableMap::COL_HHS_ADDITIONAL_NOTES},
+			'hhs_monthly_costs' => $row->{OpatrovatelkaTableMap::COL_HHS_MONTHLY_COSTS},
+			'hhs_travel_costs' => $row->{OpatrovatelkaTableMap::COL_HHS_TRAVEL_COSTS},
+			'hhs_holiday_supplement' => $row->{OpatrovatelkaTableMap::COL_HHS_HOLIDAY_SUPPLEMENT},
+			'hhs_created_by_name' => $row->{OpatrovatelkaTableMap::COL_HHS_CREATED_BY_NAME},
+			'hhs_contact_phone' => $row->{OpatrovatelkaTableMap::COL_HHS_CONTACT_PHONE},
 			'clientNumber' => (string) ($row->{OpatrovatelkaTableMap::COL_CLIENT_NUMBER} ?? ''),
 			'name' => (string) ($row->{OpatrovatelkaTableMap::COL_NAME} ?? ''),
 			'surname' => (string) ($row->{OpatrovatelkaTableMap::COL_SURNAME} ?? ''),

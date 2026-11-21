@@ -51,6 +51,9 @@
 		<div id="error" class="space20" style="color:red; font-weight:bold;"></div>
 		<div>
 			{form uploadForm}
+				<ul class="alert alert-danger" role="alert" n:ifcontent>
+					<li n:foreach="$form->errors as $error">{$error}</li>
+				</ul>
 				{input fileAll}
 				{input upload}
 			{/form}

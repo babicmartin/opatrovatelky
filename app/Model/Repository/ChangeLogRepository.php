@@ -63,6 +63,7 @@ class ChangeLogRepository extends BaseRepository
 		'babysitter.main' => 'Úvod',
 		'babysitter.address' => 'Základné informácie',
 		'babysitter.education' => 'Vzdelanie',
+		'babysitter.hhs' => 'Partnerské údaje HHS',
 		'babysitter.profile' => 'Profil',
 		'babysitter.pdf' => 'PDF',
 		'babysitter.workProfile' => 'Odborné zameranie',

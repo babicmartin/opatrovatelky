@@ -14,25 +14,18 @@ use App\Model\Table\PartnerTableMap;
 use App\Model\Table\TodoClientTableMap;
 use App\Model\Table\TurnusTableMap;
 use App\Model\Table\UserTableMap;
-use Nette\Application\IPresenterFactory;
-use Nette\Application\Request as ApplicationRequest;
-use Nette\Application\Response;
 use Nette\Application\Responses\RedirectResponse;
 use Nette\Application\Responses\TextResponse;
 use Nette\Application\UI\Presenter;
 use Nette\Database\Table\ActiveRow;
-use Nette\Http\Helpers;
-use Nette\Http\IResponse;
-use Nette\Http\Request as HttpRequest;
-use Nette\Http\UrlScript;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Support\Database\TestDatabase;
 use Tests\Support\PHPUnit\DatabaseTestCase;
-use Tests\Support\PHPUnit\PresenterWorkflowTrait;
+use Tests\Support\PHPUnit\ConfirmedFormWorkflowTrait;
 
 final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 {
-	use PresenterWorkflowTrait;
+	use ConfirmedFormWorkflowTrait;
 
 	/**
 	 * @return iterable<string, array{array<string, mixed>}>
@@ -180,7 +173,7 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 		$entityCountBefore = $this->rowCount($table);
 		$changeLogCountBefore = $this->rowCount(ChangeLogTableMap::TABLE_NAME);
 
-		$response = $this->runFlow($flow, 'GET', [
+		$response = $this->runFormRequest((string) $flow['presenter'], 'GET', [
 			'action' => $flow['action'] ?? 'default',
 			Presenter::SignalKey => $flow['legacySignal'],
 		]);
@@ -189,15 +182,9 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 		self::assertSame($entityCountBefore, $this->rowCount($table));
 		self::assertSame($changeLogCountBefore, $this->rowCount(ChangeLogTableMap::TABLE_NAME));
 
-		$formHtml = $this->extractFormBySubmitLabel($html, (string) $flow['button']);
-
-		$response = $this->runFlow($flow, 'POST', [
+		$response = $this->submitConfirmedCreate((string) $flow['presenter'], (string) $flow['button'], [
 			'action' => $flow['action'] ?? 'default',
-		], [
-			'_do' => $this->extractHiddenInput($formHtml, '_do'),
-			'_token_' => $this->extractHiddenInput($formHtml, '_token_'),
-			'create' => (string) $flow['button'],
-		]);
+		], $html);
 
 		self::assertInstanceOf(RedirectResponse::class, $response);
 		self::assertSame($entityCountBefore + 1, $this->rowCount($table));
@@ -226,7 +213,7 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 		$familyId = TestDatabase::createFamily();
 		$flow = ['presenter' => 'Admin:Family'];
 
-		$response = $this->runFlow($flow, 'GET', [
+		$response = $this->runFormRequest((string) $flow['presenter'], 'GET', [
 			'action' => 'update',
 			'id' => $familyId,
 			'tab' => 'main',
@@ -241,7 +228,7 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 		$turnusCountBefore = $this->rowCount(TurnusTableMap::TABLE_NAME);
 		$changeLogCountBefore = $this->rowCount(ChangeLogTableMap::TABLE_NAME);
 
-		$response = $this->runFlow($flow, 'GET', [
+		$response = $this->runFormRequest((string) $flow['presenter'], 'GET', [
 			'action' => 'update',
 			'id' => $familyId,
 			'tab' => 'main',
@@ -253,17 +240,11 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 		self::assertSame($turnusCountBefore, $this->rowCount(TurnusTableMap::TABLE_NAME));
 		self::assertSame($changeLogCountBefore, $this->rowCount(ChangeLogTableMap::TABLE_NAME));
 
-		$formHtml = $this->extractFormBySubmitLabel($html, 'Vytvoriť novú evidenciu');
-
-		$response = $this->runFlow($flow, 'POST', [
+		$response = $this->submitConfirmedCreate((string) $flow['presenter'], 'Vytvoriť novú evidenciu', [
 			'action' => 'update',
 			'id' => $familyId,
 			'tab' => 'main',
-		], [
-			'_do' => $this->extractHiddenInput($formHtml, '_do'),
-			'_token_' => $this->extractHiddenInput($formHtml, '_token_'),
-			'create' => 'Vytvoriť novú evidenciu',
-		]);
+		], $html);
 
 		self::assertInstanceOf(RedirectResponse::class, $response);
 		self::assertSame($turnusCountBefore + 1, $this->rowCount(TurnusTableMap::TABLE_NAME));
@@ -285,7 +266,7 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 		$familyId = TestDatabase::createFamily();
 		$flow = ['presenter' => 'Admin:Family'];
 
-		$response = $this->runFlow($flow, 'GET', [
+		$response = $this->runFormRequest((string) $flow['presenter'], 'GET', [
 			'action' => 'update',
 			'id' => $familyId,
 			'tab' => 'proposals',
@@ -300,7 +281,7 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 		$proposalCountBefore = $this->rowCount(FamilyProposalTableMap::TABLE_NAME);
 		$changeLogCountBefore = $this->rowCount(ChangeLogTableMap::TABLE_NAME);
 
-		$response = $this->runFlow($flow, 'GET', [
+		$response = $this->runFormRequest((string) $flow['presenter'], 'GET', [
 			'action' => 'update',
 			'id' => $familyId,
 			'tab' => 'proposals',
@@ -312,17 +293,11 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 		self::assertSame($proposalCountBefore, $this->rowCount(FamilyProposalTableMap::TABLE_NAME));
 		self::assertSame($changeLogCountBefore, $this->rowCount(ChangeLogTableMap::TABLE_NAME));
 
-		$formHtml = $this->extractFormBySubmitLabel($html, 'Vytvoriť nový návrh');
-
-		$response = $this->runFlow($flow, 'POST', [
+		$response = $this->submitConfirmedCreate((string) $flow['presenter'], 'Vytvoriť nový návrh', [
 			'action' => 'update',
 			'id' => $familyId,
 			'tab' => 'proposals',
-		], [
-			'_do' => $this->extractHiddenInput($formHtml, '_do'),
-			'_token_' => $this->extractHiddenInput($formHtml, '_token_'),
-			'create' => 'Vytvoriť nový návrh',
-		]);
+		], $html);
 
 		self::assertInstanceOf(RedirectResponse::class, $response);
 		self::assertSame($proposalCountBefore + 1, $this->rowCount(FamilyProposalTableMap::TABLE_NAME));
@@ -344,7 +319,7 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 		$babysitterId = TestDatabase::createBabysitter();
 		$flow = ['presenter' => 'Admin:Babysitter'];
 
-		$response = $this->runFlow($flow, 'GET', [
+		$response = $this->runFormRequest((string) $flow['presenter'], 'GET', [
 			'action' => 'update',
 			'id' => $babysitterId,
 			'tab' => 'main',
@@ -359,7 +334,7 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 		$turnusCountBefore = $this->rowCount(TurnusTableMap::TABLE_NAME);
 		$changeLogCountBefore = $this->rowCount(ChangeLogTableMap::TABLE_NAME);
 
-		$response = $this->runFlow($flow, 'GET', [
+		$response = $this->runFormRequest((string) $flow['presenter'], 'GET', [
 			'action' => 'update',
 			'id' => $babysitterId,
 			'tab' => 'main',
@@ -371,17 +346,11 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 		self::assertSame($turnusCountBefore, $this->rowCount(TurnusTableMap::TABLE_NAME));
 		self::assertSame($changeLogCountBefore, $this->rowCount(ChangeLogTableMap::TABLE_NAME));
 
-		$formHtml = $this->extractFormBySubmitLabel($html, 'Vytvoriť novú evidenciu');
-
-		$response = $this->runFlow($flow, 'POST', [
+		$response = $this->submitConfirmedCreate((string) $flow['presenter'], 'Vytvoriť novú evidenciu', [
 			'action' => 'update',
 			'id' => $babysitterId,
 			'tab' => 'main',
-		], [
-			'_do' => $this->extractHiddenInput($formHtml, '_do'),
-			'_token_' => $this->extractHiddenInput($formHtml, '_token_'),
-			'create' => 'Vytvoriť novú evidenciu',
-		]);
+		], $html);
 
 		self::assertInstanceOf(RedirectResponse::class, $response);
 		self::assertSame($turnusCountBefore + 1, $this->rowCount(TurnusTableMap::TABLE_NAME));
@@ -402,73 +371,12 @@ final class AdminCreateSignalRegressionTest extends DatabaseTestCase
 	 */
 	private function renderFlow(array $flow): string
 	{
-		$response = $this->runFlow($flow, 'GET', [
+		$response = $this->runFormRequest((string) $flow['presenter'], 'GET', [
 			'action' => $flow['action'] ?? 'default',
 		]);
 		self::assertInstanceOf(TextResponse::class, $response);
 
 		return $this->sendTextResponse($response);
-	}
-
-	/**
-	 * @param array<string, mixed> $flow
-	 * @param array<string, mixed> $params
-	 * @param array<string, mixed> $post
-	 */
-	private function runFlow(array $flow, string $method, array $params, array $post = []): Response
-	{
-		$this->replaceHttpRequest($method, $post);
-
-		$presenterName = (string) $flow['presenter'];
-		$presenter = $this->getContainer()
-			->getByType(IPresenterFactory::class)
-			->createPresenter($presenterName);
-		self::assertInstanceOf(Presenter::class, $presenter);
-		$presenter->autoCanonicalize = false;
-
-		return $presenter->run(new ApplicationRequest($presenterName, $method, $params, $post));
-	}
-
-	/**
-	 * @param array<string, mixed> $post
-	 */
-	private function replaceHttpRequest(string $method, array $post): void
-	{
-		$request = new HttpRequest(
-			new UrlScript('https://opatrovatelky.local/admin-create-test'),
-			$post,
-			[],
-			[Helpers::StrictCookieName => '1'],
-			[],
-			$method,
-		);
-
-		$this->getContainer()->removeService('http.request');
-		$this->getContainer()->addService('http.request', $request);
-		$this->getContainer()->getByType(IResponse::class)->setCode(IResponse::S200_OK);
-	}
-
-	private function extractFormBySubmitLabel(string $html, string $label): string
-	{
-		if (preg_match_all('/<form\b[^>]*>.*?<\/form>/is', $html, $matches) !== false) {
-			foreach ($matches[0] as $formHtml) {
-				if (str_contains($formHtml, $label)) {
-					return $formHtml;
-				}
-			}
-		}
-
-		self::fail('Form with submit "' . $label . '" was not rendered.');
-	}
-
-	private function extractHiddenInput(string $html, string $name): string
-	{
-		$quotedName = preg_quote($name, '/');
-		if (preg_match('/<input\b(?=[^>]*\bname="' . $quotedName . '")(?=[^>]*\bvalue="([^"]*)")[^>]*>/i', $html, $matches) !== 1) {
-			self::fail('Hidden input "' . $name . '" was not rendered.');
-		}
-
-		return html_entity_decode($matches[1], ENT_QUOTES | ENT_HTML5);
 	}
 
 	private function rowCount(string $table): int

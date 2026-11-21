@@ -4,6 +4,7 @@
 {varType array{name:string,secondName:string,acronym:string,email:string,color:string,permission:int,active:int} $profileUser}
 {varType string $imagePath}
 {varType bool $canEditAccess}
+{varType bool $ownProfile}
 
 <div class="row">
 	<div class="col-3">
@@ -65,11 +66,17 @@
 
 		<div class="divone" style="margin-top:40px;">
 			<div>
-				<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">Nastavenie hesla</div>
-				{form userPasswordUpdateForm}
+				<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">{if $ownProfile}Zmena vlastného hesla{else}Správcovský reset hesla{/if}</div>
+				{var $passwordFormName = $ownProfile ? 'userPasswordUpdateForm' : 'userPasswordResetForm'}
+				{form $passwordFormName}
 					<ul class="alert alert-danger" n:ifcontent>
 						<li n:foreach="$form->ownErrors as $error">{$error}</li>
 					</ul>
+					<div class="mb10" n:if="$ownProfile">
+						{label currentPassword class => 'inputLabel' /}
+						{input currentPassword}
+						<div class="text-danger fs-12" n:ifcontent>{inputError currentPassword}</div>
+					</div>
 					<div class="mb10">
 						{label password class => 'inputLabel' /}
 						{input password}

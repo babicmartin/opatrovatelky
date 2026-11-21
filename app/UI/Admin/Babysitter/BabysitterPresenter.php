@@ -14,6 +14,7 @@ use App\Model\Form\DTO\Admin\Babysitter\BabysitterWorkProfile\BabysitterWorkProf
 use App\Model\Form\Factory\BaseFormFactory;
 use App\Model\Repository\BabysitterRepository;
 use App\Model\Service\Audit\ChangeAuditLogger;
+use App\Model\Service\Hhs\HhsPresentationService;
 use App\Model\Service\Pdf\BabysitterPdfService;
 use App\Model\Service\Turnus\TurnusInvoicePaymentStatusService;
 use App\Model\Table\OpatrovatelkaTableMap;
@@ -31,6 +32,7 @@ use App\UI\Admin\Form\Babysitter\BabysitterAddress\BabysitterAddressFormFactory;
 use App\UI\Admin\Form\Babysitter\BabysitterEducation\BabysitterEducationFormFactory;
 use App\UI\Admin\Form\Babysitter\BabysitterMain\BabysitterMainFormFactory;
 use App\UI\Admin\Form\Babysitter\BabysitterPdf\BabysitterPdfFormFactory;
+use App\UI\Admin\Form\Babysitter\BabysitterHhs\BabysitterHhsFormFactory;
 use App\UI\Admin\Form\Babysitter\BabysitterProfile\BabysitterProfileFormFactory;
 use App\UI\Admin\Form\Babysitter\BabysitterWorkProfile\BabysitterWorkProfileFormFactory;
 use Nette\Application\Responses\FileResponse;
@@ -40,6 +42,8 @@ use Nette\Http\FileUpload;
 use Nette\Utils\ArrayHash;
 use Nette\Utils\FileSystem;
 use Nette\Utils\Random;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 class BabysitterPresenter extends AdminPresenter
 {
@@ -60,6 +64,7 @@ class BabysitterPresenter extends AdminPresenter
 		private readonly BabysitterMainFormFactory $babysitterMainFormFactory,
 		private readonly BabysitterAddressFormFactory $babysitterAddressFormFactory,
 		private readonly BabysitterEducationFormFactory $babysitterEducationFormFactory,
+		private readonly BabysitterHhsFormFactory $babysitterHhsFormFactory,
 		private readonly BabysitterProfileFormFactory $babysitterProfileFormFactory,
 		private readonly BabysitterPdfFormFactory $babysitterPdfFormFactory,
 		private readonly BabysitterWorkProfileFormFactory $babysitterWorkProfileFormFactory,
@@ -70,6 +75,8 @@ class BabysitterPresenter extends AdminPresenter
 		private readonly StorageDirProvider $storageDirProvider,
 		private readonly ImageValidator $imageValidator,
 		private readonly BabysitterPdfService $babysitterPdfService,
+		private readonly HhsPresentationService $hhsPresentationService,
+		private readonly LoggerInterface $exportLogger,
 		private readonly ChangeAuditLogger $changeAuditLogger,
 		private readonly Explorer $database,
 		private readonly TurnusInvoicePaymentStatusService $turnusInvoicePaymentStatusService,
@@ -152,6 +159,9 @@ class BabysitterPresenter extends AdminPresenter
 		$this->template->id = $id;
 		$this->template->babysitter = $this->babysitter;
 		$this->template->profileImagePath = $this->resolveProfileImagePath((string) $this->babysitter['image']);
+		if ($tab === 'hhs' && (int) $this->babysitter['type'] === 1) {
+			$this->activeTab = 'hhs';
+		}
 		$this->template->activeTab = $this->activeTab;
 		$this->template->pageTitleText = (int) $this->babysitter['type'] === 1 ? 'Opatrovateľka' : 'Pracovník';
 		$this->template->canManageBabysitter = $this->getUser()->isAllowed(Resource::BABYSITTER->value);
@@ -161,6 +171,9 @@ class BabysitterPresenter extends AdminPresenter
 		$this->template->turnusRows = $this->markTurnusRowsWithInvoiceStatus($turnusRows);
 		$this->template->pdfExists = $this->babysitterPdfService->exists($id);
 		$this->template->pdfGeneratedAt = $this->babysitterPdfService->getGeneratedAt($id);
+		if ($this->activeTab === 'pdf' && (int) $this->babysitter['type'] === 1) {
+			$this->template->hhsGeneratedAt = $this->hhsPresentationService->getGeneratedAt($id);
+		}
 	}
 
 	public function handleCreate(): void
@@ -224,6 +237,51 @@ class BabysitterPresenter extends AdminPresenter
 		$this->sendResponse(new FileResponse($path, 'babysitter-' . $id . '.pdf', 'application/pdf'));
 	}
 
+	public function handleDownloadHhsPresentation(): void
+	{
+		$this->assertHhsProfileAccess();
+		$path = $this->hhsPresentationService->getAbsolutePath($this->babysitterId);
+		if (!is_file($path)) {
+			$this->error('Prezentácia pre HHS ešte nebola vytvorená.', 404);
+		}
+
+		$this->sendResponse(new FileResponse(
+			$path,
+			'hhs-' . $this->babysitterId . '.pptx',
+			'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+		));
+	}
+
+	protected function createComponentGenerateHhsPresentationForm(): Form
+	{
+		$this->assertHhsProfileAccess();
+		$form = $this->baseFormFactory->create();
+		$form->addSubmit('generate');
+		$form->onSuccess[] = $this->generateHhsPresentation(...);
+		return $form;
+	}
+
+	private function generateHhsPresentation(): void
+	{
+		try {
+			$this->hhsPresentationService->generate($this->babysitterId);
+			$this->flashMessage('Prezentácia pre HHS bola vygenerovaná.', 'success');
+		} catch (Throwable $e) {
+			$this->exportLogger->error('HHS presentation generation failed.', ['babysitterId' => $this->babysitterId, 'exception' => $e]);
+			$this->flashMessage('Prezentáciu pre HHS sa nepodarilo vygenerovať.', 'danger');
+		}
+
+		$this->redirect('update', ['id' => $this->babysitterId, 'tab' => 'pdf']);
+	}
+
+	private function assertHhsProfileAccess(): void
+	{
+		$this->assertCanManage();
+		if ((int) $this->getBabysitter()['type'] !== 1) {
+			$this->error('Partnerské údaje HHS sú dostupné iba pre opatrovateľky.', 403);
+		}
+	}
+
 	protected function createComponentBabysitterMainForm(): Form
 	{
 		$babysitter = $this->getBabysitter();
@@ -282,6 +340,12 @@ class BabysitterPresenter extends AdminPresenter
 			$this->babysitterRepository->findLanguageSelectOptions(),
 			$this->babysitterEducationFormSucceeded(...),
 		);
+	}
+
+	protected function createComponentHhsForm(): Form
+	{
+		$this->assertHhsProfileAccess();
+		return $this->babysitterHhsFormFactory->create($this->getBabysitter());
 	}
 
 	protected function createComponentBabysitterProfileForm(): Form
@@ -516,7 +580,7 @@ class BabysitterPresenter extends AdminPresenter
 				: '';
 		}
 
-		return array_values($turnusRows);
+		return $turnusRows;
 	}
 
 	private function finishAutosave(): void

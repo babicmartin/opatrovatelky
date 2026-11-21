@@ -86,11 +86,12 @@ class MissingRegistryRepository extends BaseRepository
 		]);
 	}
 
-	public function softDelete(int $id): void
+	public function softDelete(int $id): bool
 	{
-		$this->update($id, [
-			MissingRegistryTableMap::COL_DELETED => 1,
-		]);
+		return $this->findAll()
+			->where(MissingRegistryTableMap::COL_ID, $id)
+			->where(MissingRegistryTableMap::COL_DELETED, 0)
+			->update([MissingRegistryTableMap::COL_DELETED => 1]) === 1;
 	}
 
 	/**

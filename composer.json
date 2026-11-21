@@ -1,13 +1,13 @@
 {
 	"require": {
 		"php": ">= 8.5",
-		"nette/application": "^3.2",
+		"nette/application": "^3.3.1",
 		"nette/bootstrap": "^3.2",
 		"nette/caching": "^3.4",
 		"nette/database": "^3.2",
 		"nette/di": "^3.2",
 		"nette/forms": "^3.2",
-		"nette/http": "^3.3",
+		"nette/http": "^3.4",
 		"nette/mail": "^4.0",
 		"nette/robot-loader": "^4.1",
 		"nette/security": "^3.2",
@@ -21,7 +21,8 @@
 		"mpdf/mpdf": "^8.3",
 		"psr/clock": "^1.0",
 		"ext-simplexml": "*",
-		"james-heinrich/getid3": "^1.9"
+		"james-heinrich/getid3": "^1.9",
+		"particle-academy/dark-slide": "^0.23.0"
 	},
 	"require-dev": {
 		"nette/tester": "^2.6",
@@ -31,6 +32,7 @@
 		"phpstan/phpstan": "^2.1",
 		"phpstan/phpstan-nette": "^2.0",
 		"nette/mcp-inspector": "^1.0.x-dev",
+		"nette/command-line": "@dev",
 		"infection/infection": "^0.31"
 	},
 	"autoload": {

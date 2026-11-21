@@ -3,51 +3,53 @@
 {varType App\Model\Utils\Paginator\Paginator $paginator}
 
 {define registryRow, array $row}
-	{form "registryForm-$row[id]"}
-		<div class="row">
-			<div class="col-xl-2 col-md-12">
-				<div class="mb10">
-					<div class="inputLabel">Kto</div>
-					{input userId}
+	<div class="row align-items-center">
+		<div class="col-xl-11 col-md-12">
+			{form "registryForm-$row[id]"}
+				<div class="row">
+					<div class="col-xl-2 col-md-12">
+						<div class="mb10">
+							<div class="inputLabel">Kto</div>
+							{input userId}
+						</div>
+					</div>
+					<div class="col-xl-2 col-md-12">
+						<div class="mb10">
+							<div style="font-weight:bold; font-size:16px;">Od</div>
+							{input dateFrom}
+						</div>
+					</div>
+					<div class="col-xl-2 col-md-12">
+						<div class="mb10">
+							<div style="font-weight:bold; font-size:16px;">Do</div>
+							{input dateTo}
+						</div>
+					</div>
+					<div class="col-xl-3 col-md-12">
+						<div class="mb10 mt-3 row">
+							<div class="col-4">{input typePn} PN</div>
+							<div class="col-4">{input typeOcr} OČR</div>
+							<div class="col-4">{input typeLekar} Lekár</div>
+							<div class="col-4">{input typeSviatok} Sviatok</div>
+							<div class="col-4">{input typeZastup} Zástup</div>
+							<div class="col-4">{input typeSluzba} Služba</div>
+							<div class="col-8">{input typeDovolenka} Dovolenka</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-md-12">
+						<div class="mb10">
+							<div style="font-weight:bold; font-size:16px;">Poznámka</div>
+							{input notice}
+						</div>
+					</div>
 				</div>
-			</div>
-			<div class="col-xl-2 col-md-12">
-				<div class="mb10">
-					<div style="font-weight:bold; font-size:16px;">Od</div>
-					{input dateFrom}
-				</div>
-			</div>
-			<div class="col-xl-2 col-md-12">
-				<div class="mb10">
-					<div style="font-weight:bold; font-size:16px;">Do</div>
-					{input dateTo}
-				</div>
-			</div>
-			<div class="col-xl-3 col-md-12">
-				<div class="mb10 mt-3 row">
-					<div class="col-4">{input typePn} PN</div>
-					<div class="col-4">{input typeOcr} OČR</div>
-					<div class="col-4">{input typeLekar} Lekár</div>
-					<div class="col-4">{input typeSviatok} Sviatok</div>
-					<div class="col-4">{input typeZastup} Zástup</div>
-					<div class="col-4">{input typeSluzba} Služba</div>
-					<div class="col-8">{input typeDovolenka} Dovolenka</div>
-				</div>
-			</div>
-			<div class="col-xl-2 col-md-12">
-				<div class="mb10">
-					<div style="font-weight:bold; font-size:16px;">Poznámka</div>
-					{input notice}
-				</div>
-			</div>
-			<div class="col-xl-1 col-md-12">
-				<a n:href="delete!, id: $row['id']" onclick="return confirm('Naozaj chceš odstrániť evidenciu neprítomnosti?');" title="Odstrániť">
-					<img src="{$basePath}/img/icons/x.png" style="height:30px; cursor:pointer; margin-top:30px;" alt="Odstrániť">
-				</a>
 				{input save}
-			</div>
+			{/form}
 		</div>
-	{/form}
+		<div class="col-xl-1 col-md-12">
+			{form "deleteRegistryForm-$row[id]"}{input delete}{/form}
+		</div>
+	</div>
 {/define}
 
 <div class="space20"></div>

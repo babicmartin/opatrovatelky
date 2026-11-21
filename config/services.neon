@@ -20,6 +20,9 @@ services:
 	- App\Model\Service\Audit\ChangeAuditLogger
 	- App\Model\Service\Autosave\AutosaveFieldUpdateService
 	- App\Model\Service\Pdf\BabysitterPdfService
+	- App\Model\Service\Hhs\HhsPresentationWriter
+	- App\Model\Service\Hhs\HhsPresentationService(templatePath: %rootDir%/%storageDir.hhsPresentationTemplate%, exportDirectory: %rootDir%/%storageDir.babysitterHhsPpt%)
+	- App\Command\HhsPresentationCommand
 	- App\Model\Service\Partner\TurnusEngagementClassifier
 	- App\Model\Service\Partner\PartnerEngagementCalculator
 	- App\Model\Service\Partner\PartnerFamilyEngagementService

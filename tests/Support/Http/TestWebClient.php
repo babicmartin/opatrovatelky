@@ -95,7 +95,9 @@ final class TestWebClient
 		return $this->client->post($action, [
 			'multipart' => $parts,
 			'headers' => $ajax ? ['X-Requested-With' => 'XMLHttpRequest'] : [],
-			'timeout' => 60,
+			'expect' => false,
+			// The PHP 8.5 CLI server on Windows buffers the complete 200 MiB multipart request.
+			'timeout' => 900,
 		]);
 	}
 

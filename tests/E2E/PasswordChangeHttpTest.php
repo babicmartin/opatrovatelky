@@ -43,6 +43,8 @@ final class PasswordChangeHttpTest extends DatabaseTestCase
 		$path = '/user-management/update/' . $id;
 		$page = (string) $first->get($path)->getBody();
 		self::assertStringContainsString('name="currentPassword"', $page);
+		self::assertStringContainsString('Na zmenu hesla zadajte aj svoje pôvodné heslo.', $page);
+		$this->assertPasswordRequirements($page, self::OwnForm);
 		self::assertStringNotContainsString(self::ResetForm, $page);
 		$fields = ['password' => self::NewPassword, 'passwordRepeat' => self::NewPassword];
 		foreach (['' => 'Zadajte aktuálne heslo.', 'incorrect' => 'Aktuálne heslo nie je správne.'] as $current => $error) {
@@ -76,6 +78,8 @@ final class PasswordChangeHttpTest extends DatabaseTestCase
 		$page = (string) $admin->get($path)->getBody();
 		self::assertStringContainsString(self::ResetForm, $page);
 		self::assertStringNotContainsString('name="currentPassword"', $page);
+		self::assertStringNotContainsString('Na zmenu hesla zadajte aj svoje pôvodné heslo.', $page);
+		$this->assertPasswordRequirements($page, self::ResetForm);
 		self::assertSame(303, $admin->submitForm($path, self::ResetForm, [
 			'password' => self::NewPassword,
 			'passwordRepeat' => self::NewPassword,
@@ -86,6 +90,51 @@ final class PasswordChangeHttpTest extends DatabaseTestCase
 		self::assertSame(200, $first->login(self::Email, self::OldPassword)->getStatusCode());
 		self::assertSame(303, $first->login(self::Email, self::NewPassword)->getStatusCode());
 		$this->assertPasswordAudit('password_reset', $adminId, $id);
+	}
+
+
+	private function assertPasswordRequirements(string $html, string $formId): void
+	{
+		$page = HTMLDocument::createFromString($html, LIBXML_NOERROR, 'UTF-8');
+		$form = $page->getElementById($formId);
+		self::assertNotNull($form);
+		$password = $form->querySelector('input[name=password]');
+		self::assertNotNull($password);
+		$list = $page->getElementById((string) $password->getAttribute('aria-describedby'));
+		self::assertNotNull($list);
+		$labels = [];
+		foreach ($list->querySelectorAll('li') as $item) {
+			$labels[] = trim($item->textContent ?? '');
+		}
+		self::assertSame([
+			'Aspoň 8 znakov',
+			'Aspoň jedna číslica (0–9)',
+			'Aspoň jeden špeciálny znak, napr. !, ? alebo @',
+		], $labels);
+	}
+
+
+	public function testNewPasswordRequirementsAreEnforcedOnSubmit(): void
+	{
+		$id = $this->createAccount(self::Email, UserRole::ADMIN);
+		$browser = $this->login(self::Email);
+		$before = $this->readAccessAndPassword($id);
+		foreach ([
+			['Abcd1!🙂', 'Abcd1!🙂', 'Heslo musí mať aspoň 8 znakov.'],
+			['abcdefg!', 'abcdefg!', 'Heslo musí obsahovať aspoň jednu číslicu.'],
+			['abcdefg1', 'abcdefg1', 'Heslo musí obsahovať aspoň jeden špeciálny znak.'],
+			[self::NewPassword, self::OldPassword, 'Heslá sa nezhodujú.'],
+		] as [$password, $repeat, $error]) {
+			$response = $browser->submitForm('/user-management/update', self::OwnForm, [
+				'currentPassword' => self::OldPassword,
+				'password' => $password,
+				'passwordRepeat' => $repeat,
+			]);
+			self::assertSame(200, $response->getStatusCode());
+			$page = HTMLDocument::createFromString((string) $response->getBody(), LIBXML_NOERROR, 'UTF-8');
+			self::assertSame($error, $page->querySelector('.password-form .text-danger')?->textContent);
+			self::assertSame($before, $this->readAccessAndPassword($id));
+		}
 	}
 
 

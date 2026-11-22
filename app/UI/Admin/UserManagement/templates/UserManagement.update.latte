@@ -1,13 +1,18 @@
 {block pageTitle}Profil používateľa{/block}
 
+{block head}
+	{include parent}
+	<link rel="stylesheet" href="{$basePath}/assets/css/password-change.css?v={$cssVersion}">
+{/block}
+
 {block content}
 {varType array{name:string,secondName:string,acronym:string,email:string,color:string,permission:int,active:int} $profileUser}
 {varType string $imagePath}
 {varType bool $canEditAccess}
 {varType bool $ownProfile}
 
-<div class="row">
-	<div class="col-3">
+<div class="row gy-3">
+	<div class="col-12 col-md-6 col-xl-3">
 		<div class="divone">
 			<div>
 				{form userProfileUpdateForm}
@@ -45,55 +50,57 @@
 		</div>
 	</div>
 
-	<div class="col-3">
-		<div class="divone">
-			<div>
-				{if $canEditAccess && $user->isAllowed('userManagement')}
-					{form userAccessUpdateForm}
-						<div class="mb10">
-							{label permission class => 'inputLabel' /}
-							{input permission}
-						</div>
-						<div class="mb10">
-							{label active class => 'inputLabel' /}
-							{input active}
-						</div>
-						{input save}
-					{/form}
-				{/if}
-			</div>
+	<div class="col-12 col-md-6 col-xl-4">
+		<div class="divone" n:if="$canEditAccess && $user->isAllowed('userManagement')">
+			{form userAccessUpdateForm}
+				<div class="mb10">
+					{label permission class => 'inputLabel' /}
+					{input permission}
+				</div>
+				<div class="mb10">
+					{label active class => 'inputLabel' /}
+					{input active}
+				</div>
+				{input save}
+			{/form}
 		</div>
 
-		<div class="divone" style="margin-top:40px;">
-			<div>
-				<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">{if $ownProfile}Zmena vlastného hesla{else}Správcovský reset hesla{/if}</div>
-				{var $passwordFormName = $ownProfile ? 'userPasswordUpdateForm' : 'userPasswordResetForm'}
-				{form $passwordFormName}
-					<ul class="alert alert-danger" n:ifcontent>
-						<li n:foreach="$form->ownErrors as $error">{$error}</li>
+		<section class="password-card" aria-labelledby="password-title">
+			<h2 id="password-title">{if $ownProfile}Zmena vlastného hesla{else}Správcovský reset hesla{/if}</h2>
+			{var $passwordFormName = $ownProfile ? 'userPasswordUpdateForm' : 'userPasswordResetForm'}
+			{form $passwordFormName, class => 'password-form'}
+				<ul class="alert alert-danger" n:ifcontent>
+					<li n:foreach="$form->ownErrors as $error">{$error}</li>
+				</ul>
+				<div n:if="$ownProfile">
+					<p id="current-password-hint" class="password-hint">Na zmenu hesla zadajte aj svoje pôvodné heslo.</p>
+					{label currentPassword class => 'inputLabel' /}
+					{input currentPassword, aria-describedby => 'current-password-hint'}
+					<div class="text-danger fs-12" n:ifcontent>{inputError currentPassword}</div>
+				</div>
+				<div>
+					{label password class => 'inputLabel' /}
+					{input password, aria-describedby => 'password-requirements'}
+					<div class="text-danger fs-12" n:ifcontent>{inputError password}</div>
+					<ul id="password-requirements" class="password-requirements">
+						<li n:foreach="$form['password']->getOption('requirements') as $rule" data-validator={$rule['validator']} data-argument={$rule['argument']} aria-live="polite" aria-atomic="true">
+							<span class="password-rule-icon" aria-hidden="true"></span>
+							<span>{$rule['label']}<span class="visually-hidden" data-rule-status></span></span>
+						</li>
 					</ul>
-					<div class="mb10" n:if="$ownProfile">
-						{label currentPassword class => 'inputLabel' /}
-						{input currentPassword}
-						<div class="text-danger fs-12" n:ifcontent>{inputError currentPassword}</div>
-					</div>
-					<div class="mb10">
-						{label password class => 'inputLabel' /}
-						{input password}
-						<div class="text-danger fs-12" n:ifcontent>{inputError password}</div>
-					</div>
-					<div class="mb10">
-						{label passwordRepeat class => 'inputLabel' /}
-						{input passwordRepeat}
-						<div class="text-danger fs-12" n:ifcontent>{inputError passwordRepeat}</div>
-					</div>
-					{input save}
-				{/form}
-			</div>
-		</div>
+				</div>
+				<div>
+					{label passwordRepeat class => 'inputLabel' /}
+					{input passwordRepeat, aria-describedby => 'password-match'}
+					<div class="text-danger fs-12" n:ifcontent>{inputError passwordRepeat}</div>
+					<p id="password-match" class="password-match" role="status"></p>
+				</div>
+				{input save}
+			{/form}
+		</section>
 	</div>
 
-	<div class="col-3">
+	<div class="col-12 col-md-6 col-xl-3">
 		<div class="divone">
 			<div>
 				<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">Profilový obrázok</div>
@@ -120,5 +127,6 @@
 
 {block scripts}
 	{include parent}
-	<script src="{$basePath}/js/autosaveForm.js?v=20260530-audit2"></script>
+	<script src="{$basePath}/js/autosaveForm.js?v={$jsVersion}"></script>
+	<script src="{$basePath}/js/password-change.js?v={$jsVersion}"></script>
 {/block}

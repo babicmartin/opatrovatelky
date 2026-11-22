@@ -134,9 +134,24 @@ final class UserProfileUpdateFormFactory
 	{
 		$minimumLength = 8;
 		$requirements = [
-			['validator' => Form::MinLength, 'argument' => $minimumLength, 'label' => "Aspoň $minimumLength znakov", 'error' => 'Heslo musí mať aspoň %d znakov.'],
-			['validator' => Form::Pattern, 'argument' => '.*[0-9].*', 'label' => 'Aspoň jedna číslica (0–9)', 'error' => 'Heslo musí obsahovať aspoň jednu číslicu.'],
-			['validator' => Form::Pattern, 'argument' => '.*[^A-Za-z0-9].*', 'label' => 'Aspoň jeden špeciálny znak, napr. !, ? alebo @', 'error' => 'Heslo musí obsahovať aspoň jeden špeciálny znak.'],
+			[
+				'validator' => Form::MinLength,
+				'argument' => $minimumLength,
+				'label' => "Aspoň $minimumLength znakov",
+				'error' => 'Heslo musí mať aspoň %d znakov.',
+			],
+			[
+				'validator' => Form::Pattern,
+				'argument' => '.*[0-9].*',
+				'label' => 'Aspoň jedna číslica (0–9)',
+				'error' => 'Heslo musí obsahovať aspoň jednu číslicu.',
+			],
+			[
+				'validator' => Form::Pattern,
+				'argument' => '.*[^A-Za-z0-9].*',
+				'label' => 'Aspoň jeden špeciálny znak, napr. !, ? alebo @',
+				'error' => 'Heslo musí obsahovať aspoň jeden špeciálny znak.',
+			],
 		];
 		$password = $form->addPassword('password', 'Nové heslo')
 			->setRequired('Zadajte heslo.')

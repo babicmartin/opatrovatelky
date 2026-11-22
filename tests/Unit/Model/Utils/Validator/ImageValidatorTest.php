@@ -28,7 +28,6 @@ final class ImageValidatorTest extends TestCase
 			'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMCAQDJ/JZcAAAAAElFTkSuQmCC',
 			true,
 		);
-		self::assertIsString($png);
 		$imagePath = $this->writeTempFile('png', $png);
 
 		self::assertTrue((new ImageValidator())->isImage($imagePath));

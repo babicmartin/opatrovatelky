@@ -3,3 +3,8 @@
 {block content}
 	{control missingRegistryList}
 {/block}
+
+{block scripts}
+	{include parent}
+	<script src="{$basePath}/js/autosaveForm.js?v={$jsVersion}"></script>
+{/block}

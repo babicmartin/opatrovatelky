@@ -3,6 +3,7 @@
 namespace Tests\Smoke;
 
 use App\Model\Enum\UserRole\UserRole;
+use App\Model\Latte\LatteDefaultVariables;
 use App\Model\Table\FamilyProposalTableMap;
 use App\Model\Table\OpatrovatelkaTableMap;
 use App\Model\Table\TodoClientTableMap;
@@ -56,6 +57,15 @@ final class AdminCrudPresenterSmokeTest extends DatabaseTestCase
 		} catch (BadRequestException $exception) {
 			self::assertSame(403, $exception->getCode());
 		}
+	}
+
+	public function testMissingRegistryLoadsAutosaveOnceWithCurrentVersion(): void
+	{
+		$this->loginAs(UserRole::ADMIN);
+		$html = $this->renderPresenter('Admin:MissingRegistry');
+		preg_match_all('~<script\b[^>]*\bsrc="([^"]*/js/autosaveForm\.js(?:\?[^"]*)?)"~', $html, $matches);
+		$version = $this->getContainer()->getByType(LatteDefaultVariables::class)->getJsVersion();
+		self::assertSame(['/js/autosaveForm.js?v=' . $version], $matches[1]);
 	}
 
 	public function testFamilyUpdateRendersForAdmin(): void

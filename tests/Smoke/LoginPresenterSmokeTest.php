@@ -2,6 +2,7 @@
 
 namespace Tests\Smoke;
 
+use App\Model\Latte\LatteDefaultVariables;
 use Nette\Application\IPresenterFactory;
 use Nette\Application\Request as ApplicationRequest;
 use Nette\Application\Responses\TextResponse;
@@ -40,5 +41,8 @@ final class LoginPresenterSmokeTest extends DatabaseTestCase
 		}
 
 		self::assertStringContainsString('Prihlásenie', $html);
+		preg_match_all('~(?:src|href)="([^"]+\?v=[^"]*)"~', $html, $matches);
+		$version = $this->getContainer()->getByType(LatteDefaultVariables::class)->getJsVersion();
+		self::assertSame(['/assets/js/custom.js?v=' . $version], $matches[1]);
 	}
 }

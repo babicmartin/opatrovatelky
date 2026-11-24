@@ -47,6 +47,12 @@ config/
 - User: root
 - Password: (empty)
 
+**Environment files (`config/.env*`):** loaded by `App\Model\Settings\EnvironmentFileLoader`, called from `App\Bootstrap::loadEnvironment()`.
+- Priority, highest first: real environment variable → `config/.env` (this machine, git-ignored, required for development and production) → `config/.env.<environment>` (shared non-secret defaults, committed, optional).
+- Tests (`APP_ENV=test`) read only `config/.env.test` (committed, no real secrets) plus optional git-ignored `config/.env.test.local`. `config/.env` is never read in tests.
+- New key: add it to `config/.env.example`, to `config/.env` on every machine, and to `config/.env.test` if tests need it. A key that may be missing on a machine goes to `Bootstrap::OptionalEnvironmentKeys`.
+- Never put test-only values or secrets into PHP constants.
+
 **Key Tables:**
 - `sany_users` — users (id, name, second_name, acronym, email, password, permission, color, active, image)
 - `sany_pages` — menu structure

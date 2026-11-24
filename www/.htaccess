@@ -170,6 +170,9 @@ Require all granted
 	RewriteCond %{REQUEST_FILENAME} -f
 	RewriteRule /\.|^\.(?!well-known/) - [F]
 
+	# stare kopie dokumentov a exportov: aplikacia ich vydava iba z private/ po kontrole prav
+	RewriteRule ^(documents|export)/ - [F]
+
 	# front controller
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d

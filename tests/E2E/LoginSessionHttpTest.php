@@ -3,6 +3,7 @@
 namespace Tests\E2E;
 
 use App\Model\Enum\UserRole\UserRole;
+use App\Model\Security\MediaAccessCookie;
 use App\Model\Table\SecurityAuditLogTableMap;
 use App\Model\Table\SecurityLoginAttemptTableMap;
 use App\Model\Table\UserTableMap;
@@ -106,6 +107,93 @@ final class LoginSessionHttpTest extends DatabaseTestCase
 		$user->update([UserTableMap::COL_PERMISSION => UserRole::CEO->getPermissionId()]);
 		self::assertSame(200, $this->web->get('/change-log')->getStatusCode());
 		$this->assertAuditEvents(['login_success']);
+	}
+
+
+	public function testLoginIssuesTheMediaCookieAndLogoutRemovesIt(): void
+	{
+		$login = $this->web->login(self::Email, self::Password);
+		self::assertSame(303, $login->getStatusCode());
+		$this->assertMediaCookieIssued($login);
+
+		$logout = $this->web->submitForm('/change-log', 'frm-logoutForm');
+		self::assertSame(303, $logout->getStatusCode());
+		$this->assertMediaCookieRemoved($logout);
+	}
+
+
+	public function testAuthenticatedRequestRestoresAMissingMediaCookieOnce(): void
+	{
+		self::assertSame(303, $this->web->login(self::Email, self::Password)->getStatusCode());
+		self::assertNull($this->findMediaCookie($this->web->get('/change-log')));
+
+		$this->web->forgetCookie(MediaAccessCookie::Name);
+		$restored = $this->web->get('/change-log');
+		self::assertSame(200, $restored->getStatusCode());
+		$this->assertMediaCookieIssued($restored);
+
+		self::assertNull($this->findMediaCookie($this->web->get('/change-log')));
+	}
+
+
+	public function testRevokedSessionLosesTheMediaCookie(): void
+	{
+		self::assertSame(303, $this->web->login(self::Email, self::Password)->getStatusCode());
+		$this->getDatabase()->table(UserTableMap::TABLE_NAME)->wherePrimary($this->userId)
+			->update([UserTableMap::COL_ACTIVE => 0]);
+
+		$response = $this->web->get('/change-log');
+		self::assertSame(302, $response->getStatusCode());
+		$this->assertMediaCookieRemoved($response);
+	}
+
+
+	public function testGuestOnTheLoginPageGetsNoMediaCookie(): void
+	{
+		$response = $this->web->get('/login/');
+		self::assertSame(200, $response->getStatusCode());
+		self::assertNull($this->findMediaCookie($response));
+		self::assertNull($this->findMediaCookie($this->web->login(self::Email, 'incorrect-password')));
+	}
+
+
+	private function assertMediaCookieIssued(ResponseInterface $response): void
+	{
+		$header = $this->findMediaCookie($response);
+		self::assertNotNull($header);
+		$attributes = explode('; ', $header);
+		// value from config/.env.test; the real config/.env is never read in tests
+		$secret = $_ENV['MEDIA_COOKIE_SECRET'] ?? null;
+		self::assertIsString($secret);
+		self::assertNotSame('', $secret);
+		self::assertSame(MediaAccessCookie::Name . '=' . $secret, $attributes[0]);
+		self::assertContains('Max-Age=86400', $attributes);
+		self::assertContains('path=/', $attributes);
+		self::assertContains('HttpOnly', $attributes);
+		self::assertContains('SameSite=Lax', $attributes);
+	}
+
+
+	private function assertMediaCookieRemoved(ResponseInterface $response): void
+	{
+		$header = $this->findMediaCookie($response);
+		self::assertNotNull($header);
+		$attributes = explode('; ', $header);
+		self::assertSame(MediaAccessCookie::Name . '=', $attributes[0]);
+		self::assertContains('Max-Age=0', $attributes);
+		self::assertContains('path=/', $attributes);
+	}
+
+
+	private function findMediaCookie(ResponseInterface $response): ?string
+	{
+		$headers = array_values(array_filter(
+			$response->getHeader('Set-Cookie'),
+			static fn (string $header): bool => str_starts_with($header, MediaAccessCookie::Name . '='),
+		));
+		self::assertLessThanOrEqual(1, count($headers));
+
+		return $headers[0] ?? null;
 	}
 
 

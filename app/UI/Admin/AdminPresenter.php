@@ -3,6 +3,7 @@
 namespace App\UI\Admin;
 
 use App\Model\Latte\LatteDefaultVariables;
+use App\Model\Security\MediaAccessCookie;
 use App\Model\Security\SecurityAuditLogger;
 use App\Model\Service\Autosave\AutosaveFieldUpdateService;
 use App\Model\Table\FileTableMap;
@@ -39,6 +40,12 @@ abstract class AdminPresenter extends Presenter
 	private LoggerInterface $logger;
 	private ConfirmedCreateFormFactory $confirmedCreateFormFactory;
 	private LatteDefaultVariables $latteDefaultVariables;
+	private MediaAccessCookie $mediaAccessCookie;
+
+	public function injectMediaAccessCookie(MediaAccessCookie $mediaAccessCookie): void
+	{
+		$this->mediaAccessCookie = $mediaAccessCookie;
+	}
 
 	public function injectAutosaveFieldUpdateService(AutosaveFieldUpdateService $autosaveFieldUpdateService): void
 	{
@@ -86,6 +93,7 @@ abstract class AdminPresenter extends Presenter
 
 		$sessionExistsBeforeStart = $this->getSession()->exists();
 		$this->getSession()->start();
+		$this->mediaAccessCookie->sync($this->getUser()->isLoggedIn());
 
 		if (!$this->getUser()->isLoggedIn() && $this->getName() !== 'Login:Login') {
 			$this->logger->warning('Admin request redirected to login because user is not logged in.', $this->createUnauthenticatedRequestLogContext($sessionExistsBeforeStart));
@@ -143,6 +151,7 @@ abstract class AdminPresenter extends Presenter
 			$this->getSession()->regenerateId();
 		}
 
+		$this->mediaAccessCookie->clear();
 		$this->redirect('@login');
 	}
 

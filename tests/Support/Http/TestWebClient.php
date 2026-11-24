@@ -17,10 +17,12 @@ final class TestWebClient
 {
 	private Process $server;
 	private Client $client;
+	private CookieJar $cookies;
 
 
 	public function __construct(?int $uploadLimitMiB = null)
 	{
+		$this->cookies = new CookieJar();
 		$root = dirname(__DIR__, 3);
 		$uploadOptions = $uploadLimitMiB === null ? [] : [
 			'-d', 'upload_max_filesize=' . $uploadLimitMiB . 'M',
@@ -43,7 +45,7 @@ final class TestWebClient
 			if (preg_match('~Development Server \((http://127\.0\.0\.1:\d+)\) started~', $this->server->getErrorOutput(), $matches)) {
 				$this->client = new Client([
 					'base_uri' => $matches[1],
-					'cookies' => new CookieJar(),
+					'cookies' => $this->cookies,
 					'allow_redirects' => false,
 					'http_errors' => false,
 					'timeout' => 10,
@@ -127,6 +129,15 @@ final class TestWebClient
 	public function login(string $email, string $password): ResponseInterface
 	{
 		return $this->submitForm('/login/', 'frm-login-form', ['email' => $email, 'password' => $password]);
+	}
+
+
+	/** Drops one cookie the way a browser does when it expires or the user clears it. */
+	public function forgetCookie(string $name): void
+	{
+		$before = $this->cookies->count();
+		$this->cookies->clear('127.0.0.1', '/', $name);
+		Assert::assertSame($before - 1, $this->cookies->count(), 'Cookie ' . $name . ' was not stored.');
 	}
 
 

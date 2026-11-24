@@ -10,9 +10,7 @@
 >
 	<php>
 		<env name="APP_ENV" value="test" force="true"/>
-		<env name="TEST_DATABASE_DSN" value="mysql:host=127.0.0.1;port=3307;dbname=opatrovatelky_nette_test"/>
-		<env name="TEST_DATABASE_USER" value="root"/>
-		<env name="TEST_DATABASE_PASSWORD" value=""/>
+		<!-- Database and other test values live in config/.env.test; override per machine in config/.env.test.local. -->
 	</php>
 
 	<testsuites>

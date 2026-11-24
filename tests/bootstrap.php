@@ -14,10 +14,5 @@ putenv('APP_ENV=test');
 $_ENV['APP_ENV'] = 'test';
 $_SERVER['APP_ENV'] = 'test';
 
-$_ENV['TEST_DATABASE_DSN'] ??= 'mysql:host=127.0.0.1;port=3307;dbname=opatrovatelky_nette_test';
-$_ENV['TEST_DATABASE_USER'] ??= 'root';
-$_ENV['TEST_DATABASE_PASSWORD'] ??= '';
-
-$_SERVER['TEST_DATABASE_DSN'] = $_ENV['TEST_DATABASE_DSN'];
-$_SERVER['TEST_DATABASE_USER'] = $_ENV['TEST_DATABASE_USER'];
-$_SERVER['TEST_DATABASE_PASSWORD'] = $_ENV['TEST_DATABASE_PASSWORD'];
+// Test values come from config/.env.test (plus the optional, git-ignored config/.env.test.local).
+App\Bootstrap::loadEnvironment(App\Model\Enum\Settings\Environment::TEST);

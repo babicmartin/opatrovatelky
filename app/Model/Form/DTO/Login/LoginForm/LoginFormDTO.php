@@ -6,6 +6,7 @@ final readonly class LoginFormDTO
 {
 	public function __construct(
 		private string $email,
+		#[\SensitiveParameter]
 		private string $password,
 	)
 	{

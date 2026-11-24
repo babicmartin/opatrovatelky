@@ -14,3 +14,4 @@ services:
     - App\Model\Security\LoginRateLimiter
     - App\Model\Security\SecurityAuditLogger
     - App\Model\Security\AccountPasswordService
+    - App\Model\Security\MediaAccessCookie(secret: %env.MEDIA_COOKIE_SECRET%)

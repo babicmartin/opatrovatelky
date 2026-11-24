@@ -2,8 +2,10 @@
 
 namespace App\UI\Admin\Control\Layout\Search;
 
+use App\Model\Enum\Acl\Resource;
 use App\Model\Repository\SearchRepository;
 use Nette\Application\UI\Control;
+use Nette\Security\User;
 use Tracy\Debugger;
 
 class SearchControl extends Control
@@ -20,6 +22,7 @@ class SearchControl extends Control
 
 	public function __construct(
 		private readonly SearchRepository $searchRepository,
+		private readonly User $user,
 	) {
 	}
 
@@ -33,6 +36,10 @@ class SearchControl extends Control
 	public function handleSearch(?int $type = null, string $term = ''): void
 	{
 		$type = $this->normalizeType($type ?? SearchRepository::TYPE_FAMILY);
+		if (!$this->isTypeAllowed($type)) {
+			$this->getPresenter()->error('Prístup zamietnutý', 403);
+		}
+
 		$term = trim($term);
 		$rows = $this->searchRepository->search($type, $term);
 
@@ -63,7 +70,10 @@ class SearchControl extends Control
 	public function handleSearchMobile(string $term = '', ?int $type = null): void
 	{
 		$term = trim($term);
-		$types = $type === null ? self::MOBILE_TYPE_ORDER : [$this->normalizeType($type)];
+		$types = $type === null ? $this->getAllowedTypes() : [$this->normalizeType($type)];
+		if ($types === [] || !$this->isTypeAllowed($types[0])) {
+			$this->getPresenter()->error('Prístup zamietnutý', 403);
+		}
 
 		$sections = [];
 		$counts = [];
@@ -97,6 +107,30 @@ class SearchControl extends Control
 		$html = (string) ob_get_clean();
 
 		$this->getPresenter()->sendJson(['html' => $html, 'counts' => $counts]);
+	}
+
+	/**
+	 * Search types of the modules the signed-in user may open, in mobile display order.
+	 * @return list<int>
+	 */
+	private function getAllowedTypes(): array
+	{
+		return array_values(array_filter(self::MOBILE_TYPE_ORDER, $this->isTypeAllowed(...)));
+	}
+
+	private function isTypeAllowed(int $type): bool
+	{
+		$resource = match ($type) {
+			SearchRepository::TYPE_BABYSITTER => Resource::BABYSITTER,
+			SearchRepository::TYPE_FAMILY, SearchRepository::TYPE_FAMILY_CONTACT => Resource::FAMILY,
+			SearchRepository::TYPE_PARTNER => Resource::PARTNER,
+			SearchRepository::TYPE_AGENCY => Resource::AGENCY,
+			default => null,
+		};
+
+		return $resource !== null
+			&& $this->user->isLoggedIn()
+			&& $this->user->isAllowed($resource->value);
 	}
 
 	private function getMobileLabel(int $type): string

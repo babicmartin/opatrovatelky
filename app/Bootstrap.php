@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace App;
 
 use App\Model\Enum\Settings\Environment;
-use Dotenv\Dotenv;
+use App\Model\Settings\EnvironmentFileLoader;
 use Nette\Bootstrap\Configurator;
 
 
 class Bootstrap
 {
+	/**
+	 * Kľúče, ktoré v súboroch .env smú chýbať. Kontajner dostane prázdnu hodnotu namiesto pádu,
+	 * napríklad keď sa nasadí kód skôr, než sa na hostingu doplní nový kľúč.
+	 */
+	private const array OptionalEnvironmentKeys = ['MEDIA_COOKIE_SECRET'];
+
 	public static function boot(): Configurator
 	{
 		$configurator = new Configurator;
@@ -20,12 +26,7 @@ class Bootstrap
 		$environment = Environment::tryFrom($rawEnvironment) ?? Environment::PRODUCTION;
 		$debugMode = $environment === Environment::DEVELOPMENT;
 
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../config/');
-        $dotenv->load();
-
-		if ($environment === Environment::TEST) {
-			self::setTestEnvironmentDefaults();
-		}
+		self::loadEnvironment($environment);
 
 		//$configurator->setDebugMode('secret@23.75.345.200'); // enable for your remote IP
         //$configurator->setDebugMode(getenv('APP_DEBUG') === '1');
@@ -49,20 +50,19 @@ class Bootstrap
 	}
 
 	/**
-	 * Keep test configuration usable without local secrets while still allowing
-	 * machine-specific overrides through the environment.
+	 * Načíta config/.env* pre dané prostredie do $_ENV a $_SERVER.
+	 * Ktoré súbory a v akom poradí, určuje EnvironmentFileLoader.
 	 */
-	private static function setTestEnvironmentDefaults(): void
+	public static function loadEnvironment(Environment $environment): void
 	{
-		$defaults = [
-			'TEST_DATABASE_DSN' => 'mysql:host=127.0.0.1;port=3307;dbname=opatrovatelky_nette_test',
-			'TEST_DATABASE_USER' => 'root',
-			'TEST_DATABASE_PASSWORD' => '',
-		];
+		$values = EnvironmentFileLoader::resolve(
+			dirname(__DIR__) . '/config',
+			$environment,
+			self::OptionalEnvironmentKeys,
+			self::getEnvironmentValue(...),
+		);
 
-		foreach ($defaults as $key => $default) {
-			$value = self::getEnvironmentValue($key) ?? $default;
-
+		foreach ($values as $key => $value) {
 			$_ENV[$key] = $value;
 			$_SERVER[$key] = $value;
 		}

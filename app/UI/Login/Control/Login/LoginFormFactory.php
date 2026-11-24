@@ -6,6 +6,7 @@ use App\Model\Form\DTO\Login\LoginForm\LoginFormDTO;
 use App\Model\Form\Factory\BaseFormFactory;
 use App\Model\Security\AdminAuthenticator;
 use App\Model\Security\LoginRateLimiter;
+use App\Model\Security\LoginRateLimitUnavailableException;
 use App\Model\Security\MediaAccessCookie;
 use App\Model\Security\SecurityAuditLogger;
 use Nette\Application\UI\Form;
@@ -51,7 +52,17 @@ class LoginFormFactory
 	{
 		$email = trim($formDTO->getEmail());
 		$ipAddress = $this->httpRequest->getRemoteAddress() ?? '';
-		$blockedUntil = $this->loginRateLimiter->getBlockedUntil($email, $ipAddress);
+		try {
+			$blockedUntil = $this->loginRateLimiter->getBlockedUntil($email, $ipAddress);
+		} catch (LoginRateLimitUnavailableException $exception) {
+			// Without the attempt counts nothing limits password guessing, so the login is refused.
+			$form->addError('Prihlásenie sa nepodarilo');
+			$this->securityAuditLogger->log('login_limit_unavailable', null, $email, [
+				'error' => ($exception->getPrevious() ?? $exception)::class,
+			]);
+			$this->logger->error('Login refused because the rate limit is unavailable: ' . $email);
+			return;
+		}
 
 		if ($blockedUntil !== null) {
 			$form->addError('Prihlásenie sa nepodarilo');

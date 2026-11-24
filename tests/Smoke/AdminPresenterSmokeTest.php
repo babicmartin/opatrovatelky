@@ -84,6 +84,25 @@ final class AdminPresenterSmokeTest extends DatabaseTestCase
 		self::assertStringContainsString('Prihlásenia do administrácie', $html);
 	}
 
+	public function testLoginLogPageShowsRateLimitOutage(): void
+	{
+		$this->loginAs(UserRole::CEO);
+		TestDatabase::insert('security_audit_log', [
+			'event_type' => 'login_limit_unavailable',
+			'email' => 'outage@example.test',
+			'ip_address' => '203.0.113.10',
+		]);
+
+		$html = \Dom\HTMLDocument::createFromString($this->renderPresenter('Admin:LoginLog'), LIBXML_NOERROR, 'UTF-8');
+
+		$badge = $html->querySelector('table tbody tr td span.badge');
+		self::assertNotNull($badge);
+		self::assertSame('Limit nedostupný', trim((string) $badge->textContent));
+		self::assertSame('badge bg-dark', $badge->getAttribute('class'));
+		self::assertStringContainsString('outage@example.test', (string) $html->querySelector('table tbody tr')?->textContent);
+		self::assertNotNull($html->querySelector('select option[value="login_limit_unavailable"]'));
+	}
+
 	protected function tearDown(): void
 	{
 		$this->logout();

@@ -2,18 +2,26 @@
 
 namespace App\UI\Admin\Control\Layout\Toolbar\FamilyOffcanvas;
 
+use App\Model\Enum\Acl\Resource;
 use App\Model\Repository\FamilyRepository;
 use Nette\Application\UI\Control;
+use Nette\Security\User;
 
 class FamilyOffcanvasControl extends Control
 {
 	public function __construct(
 		private readonly FamilyRepository $familyRepository,
+		private readonly User $user,
 	) {
 	}
 
 	public function render(): void
 	{
+		// The panel sits in the layout of every page, so it checks the module permission itself.
+		if (!$this->user->isLoggedIn() || !$this->user->isAllowed(Resource::FAMILY->value)) {
+			return;
+		}
+
 		$presenter = $this->getPresenter();
 
 		$lastFamilies = array_map(

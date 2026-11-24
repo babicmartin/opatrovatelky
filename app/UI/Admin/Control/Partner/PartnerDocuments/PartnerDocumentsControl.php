@@ -141,17 +141,19 @@ class PartnerDocumentsControl extends Control
 				->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
 			$form->addSubmit('save', 'Uložiť')->setHtmlAttribute('class', 'd-none');
 
-			$form->onSuccess[] = function (Form $form, ArrayHash $values): void {
+			// Save the document verified above, never the one named by the hidden field of the request.
+			$documentId = (int) $document['id'];
+			$form->onSuccess[] = function (Form $form, ArrayHash $values) use ($documentId): void {
 				if (!$this->user->isAllowed(Resource::PARTNER->value)) {
 					$this->getPresenter()->error('Prístup zamietnutý', 403);
 				}
 
 				$presenter = $this->getPresenter();
 				if ($presenter instanceof AdminPresenter) {
-					$presenter->tryHandleAutosavePartialRequest();
+					$presenter->tryHandleAutosavePartialRequest($documentId);
 				}
 
-				$this->fileRepository->updateDocument((int) $values->id, [
+				$this->fileRepository->updateDocument($documentId, [
 					'notice' => (string) $values->notice,
 					'validFrom' => $this->dateService->tryCreateFromUserInput((string) $values->validFrom),
 					'validTo' => $this->dateService->tryCreateFromUserInput((string) $values->validTo),

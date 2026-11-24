@@ -235,7 +235,7 @@
 									<div n:if="(int) $babysitter['type'] === 2" class="mb10">{label workShoes class => 'inputLabel' /}{input workShoes}</div>
 									<div n:if="(int) $babysitter['type'] === 2" class="mb10">{label shoeSize class => 'inputLabel' /}{input shoeSize}</div>
 									<div n:if="(int) $babysitter['type'] === 2" class="mb10">{label germanTaxId class => 'inputLabel' /}{input germanTaxId}</div>
-									<div n:if="(int) $babysitter['type'] === 1" class="mb10">{label diseaseIds class => 'inputLabel' /}{input diseaseIds}</div>
+									<div n:if="(int) $babysitter['type'] === 1" class="mb10">{include checkboxList, control: $form['diseaseIds']}</div>
 									{input save}
 								</div>
 							</div>
@@ -251,12 +251,12 @@
 						<div class="row">
 							<div class="col-xl-6 col-md-12">
 								<div class="divone">
-									<div class="mb10">{label qualificationIds class => 'inputLabel' /}{input qualificationIds}</div>
+									<div class="mb10">{include checkboxList, control: $form['qualificationIds']}</div>
 								</div>
 							</div>
 							<div class="col-xl-6 col-md-12">
 								<div class="divone">
-									<div class="mb10">{label preferenceIds class => 'inputLabel' /}{input preferenceIds}</div>
+									<div class="mb10">{include checkboxList, control: $form['preferenceIds']}</div>
 									{input save}
 								</div>
 							</div>
@@ -360,6 +360,16 @@
 		</div>
 		{include profileImage}
 	</div>
+{/define}
+
+{define checkboxList, Nette\Forms\Controls\CheckboxList $control}
+	{label $control class => 'inputLabel d-block mb-2' /}
+	{foreach $control->getItems() as $key => $caption}
+		<div class="form-check mb-1">
+			{input $control:$key class => 'form-check-input js-autosave-control'}
+			{label $control:$key class => 'form-check-label'}{$caption}{/label}
+		</div>
+	{/foreach}
 {/define}
 
 {define profileImage}

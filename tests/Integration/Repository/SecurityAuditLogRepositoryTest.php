@@ -70,6 +70,7 @@ final class SecurityAuditLogRepositoryTest extends DatabaseTestCase
 			'login_success' => 'Úspešné',
 			'login_failed' => 'Neúspešné',
 			'login_blocked' => 'Blokované',
+			'login_limit_unavailable' => 'Limit nedostupný',
 		], $repository->getLoginEventOptions());
 
 		self::assertSame([

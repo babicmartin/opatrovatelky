@@ -23,19 +23,37 @@ final class SecurityLoginAttemptRepository extends BaseRepository
 	}
 
 	/**
+	 * Failed attempts on one account, whatever address they came from.
 	 * @return array{failureCount:int,latestFailureAt:?string}
 	 */
-	public function findFailureSummary(string $email, string $ipAddress, DateTimeImmutable $since): array
+	public function findFailureSummaryByEmail(string $email, DateTimeImmutable $since): array
+	{
+		return $this->findFailureSummary(SecurityLoginAttemptTableMap::COL_EMAIL, $email, $since);
+	}
+
+	/**
+	 * Failed attempts from one address, whatever account they aimed at.
+	 * @return array{failureCount:int,latestFailureAt:?string}
+	 */
+	public function findFailureSummaryByIpAddress(string $ipAddress, DateTimeImmutable $since): array
+	{
+		return $this->findFailureSummary(SecurityLoginAttemptTableMap::COL_IP_ADDRESS, $ipAddress, $since);
+	}
+
+	/**
+	 * @param SecurityLoginAttemptTableMap::COL_EMAIL|SecurityLoginAttemptTableMap::COL_IP_ADDRESS $column
+	 * @return array{failureCount:int,latestFailureAt:?string}
+	 */
+	private function findFailureSummary(string $column, string $value, DateTimeImmutable $since): array
 	{
 		$row = $this->database->query(
 			'SELECT COUNT(*) AS failure_count, MAX(' . SecurityLoginAttemptTableMap::COL_CREATED_AT . ') AS latest_failure_at
 			FROM ' . SecurityLoginAttemptTableMap::TABLE_NAME . '
 			WHERE ' . SecurityLoginAttemptTableMap::COL_SUCCESS . ' = 0
 				AND ' . SecurityLoginAttemptTableMap::COL_CREATED_AT . ' >= ?
-				AND (' . SecurityLoginAttemptTableMap::COL_EMAIL . ' = ? OR ' . SecurityLoginAttemptTableMap::COL_IP_ADDRESS . ' = ?)',
+				AND ' . $column . ' = ?',
 			$since->format('Y-m-d H:i:s'),
-			$email,
-			$ipAddress,
+			$value,
 		)->fetch();
 
 		if (!$row) {

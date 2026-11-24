@@ -2,18 +2,26 @@
 
 namespace App\UI\Admin\Control\Layout\Toolbar\ProjectOffcanvas;
 
+use App\Model\Enum\Acl\Resource;
 use App\Model\Repository\FamilyRepository;
 use Nette\Application\UI\Control;
+use Nette\Security\User;
 
 class ProjectOffcanvasControl extends Control
 {
 	public function __construct(
 		private readonly FamilyRepository $familyRepository,
+		private readonly User $user,
 	) {
 	}
 
 	public function render(): void
 	{
+		// The panel sits in the layout of every page, so it checks the module permission itself.
+		if (!$this->user->isLoggedIn() || !$this->user->isAllowed(Resource::PROJECT->value)) {
+			return;
+		}
+
 		$presenter = $this->getPresenter();
 
 		$lastProjects = array_map(

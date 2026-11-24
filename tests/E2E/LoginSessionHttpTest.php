@@ -76,6 +76,29 @@ final class LoginSessionHttpTest extends DatabaseTestCase
 	}
 
 
+	public function testFailuresOfAnotherAccountOnTheSameAddressDoNotBlockThisAccount(): void
+	{
+		$colleague = 'colleague@example.test';
+		for ($attempt = 1; $attempt <= 10; $attempt++) {
+			$this->assertLoginRejected($this->web->login($colleague, 'incorrect-password'));
+		}
+		// The colleague's account is blocked now; every request came from the same address.
+		$this->assertLoginRejected($this->web->login($colleague, 'incorrect-password'));
+
+		$this->assertLoginSucceeds();
+
+		$events = [];
+		foreach ($this->getDatabase()->table(SecurityAuditLogTableMap::TABLE_NAME)->order(SecurityAuditLogTableMap::COL_ID) as $row) {
+			$events[] = $row->{SecurityAuditLogTableMap::COL_EVENT_TYPE} . ' ' . $row->{SecurityAuditLogTableMap::COL_EMAIL};
+		}
+		self::assertSame([
+			...array_fill(0, 10, 'login_failed ' . $colleague),
+			'login_blocked ' . $colleague,
+			'login_success ' . self::Email,
+		], $events);
+	}
+
+
 	public function testLogoutRevokesAccessAndAuditsTheAuthenticatedUser(): void
 	{
 		$this->assertLoginSucceeds();

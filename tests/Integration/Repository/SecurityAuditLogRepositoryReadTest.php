@@ -69,6 +69,7 @@ final class SecurityAuditLogRepositoryReadTest extends DatabaseTestCase
 			'login_success' => 'Úspešné',
 			'login_failed' => 'Neúspešné',
 			'login_blocked' => 'Blokované',
+			'login_limit_unavailable' => 'Limit nedostupný',
 		], $this->repository()->getLoginEventOptions());
 		self::assertSame([(string) $userId => 'Option User'], $this->repository()->findLoginUserOptions());
 	}

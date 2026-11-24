@@ -16,6 +16,7 @@ final class SecurityAuditLogRepository extends BaseRepository
 		'login_success' => 'Úspešné',
 		'login_failed' => 'Neúspešné',
 		'login_blocked' => 'Blokované',
+		'login_limit_unavailable' => 'Limit nedostupný',
 	];
 
 	protected function getTableName(): string
@@ -197,7 +198,10 @@ final class SecurityAuditLogRepository extends BaseRepository
 
 	private function buildLoginEventWhereSql(string $auditTableAlias): string
 	{
-		return $auditTableAlias . '.' . SecurityAuditLogTableMap::COL_EVENT_TYPE . ' IN (?, ?, ?)';
+		// One placeholder per login event, so adding an event to LOGIN_EVENT_OPTIONS needs no change here.
+		$placeholders = implode(', ', array_fill(0, count(self::LOGIN_EVENT_OPTIONS), '?'));
+
+		return $auditTableAlias . '.' . SecurityAuditLogTableMap::COL_EVENT_TYPE . ' IN (' . $placeholders . ')';
 	}
 
 	private function parseFilterDate(string $value): ?DateTimeImmutable
@@ -255,6 +259,7 @@ final class SecurityAuditLogRepository extends BaseRepository
 			'login_success' => 'bg-success',
 			'login_failed' => 'bg-danger',
 			'login_blocked' => 'bg-warning text-dark',
+			'login_limit_unavailable' => 'bg-dark',
 			default => 'bg-secondary',
 		};
 	}

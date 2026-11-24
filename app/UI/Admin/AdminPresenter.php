@@ -4,7 +4,6 @@ namespace App\UI\Admin;
 
 use App\Model\Latte\LatteDefaultVariables;
 use App\Model\Security\MediaAccessCookie;
-use App\Model\Security\SecurityAuditLogger;
 use App\Model\Service\Autosave\AutosaveFieldUpdateService;
 use App\Model\Table\FileTableMap;
 use App\UI\Admin\Control\Layout\Menu\MenuPresenterTrait;
@@ -15,12 +14,12 @@ use App\UI\Admin\Control\Layout\Toolbar\ProjectOffcanvas\ProjectOffcanvasPresent
 use App\UI\Admin\Control\Layout\Toolbar\ToolbarPresenterTrait;
 use App\UI\Admin\Control\User\UserProfileImage\UserProfileImagePresenterTrait;
 use App\UI\Admin\Form\ConfirmedCreateFormFactory;
+use App\UI\Login\Control\Logout\LogoutFormFactory;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\Presenter;
 use Nette\Database\Explorer;
 use Nette\Http\FetchSite;
 use Nette\Security\IIdentity;
-use Nette\Security\SimpleIdentity;
 use Nette\Security\User as SecurityUser;
 use Psr\Log\LoggerInterface;
 
@@ -35,7 +34,7 @@ abstract class AdminPresenter extends Presenter
 	use UserProfileImagePresenterTrait;
 
 	private AutosaveFieldUpdateService $autosaveFieldUpdateService;
-	private SecurityAuditLogger $securityAuditLogger;
+	private LogoutFormFactory $logoutFormFactory;
 	private Explorer $database;
 	private LoggerInterface $logger;
 	private ConfirmedCreateFormFactory $confirmedCreateFormFactory;
@@ -57,9 +56,9 @@ abstract class AdminPresenter extends Presenter
 		$this->database = $database;
 	}
 
-	public function injectSecurityAuditLogger(SecurityAuditLogger $securityAuditLogger): void
+	public function injectLogoutFormFactory(LogoutFormFactory $logoutFormFactory): void
 	{
-		$this->securityAuditLogger = $securityAuditLogger;
+		$this->logoutFormFactory = $logoutFormFactory;
 	}
 
 	public function injectLogger(LoggerInterface $logger): void
@@ -95,7 +94,7 @@ abstract class AdminPresenter extends Presenter
 		$this->getSession()->start();
 		$this->mediaAccessCookie->sync($this->getUser()->isLoggedIn());
 
-		if (!$this->getUser()->isLoggedIn() && $this->getName() !== 'Login:Login') {
+		if (!$this->getUser()->isLoggedIn()) {
 			$this->logger->warning('Admin request redirected to login because user is not logged in.', $this->createUnauthenticatedRequestLogContext($sessionExistsBeforeStart));
 			$this->redirect('@login', ['storeRequestId' => $this->storeRequest()]);
 		}
@@ -122,37 +121,12 @@ abstract class AdminPresenter extends Presenter
 		return $this->confirmedCreateFormFactory->create($buttonText, $confirmMessage, $onSuccess, $style);
 	}
 
+	/**
+	 * Rendered by the layout only. The form is submitted to and handled by LoginPresenter.
+	 */
 	protected function createComponentLogoutForm(): Form
 	{
-		$form = new Form();
-		$form->addProtection();
-		$form->setAction($this->link(':Login:Login:logout'));
-		$form->addSubmit('send', 'Odhlásiť sa');
-		$form->onSuccess[] = [$this, 'logoutFormSucceeded'];
-		$form->onError[] = function (): void {
-			$this->error('Odhlásenie sa nepodarilo.', 403);
-		};
-
-		return $form;
-	}
-
-	public function logoutFormSucceeded(): void
-	{
-		if ($this->getUser()->isLoggedIn()) {
-			$userId = $this->getUser()->getId();
-			$identity = $this->getUser()->getIdentity();
-			$identityData = $identity instanceof SimpleIdentity ? $identity->getData() : [];
-			$this->securityAuditLogger->log(
-				'logout',
-				is_int($userId) ? $userId : null,
-				isset($identityData['email']) ? (string) $identityData['email'] : null,
-			);
-			$this->getUser()->logout(true);
-			$this->getSession()->regenerateId();
-		}
-
-		$this->mediaAccessCookie->clear();
-		$this->redirect('@login');
+		return $this->logoutFormFactory->create($this->link(':Login:Login:logout'));
 	}
 
 	public function tryHandleAutosavePartialRequest(?int $expectedEntityId = null): void

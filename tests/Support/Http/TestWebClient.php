@@ -75,11 +75,15 @@ final class TestWebClient
 	}
 
 
-	/** @param array<string, string> $fields */
+	/**
+	 * Submits the form with its hidden and submit fields. A value in $fields wins over the rendered one,
+	 * so a test can forge a hidden field the way a tampered request would.
+	 * @param array<string, string> $fields
+	 */
 	public function submitForm(string $path, string $formId, array $fields = []): ResponseInterface
 	{
 		[$action, $defaults] = $this->readForm($path, $formId);
-		return $this->post($action, $defaults + $fields);
+		return $this->post($action, $fields + $defaults);
 	}
 
 

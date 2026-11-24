@@ -8,27 +8,48 @@ use Tests\Support\PHPUnit\DatabaseTestCase;
 
 final class SecurityLoginAttemptRepositoryTest extends DatabaseTestCase
 {
-	public function testRecordsFailureAndFindsFailureSummary(): void
+	public function testRecordsFailureAndFindsItByEmailAndByAddress(): void
 	{
 		$repository = $this->getContainer()->getByType(SecurityLoginAttemptRepository::class);
+		$since = new DateTimeImmutable('-15 minutes');
 
 		$repository->recordAttempt('test@example.com', '127.0.0.1', false, 'invalid_password');
 
-		$summary = $repository->findFailureSummary('test@example.com', '127.0.0.1', new DateTimeImmutable('-15 minutes'));
+		$byEmail = $repository->findFailureSummaryByEmail('test@example.com', $since);
+		self::assertSame(1, $byEmail['failureCount']);
+		self::assertIsString($byEmail['latestFailureAt']);
 
-		self::assertSame(1, $summary['failureCount']);
-		self::assertIsString($summary['latestFailureAt']);
+		$byAddress = $repository->findFailureSummaryByIpAddress('127.0.0.1', $since);
+		self::assertSame(1, $byAddress['failureCount']);
+		self::assertIsString($byAddress['latestFailureAt']);
+	}
+
+	public function testEmailAndAddressAreCountedSeparately(): void
+	{
+		$repository = $this->getContainer()->getByType(SecurityLoginAttemptRepository::class);
+		$since = new DateTimeImmutable('-15 minutes');
+
+		$repository->recordAttempt('first@example.com', '10.0.0.1', false, 'invalid_password');
+		$repository->recordAttempt('first@example.com', '10.0.0.2', false, 'invalid_password');
+		$repository->recordAttempt('second@example.com', '10.0.0.1', false, 'invalid_password');
+
+		self::assertSame(2, $repository->findFailureSummaryByEmail('first@example.com', $since)['failureCount']);
+		self::assertSame(1, $repository->findFailureSummaryByEmail('second@example.com', $since)['failureCount']);
+		self::assertSame(2, $repository->findFailureSummaryByIpAddress('10.0.0.1', $since)['failureCount']);
+		self::assertSame(1, $repository->findFailureSummaryByIpAddress('10.0.0.2', $since)['failureCount']);
+		self::assertSame(0, $repository->findFailureSummaryByIpAddress('10.0.0.3', $since)['failureCount']);
 	}
 
 	public function testSuccessfulAttemptDoesNotCountAsFailure(): void
 	{
 		$repository = $this->getContainer()->getByType(SecurityLoginAttemptRepository::class);
+		$since = new DateTimeImmutable('-15 minutes');
 
 		$repository->recordAttempt('test@example.com', '127.0.0.1', true);
 
-		$summary = $repository->findFailureSummary('test@example.com', '127.0.0.1', new DateTimeImmutable('-15 minutes'));
-
-		self::assertSame(0, $summary['failureCount']);
-		self::assertNull($summary['latestFailureAt']);
+		$byEmail = $repository->findFailureSummaryByEmail('test@example.com', $since);
+		self::assertSame(0, $byEmail['failureCount']);
+		self::assertNull($byEmail['latestFailureAt']);
+		self::assertSame(0, $repository->findFailureSummaryByIpAddress('127.0.0.1', $since)['failureCount']);
 	}
 }

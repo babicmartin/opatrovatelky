@@ -11,6 +11,10 @@ use App\Model\Table\OpatrovatelkaTableMap;
 use App\Model\Table\PartnerTableMap;
 use App\Model\Table\TurnusTableMap;
 use App\Model\Table\UserTableMap;
+use Nette\Caching\Storages\DevNullStorage;
+use Nette\Database\Connection;
+use Nette\Database\Explorer;
+use Nette\Database\Structure;
 use PDO;
 use PDOException;
 use RuntimeException;
@@ -68,6 +72,22 @@ final class TestDatabase
 		self::ensureSchema();
 
 		return self::createPdo(self::env('TEST_DATABASE_DSN', 'mysql:host=127.0.0.1;port=3307;dbname=opatrovatelky_nette_test'));
+	}
+
+	/**
+	 * Explorer on the same server, but on a schema without any application table,
+	 * so every application query fails at once. Simulates a database outage without touching the test schema.
+	 */
+	public static function explorerWithoutTables(): Explorer
+	{
+		$dsn = self::dsnWithoutDatabase(self::env('TEST_DATABASE_DSN', 'mysql:host=127.0.0.1;port=3307;dbname=opatrovatelky_nette_test'));
+		$connection = new Connection(
+			self::ensureCharset($dsn . ';dbname=information_schema'),
+			self::env('TEST_DATABASE_USER', 'root'),
+			self::env('TEST_DATABASE_PASSWORD', ''),
+		);
+
+		return new Explorer($connection, new Structure($connection, new DevNullStorage()));
 	}
 
 	/**

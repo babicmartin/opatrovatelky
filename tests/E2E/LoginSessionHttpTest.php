@@ -8,6 +8,9 @@ use App\Model\Table\SecurityAuditLogTableMap;
 use App\Model\Table\SecurityLoginAttemptTableMap;
 use App\Model\Table\UserTableMap;
 use DateTimeImmutable;
+use Dom\HTMLDocument;
+use Nette\Http\Session;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\ResponseInterface;
 use Tests\Support\Database\TestDatabase;
 use Tests\Support\Http\TestWebClient;
@@ -18,6 +21,9 @@ final class LoginSessionHttpTest extends DatabaseTestCase
 	private const Email = 'session@example.test';
 	private const Password = 'session-test-password';
 	private TestWebClient $web;
+
+	/** @var list<TestWebClient> */
+	private array $otherBrowsers = [];
 	private int $userId;
 
 
@@ -37,6 +43,9 @@ final class LoginSessionHttpTest extends DatabaseTestCase
 	{
 		if (isset($this->web)) {
 			$this->web->stop();
+		}
+		foreach ($this->otherBrowsers as $browser) {
+			$browser->stop();
 		}
 		parent::tearDown();
 	}
@@ -180,6 +189,153 @@ final class LoginSessionHttpTest extends DatabaseTestCase
 	}
 
 
+	/** @return array<string, array{string}> */
+	public static function unusableFormTokens(): array
+	{
+		return [
+			'no token' => ['missing'],
+			'invented token' => ['invented'],
+			'token of another session' => ['foreign'],
+		];
+	}
+
+
+	#[DataProvider('unusableFormTokens')]
+	public function testLoginWithoutTheFormTokenOfItsSessionIsNotProcessed(string $case): void
+	{
+		$fields = ['email' => self::Email, 'password' => self::Password] + $this->readLoginFields($this->web);
+		$valid = $fields['_token_'];
+		if ($case === 'missing') {
+			unset($fields['_token_']);
+		} elseif ($case === 'invented') {
+			$fields['_token_'] = str_repeat('a', strlen($valid));
+		} else {
+			$fields['_token_'] = $this->readLoginFields($this->openBrowser())['_token_'];
+			self::assertNotSame($valid, $fields['_token_']);
+		}
+
+		$response = $this->web->post('/login/', $fields);
+		self::assertSame(200, $response->getStatusCode());
+		// The password is correct, yet the handler never ran: nobody is signed in and nothing was recorded.
+		self::assertStringNotContainsString('Prihlásenie sa nepodarilo', (string) $response->getBody());
+		$this->assertLoginRequired();
+		self::assertSame(0, $this->getDatabase()->table(SecurityAuditLogTableMap::TABLE_NAME)->count('*'));
+		self::assertSame(0, $this->getDatabase()->table(SecurityLoginAttemptTableMap::TABLE_NAME)->count('*'));
+
+		// The very same request with the token of its own session signs in, so only the token stood in the way.
+		$fields['_token_'] = $valid;
+		self::assertSame(303, $this->web->post('/login/', $fields)->getStatusCode());
+	}
+
+
+	public function testLoginReplacesASessionIdPlantedByAnAttacker(): void
+	{
+		$cookie = $this->getContainer()->getByType(Session::class)->getName();
+		$attacker = $this->openBrowser();
+		self::assertSame(200, $attacker->get('/login/')->getStatusCode());
+		$planted = $attacker->cookieValue($cookie);
+		self::assertIsString($planted);
+
+		// The victim's browser carries the attacker's ID and the server accepts it on the login page.
+		$this->web->setCookie($cookie, $planted);
+		self::assertSame(200, $this->web->get('/login/')->getStatusCode());
+		self::assertSame($planted, $this->web->cookieValue($cookie));
+
+		self::assertSame(303, $this->web->login(self::Email, self::Password)->getStatusCode());
+		$issued = $this->web->cookieValue($cookie);
+		self::assertIsString($issued);
+		self::assertNotSame($planted, $issued);
+		self::assertSame(200, $this->web->get('/change-log')->getStatusCode());
+
+		// The ID the attacker knows was thrown away by the login and opens nothing.
+		$response = $attacker->get('/change-log');
+		self::assertSame(302, $response->getStatusCode());
+		self::assertSame('/login/', parse_url($response->getHeaderLine('Location'), PHP_URL_PATH));
+	}
+
+
+	/** @return array<string, array{string}> */
+	public static function outdatedHashes(): array
+	{
+		return [
+			'unsalted SHA-256 of the old CRM' => [crypt(self::Password, '$5$')],
+			'bcrypt' => [password_hash(self::Password, PASSWORD_BCRYPT, ['cost' => 4])],
+		];
+	}
+
+
+	#[DataProvider('outdatedHashes')]
+	public function testOutdatedHashSignsInAndIsReplacedByArgon2id(string $outdated): void
+	{
+		self::assertStringStartsNotWith('$argon2id$', $outdated);
+		$this->getDatabase()->table(UserTableMap::TABLE_NAME)->wherePrimary($this->userId)
+			->update([UserTableMap::COL_PASSWORD => $outdated]);
+
+		$this->assertLoginRejected($this->web->login(self::Email, 'incorrect-password'));
+		self::assertSame(['hash' => $outdated, 'version' => 0], $this->readPasswordState());
+
+		self::assertSame(303, $this->web->login(self::Email, self::Password)->getStatusCode());
+		$upgraded = $this->readPasswordState();
+		self::assertStringStartsWith('$argon2id$', $upgraded['hash']);
+		// Also proves the new hash fits the column: a truncated one would not verify.
+		self::assertTrue(password_verify(self::Password, $upgraded['hash']));
+		self::assertFalse(password_verify('incorrect-password', $upgraded['hash']));
+		// The upgrade is not a password change, other devices stay signed in.
+		self::assertSame(0, $upgraded['version']);
+
+		// The new hash signs in as well and is kept as it is.
+		self::assertSame(303, $this->openBrowser()->login(self::Email, self::Password)->getStatusCode());
+		self::assertSame($upgraded, $this->readPasswordState());
+	}
+
+
+	public function testUnknownEmailWrongPasswordAndInactiveAccountGetTheSameAnswer(): void
+	{
+		$unknown = 'nobody@example.test';
+		$inactive = 'inactive@example.test';
+		TestDatabase::createUser([
+			UserTableMap::COL_EMAIL => $inactive,
+			UserTableMap::COL_PASSWORD => password_hash(self::Password, PASSWORD_BCRYPT, ['cost' => 4]),
+			UserTableMap::COL_ACTIVE => 0,
+		]);
+
+		foreach ([$unknown => self::Password, self::Email => 'incorrect-password', $inactive => self::Password] as $email => $password) {
+			$response = $this->web->login($email, $password);
+			self::assertSame(200, $response->getStatusCode(), $email);
+			self::assertSame(['Prihlásenie sa nepodarilo'], $this->readLoginErrors($response), $email);
+		}
+		$this->assertLoginRequired();
+
+		$audit = [];
+		foreach ($this->getDatabase()->table(SecurityAuditLogTableMap::TABLE_NAME)->order(SecurityAuditLogTableMap::COL_ID) as $row) {
+			$audit[] = [
+				$row->{SecurityAuditLogTableMap::COL_EVENT_TYPE},
+				$row->{SecurityAuditLogTableMap::COL_EMAIL},
+				$row->{SecurityAuditLogTableMap::COL_USER_ID},
+			];
+		}
+		self::assertSame([
+			['login_failed', $unknown, null],
+			['login_failed', self::Email, null],
+			['login_failed', $inactive, null],
+		], $audit);
+
+		$attempts = [];
+		foreach ($this->getDatabase()->table(SecurityLoginAttemptTableMap::TABLE_NAME)->order(SecurityLoginAttemptTableMap::COL_ID) as $row) {
+			$attempts[] = [
+				$row->{SecurityLoginAttemptTableMap::COL_EMAIL},
+				(int) $row->{SecurityLoginAttemptTableMap::COL_SUCCESS},
+				$row->{SecurityLoginAttemptTableMap::COL_FAILURE_REASON},
+			];
+		}
+		self::assertSame([
+			[$unknown, 0, 'authentication_failed'],
+			[self::Email, 0, 'authentication_failed'],
+			[$inactive, 0, 'authentication_failed'],
+		], $attempts);
+	}
+
+
 	private function assertMediaCookieIssued(ResponseInterface $response): void
 	{
 		$header = $this->findMediaCookie($response);
@@ -233,6 +389,57 @@ final class LoginSessionHttpTest extends DatabaseTestCase
 	{
 		self::assertSame(200, $response->getStatusCode());
 		self::assertStringContainsString('Prihlásenie sa nepodarilo', (string) $response->getBody());
+	}
+
+
+	/** A second, independent browser; stopped in tearDown(). */
+	private function openBrowser(): TestWebClient
+	{
+		return $this->otherBrowsers[] = new TestWebClient();
+	}
+
+
+	/** @return array<string, string> hidden and submit fields of the login form as this browser's session got them */
+	private function readLoginFields(TestWebClient $browser): array
+	{
+		$response = $browser->get('/login/');
+		self::assertSame(200, $response->getStatusCode());
+		$form = HTMLDocument::createFromString((string) $response->getBody(), LIBXML_NOERROR, 'UTF-8')
+			->getElementById('frm-login-form');
+		self::assertNotNull($form);
+		$fields = [];
+		foreach ($form->querySelectorAll('input[type=hidden], button[type=submit]') as $input) {
+			$fields[(string) $input->getAttribute('name')] = $input->getAttribute('value') ?? '';
+		}
+		self::assertNotSame('', $fields['_token_'] ?? '');
+
+		return $fields;
+	}
+
+
+	/** @return list<string> */
+	private function readLoginErrors(ResponseInterface $response): array
+	{
+		$page = HTMLDocument::createFromString((string) $response->getBody(), LIBXML_NOERROR, 'UTF-8');
+		$errors = [];
+		foreach ($page->querySelectorAll('#frm-login-form .alert-danger') as $alert) {
+			$errors[] = trim($alert->textContent ?? '');
+		}
+
+		return $errors;
+	}
+
+
+	/** @return array{hash: string, version: int} */
+	private function readPasswordState(): array
+	{
+		$row = $this->getDatabase()->table(UserTableMap::TABLE_NAME)->get($this->userId);
+		self::assertNotNull($row);
+
+		return [
+			'hash' => (string) $row->{UserTableMap::COL_PASSWORD},
+			'version' => (int) $row->{UserTableMap::COL_SESSION_VERSION},
+		];
 	}
 
 

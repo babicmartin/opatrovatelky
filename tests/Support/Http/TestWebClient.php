@@ -6,6 +6,7 @@ use Dom\Element;
 use Dom\HTMLDocument;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Cookie\SetCookie;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\UriResolver;
 use PHPUnit\Framework\Assert;
@@ -142,6 +143,27 @@ final class TestWebClient
 		$before = $this->cookies->count();
 		$this->cookies->clear('127.0.0.1', '/', $name);
 		Assert::assertSame($before - 1, $this->cookies->count(), 'Cookie ' . $name . ' was not stored.');
+	}
+
+
+	/** Value of a cookie this browser holds for the test server. */
+	public function cookieValue(string $name): ?string
+	{
+		return $this->cookies->getCookieByName($name)?->getValue();
+	}
+
+
+	/** Plants a cookie into this browser, the way an attacker fixes a session ID for the victim. */
+	public function setCookie(string $name, string $value): void
+	{
+		$this->cookies->setCookie(new SetCookie([
+			'Name' => $name,
+			'Value' => $value,
+			'Domain' => '127.0.0.1',
+			'Path' => '/',
+			// Same identity as a cookie the server sets without a Domain attribute, so the server's next one replaces it.
+			'HostOnly' => true,
+		]));
 	}
 
 

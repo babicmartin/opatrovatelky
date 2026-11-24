@@ -120,6 +120,78 @@
 		</a>
 	</li>
 
+		<li class="nav-item">
+			<a class="nav-link" style="color:#C0C4DD" href="/family">
+				<svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" style="fill: #ccd4e0 !important;" width="24" height="24" viewBox="0 0 24 24">
+					<path d="M20 17V7c0-2.168-3.663-4-8-4S4 4.832 4 7v10c0 2.168 3.663 4 8 4s8-1.832 8-4zM12 5c3.691 0 5.931 1.507 6 1.994C17.931 7.493 15.691 9 12 9S6.069 7.493 6 7.006C6.069 6.507 8.309 5 12 5zM6 9.607C7.479 10.454 9.637 11 12 11s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2V9.607zM6 17v-2.393C7.479 15.454 9.637 16 12 16s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2z"></path>
+				</svg>
+				<span>Rodiny</span>
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" style="color:#C0C4DD" href="/babysitter">
+				<svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" style="fill: #ccd4e0 !important;" width="24" height="24" viewBox="0 0 24 24">
+					<path d="M20 17V7c0-2.168-3.663-4-8-4S4 4.832 4 7v10c0 2.168 3.663 4 8 4s8-1.832 8-4zM12 5c3.691 0 5.931 1.507 6 1.994C17.931 7.493 15.691 9 12 9S6.069 7.493 6 7.006C6.069 6.507 8.309 5 12 5zM6 9.607C7.479 10.454 9.637 11 12 11s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2V9.607zM6 17v-2.393C7.479 15.454 9.637 16 12 16s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2z"></path>
+				</svg>
+				<span>Opatrovateľky</span>
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" style="color:#C0C4DD" href="/partner">
+				<svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" style="fill: #ccd4e0 !important;" width="24" height="24" viewBox="0 0 24 24">
+					<path d="M20 17V7c0-2.168-3.663-4-8-4S4 4.832 4 7v10c0 2.168 3.663 4 8 4s8-1.832 8-4zM12 5c3.691 0 5.931 1.507 6 1.994C17.931 7.493 15.691 9 12 9S6.069 7.493 6 7.006C6.069 6.507 8.309 5 12 5zM6 9.607C7.479 10.454 9.637 11 12 11s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2V9.607zM6 17v-2.393C7.479 15.454 9.637 16 12 16s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2z"></path>
+				</svg>
+				<span>Partneri</span>
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" style="color:#C0C4DD" href="/agency">
+				<svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" style="fill: #ccd4e0 !important;" width="24" height="24" viewBox="0 0 24 24">
+					<path d="M20 17V7c0-2.168-3.663-4-8-4S4 4.832 4 7v10c0 2.168 3.663 4 8 4s8-1.832 8-4zM12 5c3.691 0 5.931 1.507 6 1.994C17.931 7.493 15.691 9 12 9S6.069 7.493 6 7.006C6.069 6.507 8.309 5 12 5zM6 9.607C7.479 10.454 9.637 11 12 11s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2V9.607zM6 17v-2.393C7.479 15.454 9.637 16 12 16s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2z"></path>
+				</svg>
+				<span>Agentúry</span>
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" style="color:#C0C4DD" href="/worker">
+				<svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" style="fill: #ccd4e0 !important;" width="24" height="24" viewBox="0 0 24 24">
+					<path d="M20 17V7c0-2.168-3.663-4-8-4S4 4.832 4 7v10c0 2.168 3.663 4 8 4s8-1.832 8-4zM12 5c3.691 0 5.931 1.507 6 1.994C17.931 7.493 15.691 9 12 9S6.069 7.493 6 7.006C6.069 6.507 8.309 5 12 5zM6 9.607C7.479 10.454 9.637 11 12 11s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2V9.607zM6 17v-2.393C7.479 15.454 9.637 16 12 16s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2z"></path>
+				</svg>
+				<span>Pracovníci</span>
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" style="color:#C0C4DD" href="/project">
+				<svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" style="fill: #ccd4e0 !important;" width="24" height="24" viewBox="0 0 24 24">
+					<path d="M20 17V7c0-2.168-3.663-4-8-4S4 4.832 4 7v10c0 2.168 3.663 4 8 4s8-1.832 8-4zM12 5c3.691 0 5.931 1.507 6 1.994C17.931 7.493 15.691 9 12 9S6.069 7.493 6 7.006C6.069 6.507 8.309 5 12 5zM6 9.607C7.479 10.454 9.637 11 12 11s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2V9.607zM6 17v-2.393C7.479 15.454 9.637 16 12 16s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2z"></path>
+				</svg>
+				<span>Projekty</span>
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" style="color:#C0C4DD" href="/turnus">
+				<svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" style="fill: #ccd4e0 !important;" width="24" height="24" viewBox="0 0 24 24">
+					<path d="M20 17V7c0-2.168-3.663-4-8-4S4 4.832 4 7v10c0 2.168 3.663 4 8 4s8-1.832 8-4zM12 5c3.691 0 5.931 1.507 6 1.994C17.931 7.493 15.691 9 12 9S6.069 7.493 6 7.006C6.069 6.507 8.309 5 12 5zM6 9.607C7.479 10.454 9.637 11 12 11s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2V9.607zM6 17v-2.393C7.479 15.454 9.637 16 12 16s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2z"></path>
+				</svg>
+				<span>Evidencia</span>
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" style="color:#C0C4DD" href="/settings">
+				<svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" style="fill: #ccd4e0 !important;" width="24" height="24" viewBox="0 0 24 24">
+					<path d="M20 17V7c0-2.168-3.663-4-8-4S4 4.832 4 7v10c0 2.168 3.663 4 8 4s8-1.832 8-4zM12 5c3.691 0 5.931 1.507 6 1.994C17.931 7.493 15.691 9 12 9S6.069 7.493 6 7.006C6.069 6.507 8.309 5 12 5zM6 9.607C7.479 10.454 9.637 11 12 11s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2V9.607zM6 17v-2.393C7.479 15.454 9.637 16 12 16s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2z"></path>
+				</svg>
+				<span>Nastavenia</span>
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" style="color:#C0C4DD" href="/todo">
+				<svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" style="fill: #ccd4e0 !important;" width="24" height="24" viewBox="0 0 24 24">
+					<path d="M20 17V7c0-2.168-3.663-4-8-4S4 4.832 4 7v10c0 2.168 3.663 4 8 4s8-1.832 8-4zM12 5c3.691 0 5.931 1.507 6 1.994C17.931 7.493 15.691 9 12 9S6.069 7.493 6 7.006C6.069 6.507 8.309 5 12 5zM6 9.607C7.479 10.454 9.637 11 12 11s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2V9.607zM6 17v-2.393C7.479 15.454 9.637 16 12 16s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2z"></path>
+				</svg>
+				<span>Todo list</span>
+			</a>
+		</li>
 </ul>
 					</div>
 				</div>
@@ -129,6 +201,27 @@
 
 	<div class="container-fluid" style="max-width:1500px;">
 		<div class="admin-toolbar-row"><div class="fright">
+	<div data-bs-toggle="tooltip" data-bs-title="Údaje o projektoch" class="float-end">
+		<button type="button" class="admin-toolbar-icon" data-bs-toggle="offcanvas" data-bs-target="#projectStatsOffcanvas" aria-controls="projectStatsOffcanvas" aria-label="Údaje o projektoch">
+			<svg class="admin-toolbar-icon-symbol" aria-hidden="true" focusable="false" viewBox="0 0 640 512">
+				<path fill="currentColor" d="M36.8 192H603.2c20.3 0 36.8-16.5 36.8-36.8c0-7.3-2.2-14.4-6.2-20.4L558.2 21.4C549.3 8 534.4 0 518.3 0H121.7c-16 0-31 8-39.9 21.4L6.2 134.7c-4 6.1-6.2 13.2-6.2 20.4C0 175.5 16.5 192 36.8 192zM64 224V384v80c0 26.5 21.5 48 48 48H336c26.5 0 48-21.5 48-48V384 224H320V384H128V224H64zm448 0V480c0 17.7 14.3 32 32 32s32-14.3 32-32V224H512z"></path>
+			</svg>
+		</button>
+	</div>
+	<div data-bs-toggle="tooltip" data-bs-title="Údaje o rodinách" class="float-end">
+		<button type="button" class="admin-toolbar-icon" data-bs-toggle="offcanvas" data-bs-target="#familyStatsOffcanvas" aria-controls="familyStatsOffcanvas" aria-label="Údaje o rodinách">
+			<svg class="admin-toolbar-icon-symbol" aria-hidden="true" focusable="false" viewBox="0 0 640 512">
+				<path fill="currentColor" d="M335.5 4l288 160c15.4 8.6 21 28.1 12.4 43.5s-28.1 21-43.5 12.4L320 68.6 47.5 220c-15.4 8.6-34.9 3-43.5-12.4s-3-34.9 12.4-43.5L304.5 4c9.7-5.4 21.4-5.4 31.1 0zM320 240c-22.1 0-40-17.9-40-40s17.9-40 40-40s40 17.9 40 40s-17.9 40-40 40zM144 336c-22.1 0-40-17.9-40-40s17.9-40 40-40s40 17.9 40 40s-17.9 40-40 40zm392-40c0 22.1-17.9 40-40 40s-40-17.9-40-40s17.9-40 40-40s40 17.9 40 40zM226.9 491.4L200 441.5V480c0 17.7-14.3 32-32 32H120c-17.7 0-32-14.3-32-32V441.5L61.1 491.4c-6.3 11.7-20.8 16-32.5 9.8s-16-20.8-9.8-32.5l37.9-70.3c15.3-28.5 45.1-46.3 77.5-46.3h19.5c16.3 0 31.9 4.5 45.4 12.6l33.6-62.3c15.3-28.5 45.1-46.3 77.5-46.3h19.5c32.4 0 62.1 17.8 77.5 46.3l33.6 62.3c13.5-8.1 29.1-12.6 45.4-12.6h19.5c32.4 0 62.1 17.8 77.5 46.3l37.9 70.3c6.3 11.7 1.9 26.2-9.8 32.5s-26.2 1.9-32.5-9.8L552 441.5V480c0 17.7-14.3 32-32 32H472c-17.7 0-32-14.3-32-32V441.5l-26.9 49.9c-6.3 11.7-20.8 16-32.5 9.8s-16-20.8-9.8-32.5l36.3-67.5c-1.7-1.7-3.2-3.6-4.3-5.8L376 345.5V400c0 17.7-14.3 32-32 32H296c-17.7 0-32-14.3-32-32V345.5l-26.9 49.9c-1.2 2.2-2.6 4.1-4.3 5.8l36.3 67.5c6.3 11.7 1.9 26.2-9.8 32.5s-26.2 1.9-32.5-9.8z"></path>
+			</svg>
+		</button>
+	</div>
+	<div data-bs-toggle="tooltip" data-bs-title="Údaje o partneroch" class="float-end me-2">
+		<button type="button" class="admin-toolbar-icon" data-bs-toggle="offcanvas" data-bs-target="#partnerStatsOffcanvas" aria-controls="partnerStatsOffcanvas" aria-label="Údaje o partneroch">
+			<svg class="admin-toolbar-icon-symbol" aria-hidden="true" focusable="false" viewBox="0 0 640 512">
+				<path fill="currentColor" d="M323.4 85.2l-96.8 78.4c-16.1 13-19.2 36.4-7 53.1c12.9 17.8 38 21.3 55.3 7.8l99.3-77.2c7-5.4 17-4.2 22.5 2.8s4.2 17-2.8 22.5l-20.9 16.2L512 316.8V128h-.7l-3.9-2.5L434.8 79c-15.3-9.8-33.2-15-51.4-15c-21.8 0-43 7.5-60 21.2zm22.8 124.4l-51.7 40.2C263 274.4 217.3 268 193.7 235.6c-22.2-30.5-16.6-73.1 12.7-96.8l83.2-67.3c-11.6-4.9-24.1-7.4-36.8-7.4C234 64 215.7 69.6 200 80l-72 48V352h28.2l91.4 83.4c19.6 17.9 49.9 16.5 67.8-3.1c5.5-6.1 9.2-13.2 11.1-20.6l17 15.6c19.5 17.9 49.9 16.6 67.8-2.9c4.5-4.9 7.8-10.6 9.9-16.5c19.4 13 45.8 10.3 62.1-7.5c17.9-19.5 16.6-49.9-2.9-67.8l-134.2-123zM96 128H0V352c0 17.7 14.3 32 32 32H64c17.7 0 32-14.3 32-32V128zM48 352c-8.8 0-16-7.2-16-16s7.2-16 16-16s16 7.2 16 16s-7.2 16-16 16zM544 128V352c0 17.7 14.3 32 32 32h32c17.7 0 32-14.3 32-32V128H544zm64 208c0 8.8-7.2 16-16 16s-16-7.2-16-16s7.2-16 16-16s16 7.2 16 16z"></path>
+			</svg>
+		</button>
+	</div>
 	<div data-bs-toggle="tooltip" data-bs-title="Turnusy" class="float-end me-2">
 		<a href="/turnus/select-month" class="admin-toolbar-icon" aria-label="Turnusy">
 			<svg class="admin-toolbar-icon-symbol" aria-hidden="true" focusable="false" viewBox="0 0 384 512">
@@ -158,10 +251,83 @@
 		<h1>Nastavenia</h1>
 
 		<div class="py-4">
+	<a href="/missing-registry" class="btn btn-success btn-sm">Evidencia neprítomnosti</a>
+	<a href="/country" class="btn btn-success btn-sm">Správa krajín</a>
+	<a href="/user-management" class="btn btn-success btn-sm">Správa užívateľov</a>
+	<a href="/translation" class="btn btn-success btn-sm">Preklady profilu</a>
 	<a href="/change-log" class="btn btn-success btn-sm">Evidencia zmien</a>
 	<a href="/login-log" class="btn btn-success btn-sm">Evidencia prihlásení</a>
 		</div>
 	</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="familyStatsOffcanvas" aria-labelledby="familyStatsOffcanvasLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="familyStatsOffcanvasLabel">Údaje o rodinách</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+
+		<div class="col-xl-12 col-md-6">
+			<div class="divone">
+				<div class="divone-header">
+					<h3 class="divone-title">Rodiny - status</h3>
+				</div>
+				<div>
+				</div>
+			</div>
+			<div class="space20"></div>
+		</div>
+
+		<div class="col-xl-12 col-md-6">
+			<div class="divone">
+				<div class="divone-header">
+					<h3 class="divone-title">Rodiny - krajiny</h3>
+				</div>
+				<div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="partnerStatsOffcanvas" aria-labelledby="partnerStatsOffcanvasLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="partnerStatsOffcanvasLabel">Údaje o partneroch</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+	</div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="projectStatsOffcanvas" aria-labelledby="projectStatsOffcanvasLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="projectStatsOffcanvasLabel">Údaje o projektoch</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+
+		<div class="col-xl-12 col-md-6 mt-2">
+			<div class="divone">
+				<div class="divone-header">
+					<h3 class="divone-title">Projekty - status</h3>
+				</div>
+				<div>
+				</div>
+			</div>
+			<div class="space20"></div>
+		</div>
+
+		<div class="col-xl-12 col-md-6">
+			<div class="divone">
+				<div class="divone-header">
+					<h3 class="divone-title">Projekty - krajiny</h3>
+				</div>
+				<div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 	<footer class="footer">
 		<div class="container">

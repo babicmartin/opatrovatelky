@@ -3,7 +3,6 @@
 namespace Tests\E2E;
 
 use App\Model\Enum\UserRole\UserRole;
-use App\Model\Table\PageTableMap;
 use App\Model\Table\SecurityAuditLogTableMap;
 use App\Model\Table\UserTableMap;
 use Dom\HTMLDocument;
@@ -143,7 +142,6 @@ final class PasswordChangeHttpTest extends DatabaseTestCase
 		$id = $this->createAccount(self::Email, UserRole::ADMIN);
 		$this->createAccount('ceo@example.test', UserRole::CEO);
 		$this->createAccount('dealer@example.test', UserRole::DEALER);
-		$this->getDatabase()->table('sany_pages')->where('url', 'user-management')->update(['permission' => 5]);
 		$path = '/user-management/update/' . $id;
 		$admin = $this->login(self::Email);
 		$fields = ['_do' => 'userPasswordResetForm-submit', 'password' => self::NewPassword, 'passwordRepeat' => self::NewPassword];
@@ -159,23 +157,28 @@ final class PasswordChangeHttpTest extends DatabaseTestCase
 	}
 
 
-	/** @return array<string, array{?UserRole, UserRole, UserRole}> */
+	/**
+	 * Actor => owner of the profile. User management starts at CEO (AuthorizatorFactory),
+	 * and a CEO may not touch an admin account.
+	 *
+	 * @return array<string, array{?UserRole, UserRole}>
+	 */
 	public static function deniedProfiles(): array
 	{
 		return [
-			'guest' => [null, UserRole::DEALER, UserRole::DEALER_JUNIOR],
-			'junior with page access' => [UserRole::DEALER_JUNIOR, UserRole::DEALER, UserRole::DEALER_JUNIOR],
-			'dealer with page access' => [UserRole::DEALER, UserRole::DEALER, UserRole::DEALER],
-			'CEO without page access' => [UserRole::CEO, UserRole::DEALER, UserRole::ADMIN],
-			'CEO editing admin' => [UserRole::CEO, UserRole::ADMIN, UserRole::CEO],
+			'guest' => [null, UserRole::DEALER],
+			'junior editing dealer' => [UserRole::DEALER_JUNIOR, UserRole::DEALER],
+			'junior editing another junior' => [UserRole::DEALER_JUNIOR, UserRole::DEALER_JUNIOR],
+			'dealer editing another dealer' => [UserRole::DEALER, UserRole::DEALER],
+			'dealer editing junior' => [UserRole::DEALER, UserRole::DEALER_JUNIOR],
+			'CEO editing admin' => [UserRole::CEO, UserRole::ADMIN],
 		];
 	}
 
 
 	#[DataProvider('deniedProfiles')]
-	public function testDeniedForeignProfile(?UserRole $actor, UserRole $target, UserRole $pageRole): void
+	public function testDeniedForeignProfile(?UserRole $actor, UserRole $target): void
 	{
-		$this->setManagementPageRole($pageRole);
 		$id = $this->createAccount(self::Email, $target);
 		$before = $this->readAccessAndPassword($id);
 		$path = '/user-management/update/' . $id;
@@ -234,7 +237,6 @@ final class PasswordChangeHttpTest extends DatabaseTestCase
 	#[DataProvider('allowedProfiles')]
 	public function testAllowedForeignProfile(UserRole $actor, UserRole $target): void
 	{
-		$this->setManagementPageRole($actor);
 		$id = $this->createAccount(self::Email, $target);
 		$this->createAccount('manager@example.test', $actor);
 		$browser = $this->login('manager@example.test');
@@ -270,7 +272,6 @@ final class PasswordChangeHttpTest extends DatabaseTestCase
 
 	public function testCeoCanOnlyAssignRolesOfferedByTheAccessForm(): void
 	{
-		$this->setManagementPageRole(UserRole::CEO);
 		$id = $this->createAccount(self::Email, UserRole::DEALER);
 		$this->createAccount('ceo@example.test', UserRole::CEO);
 		$browser = $this->login('ceo@example.test');
@@ -308,13 +309,6 @@ final class PasswordChangeHttpTest extends DatabaseTestCase
 		$row = $this->getDatabase()->table(UserTableMap::TABLE_NAME)->get($id);
 		self::assertNotNull($row);
 		return ['role' => (int) $row->{UserTableMap::COL_PERMISSION}, 'hash' => (string) $row->{UserTableMap::COL_PASSWORD}];
-	}
-
-
-	private function setManagementPageRole(UserRole $role): void
-	{
-		$this->getDatabase()->table(PageTableMap::TABLE_NAME)->where(PageTableMap::COL_URL, 'user-management')
-			->update([PageTableMap::COL_PERMISSION => $role->getPermissionId()]);
 	}
 
 

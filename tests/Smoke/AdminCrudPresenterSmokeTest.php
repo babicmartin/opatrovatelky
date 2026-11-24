@@ -46,14 +46,71 @@ final class AdminCrudPresenterSmokeTest extends DatabaseTestCase
 		self::assertStringContainsString('</html>', $html);
 	}
 
-	#[DataProvider('adminPresenters')]
-	public function testDealerRoleIsForbidden(string $presenter): void
+	/**
+	 * Presenter => lowest role that may open it, as set in AuthorizatorFactory.
+	 *
+	 * @return iterable<string, array{string, UserRole}>
+	 */
+	public static function lowestRoles(): iterable
 	{
-		$this->loginAs(UserRole::DEALER);
+		yield 'Home' => ['Admin:Home', UserRole::DEALER_JUNIOR];
+		yield 'Babysitter' => ['Admin:Babysitter', UserRole::DEALER_JUNIOR];
+		yield 'Family' => ['Admin:Family', UserRole::DEALER_JUNIOR];
+		yield 'Worker' => ['Admin:Worker', UserRole::DEALER_JUNIOR];
+		yield 'Project' => ['Admin:Project', UserRole::DEALER_JUNIOR];
+		yield 'Turnus' => ['Admin:Turnus', UserRole::DEALER_JUNIOR];
+		yield 'Stats' => ['Admin:Stats', UserRole::DEALER_JUNIOR];
+		yield 'Todo' => ['Admin:Todo', UserRole::DEALER_JUNIOR];
+		yield 'Proposal' => ['Admin:Proposal', UserRole::DEALER_JUNIOR];
+		yield 'MissingRegistry' => ['Admin:MissingRegistry', UserRole::DEALER_JUNIOR];
+		yield 'Partner' => ['Admin:Partner', UserRole::DEALER];
+		yield 'Agency' => ['Admin:Agency', UserRole::DEALER];
+		yield 'Settings' => ['Admin:Settings', UserRole::CEO];
+		yield 'Country' => ['Admin:Country', UserRole::CEO];
+		yield 'UserManagement' => ['Admin:UserManagement', UserRole::CEO];
+		yield 'Translation' => ['Admin:Translation', UserRole::CEO];
+		yield 'ChangeLog' => ['Admin:ChangeLog', UserRole::CEO];
+		yield 'LoginLog' => ['Admin:LoginLog', UserRole::CEO];
+		// Admin:PartnerFamily (CEO) needs a partner id; PartnerFamilyPresenterSmokeTest covers both sides.
+	}
+
+	#[DataProvider('lowestRoles')]
+	public function testLowestAllowedRoleRendersDefaultAction(string $presenter, UserRole $lowestRole): void
+	{
+		$this->loginAs($lowestRole);
+
+		self::assertStringContainsString('</html>', $this->renderPresenter($presenter));
+	}
+
+	/**
+	 * Presenter => highest role that may not open it. Pages open to DEALER_JUNIOR have no such role:
+	 * every signed-in user may open them and only a guest is turned away.
+	 *
+	 * @return iterable<string, array{string, UserRole}>
+	 */
+	public static function rolesBelowTheLowestAllowed(): iterable
+	{
+		foreach (self::lowestRoles() as $name => [$presenter, $lowestRole]) {
+			$roleBelow = match ($lowestRole) {
+				UserRole::DEALER_JUNIOR => null,
+				UserRole::DEALER => UserRole::DEALER_JUNIOR,
+				UserRole::CEO => UserRole::DEALER,
+				UserRole::ADMIN => UserRole::CEO,
+			};
+			if ($roleBelow !== null) {
+				yield $name => [$presenter, $roleBelow];
+			}
+		}
+	}
+
+	#[DataProvider('rolesBelowTheLowestAllowed')]
+	public function testRoleBelowTheLowestAllowedIsForbidden(string $presenter, UserRole $roleBelow): void
+	{
+		$this->loginAs($roleBelow);
 
 		try {
 			$this->runPresenter($presenter);
-			self::fail($presenter . ' must reject the dealer role.');
+			self::fail($presenter . ' must reject the role ' . $roleBelow->value . '.');
 		} catch (BadRequestException $exception) {
 			self::assertSame(403, $exception->getCode());
 		}

@@ -386,11 +386,7 @@ final class TestDatabase
 			'sn_status_proposal' => [
 				['id' => 1, 'status' => 'Nový', 'color' => '#0d6efd'],
 			],
-			'sany_pages' => [
-				['id' => 1, 'name' => 'Homepage', 'url' => 'homepage', 'parent' => 0, 'permission' => 2, 'active' => 1, 'in_menu' => 1],
-				['id' => 2, 'name' => 'Nastavenia', 'url' => 'settings', 'parent' => 0, 'permission' => 5, 'active' => 1, 'in_menu' => 1],
-				['id' => 3, 'name' => 'Používatelia', 'url' => 'user-management', 'parent' => 0, 'permission' => 10, 'active' => 1, 'in_menu' => 1],
-			],
+			'sany_pages' => self::productionPages(),
 		];
 
 		foreach ($lookupRows as $table => $rows) {
@@ -398,6 +394,64 @@ final class TestDatabase
 				self::insertLookupRow($table, $row);
 			}
 		}
+	}
+
+	/**
+	 * Copy of the 29 production rows of `sany_pages` (export of 24. 11. 2026), so tests render the real menu.
+	 * The rows drive the menu only; role permissions live in AuthorizatorFactory.
+	 *
+	 * @return list<array<string, int|string|null>>
+	 */
+	private static function productionPages(): array
+	{
+		// id, name, url, parent, permission, active, in_menu, show_parents, position
+		$pages = [
+			[1, 'Firma 4MS', 'homepage', 0, 2, 0, 1, 0, 0],
+			[3, 'Nastavenia', 'settings', 0, 5, 1, 1, 0, 7],
+			[4, 'Užívatelia', 'users', 0, 5, 0, 1, 0, 0],
+			[5, 'Opatrovateľky', 'opatrovatelky', 0, 2, 1, 1, 0, 3],
+			[6, 'Opatrovateľky - upraviť', 'opatrovatelky-update', 5, 2, 1, 1, 0, 0],
+			[7, 'Rodiny', 'families', 0, 2, 1, 1, 0, 2],
+			[8, 'Rodiny - upraviť', 'families-update', 7, 2, 0, 1, 0, 0],
+			[9, 'Partneri', 'partneri', 0, 3, 1, 1, 0, 4],
+			[10, 'Partneri - upraviť', 'partneri-update', 9, 3, 1, 0, 0, 0],
+			[11, 'Dokumenty', 'dokumenty', 0, 2, 1, 0, 0, 5],
+			[12, 'Správa užívateľov', 'user-management', 3, 5, 1, 1, 0, 6],
+			[13, 'Správa užívateľov - úprava', 'user-management-update', 12, 5, 1, 0, 1, 0],
+			[14, 'Krajiny', 'country', 3, 5, 1, 1, 0, 7],
+			[15, 'Krajiny - úprava', 'country-update', 14, 5, 1, 0, 1, 0],
+			[16, 'Agentúry', 'agencies', 0, 3, 1, 1, 0, 4],
+			[17, 'Agentúry - upraviť', 'agencies-update', 16, 3, 1, 0, 0, 0],
+			[18, 'Evidencia', 'turnus', 0, 2, 1, 1, 0, 6],
+			[19, 'Todo list', 'todo', 0, 2, 1, 1, 0, 8],
+			[20, 'Todo - upraviť', 'todo-update', 19, 2, 1, 0, 0, 0],
+			[21, 'Evidencia opatrovania - detail', 'turnus-update', 0, 2, 1, 0, 0, 0],
+			[22, 'Štatistiky', 'stats', 0, 2, 1, 0, 0, 0],
+			[23, 'Návrhy', 'proposal-update', 0, 2, 1, 0, 0, 0],
+			[24, 'Preklady do profilu', 'translation', 3, 2, 1, 1, 0, 9],
+			[25, 'Evidencia neprítomnosti', 'missing-registry', 0, 2, 1, 0, 0, 7],
+			[26, 'Evidencia návrhov', 'proposal-records', 0, 2, 1, 0, 0, 8],
+			[27, 'Evidencia turnusov - výber mesiaca', 'turnus-select-month', 0, 2, 1, 0, 0, 8],
+			[28, 'Evidencia turnusov podľa mesiaca', 'turnus-records-month', 0, 2, 1, 0, 0, 8],
+			[29, 'Pracovníci', 'pracovnici', 0, 2, 1, 1, 0, 4],
+			[30, 'Projekty', 'projekty', 0, 2, 1, 1, 0, 5],
+		];
+
+		return array_values(array_map(static fn(array $page): array => [
+			'id' => $page[0],
+			'name' => $page[1],
+			'url' => $page[2],
+			'parent' => $page[3],
+			'permission' => $page[4],
+			'active' => $page[5],
+			'in_menu' => $page[6],
+			'show_parents' => $page[7],
+			'show_same_level' => 0,
+			'header' => 1,
+			'sidebar_right' => 1,
+			'position' => $page[8],
+			'template_folder' => null,
+		], $pages));
 	}
 
 	/**

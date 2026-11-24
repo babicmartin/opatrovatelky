@@ -19,11 +19,16 @@ final class AdminDeleteFormRegressionTest extends DatabaseTestCase
 {
 	use ConfirmedFormWorkflowTrait;
 
-	/** @return iterable<string, array{string, string}> */
+	/**
+	 * Both pages are open to every signed-in role (DEALER_JUNIOR and up), so no role is denied here.
+	 * The only actor without the permission is a guest: scenario 'signed out'.
+	 *
+	 * @return iterable<string, array{string, string}>
+	 */
 	public static function deleteRequests(): iterable
 	{
 		foreach (['Admin:Turnus', 'Admin:MissingRegistry'] as $presenter) {
-			foreach (['confirmed POST', 'legacy GET', 'form GET', 'cross-site POST', 'invalid token', 'denied role'] as $scenario) {
+			foreach (['confirmed POST', 'legacy GET', 'form GET', 'cross-site POST', 'invalid token', 'signed out'] as $scenario) {
 				yield $presenter . ' / ' . $scenario => [$presenter, $scenario];
 			}
 		}
@@ -85,8 +90,8 @@ final class AdminDeleteFormRegressionTest extends DatabaseTestCase
 			case 'invalid token':
 				$post['_token_'] = 'invalid';
 				break;
-			case 'denied role':
-				$this->loginAs(UserRole::DEALER);
+			case 'signed out':
+				$this->logout();
 				break;
 		}
 
@@ -95,11 +100,14 @@ final class AdminDeleteFormRegressionTest extends DatabaseTestCase
 			if ($scenario === 'form GET') {
 				self::assertInstanceOf(TextResponse::class, $response);
 			} else {
-				self::assertContains($scenario, ['confirmed POST', 'cross-site POST']);
+				self::assertContains($scenario, ['confirmed POST', 'cross-site POST', 'signed out']);
 				self::assertInstanceOf(RedirectResponse::class, $response);
+				if ($scenario === 'signed out') {
+					self::assertStringEndsWith('/login/', (string) parse_url($response->getUrl(), PHP_URL_PATH));
+				}
 			}
 		} catch (BadRequestException $exception) {
-			self::assertContains($scenario, ['legacy GET', 'invalid token', 'denied role']);
+			self::assertContains($scenario, ['legacy GET', 'invalid token']);
 			self::assertSame(403, $exception->getCode());
 		}
 

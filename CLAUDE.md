@@ -63,6 +63,7 @@ config/
 - ACL resources: `App\Model\Enum\Acl\Resource`
 - Authenticator: `App\Model\Security\AdminAuthenticator`
 - Authorizator: `App\Model\Security\Authorizator\AuthorizatorFactory`
+- Role permissions are set only in `AuthorizatorFactory::ROLE_RESOURCES`; the table `sany_pages` drives the menu (name, order, active) and grants nothing, its `url` → resource/presenter mapping is the enum `App\UI\Admin\Control\Layout\Menu\MenuPage`.
 
 ## Control & Component Conventions
 

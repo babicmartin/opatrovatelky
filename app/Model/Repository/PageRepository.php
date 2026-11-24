@@ -32,9 +32,12 @@ class PageRepository extends BaseRepository
 	}
 
 	/**
+	 * Top-level menu rows in display order. Who may see a row is decided by the menu control
+	 * from the role's permissions; the `permission` column is not read.
+	 *
 	 * @return ($wrapToEntity is true ? list<PageEntity> : Selection<ActiveRow>)
 	 */
-	public function findMenuItems(?int $userPermission = null, bool $wrapToEntity = false): Selection|array
+	public function findMenuItems(bool $wrapToEntity = false): Selection|array
 	{
 		$selection = $this->findAll()
 			->where(PageTableMap::COL_ACTIVE, 1)
@@ -43,24 +46,11 @@ class PageRepository extends BaseRepository
 			->where(PageTableMap::COL_IN_MENU, 1)
 			->order(PageTableMap::COL_POSITION . ' ASC');
 
-		if ($userPermission !== null) {
-			$selection->where(PageTableMap::COL_PERMISSION . ' <= ?', $userPermission);
-		}
-
 		if ($wrapToEntity) {
 			/** @var list<PageEntity> */
 			return $this->wrapToEntities($selection);
 		}
 
 		return $selection;
-	}
-
-	/**
-	 * @return list<PageEntity>
-	 */
-	public function getAll(): array
-	{
-		/** @var list<PageEntity> */
-		return $this->wrapToEntities($this->findAll());
 	}
 }

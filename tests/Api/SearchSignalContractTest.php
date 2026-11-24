@@ -4,7 +4,9 @@ namespace Tests\Api;
 
 use App\Model\Enum\UserRole\UserRole;
 use App\Model\Repository\SearchRepository;
+use App\Model\Table\AgencyTableMap;
 use App\Model\Table\FamilyTableMap;
+use App\Model\Table\PartnerTableMap;
 use Nette\Application\BadRequestException;
 use Nette\Application\IPresenterFactory;
 use Nette\Application\Request as ApplicationRequest;
@@ -81,14 +83,60 @@ final class SearchSignalContractTest extends DatabaseTestCase
 		$this->assertSearchForbidden($type, 'Hladana', 'Login:Login', $signal);
 	}
 
-	#[DataProvider('provideSearchSignals')]
-	public function testRoleWithoutModuleAccessGetsNoSearchResults(string $signal, ?int $type): void
+	#[DataProvider('provideSearchesDeniedToDealerJunior')]
+	public function testRoleWithoutModuleAccessGetsNoSearchResults(string $signal, int $type): void
 	{
-		// The test database grants DEALER only the homepage, so no searchable module is open to it.
-		$this->loginAs(UserRole::DEALER);
-		TestDatabase::createFamily([FamilyTableMap::COL_SURNAME => 'Hladana']);
+		// Partners and agencies start at DEALER. DEALER_JUNIOR may open babysitters and families only.
+		$this->loginAs(UserRole::DEALER_JUNIOR);
+		TestDatabase::createPartner([PartnerTableMap::COL_NAME => 'Hladanapartner']);
+		TestDatabase::createAgency([AgencyTableMap::COL_NAME => 'Hladanaagentura']);
 
 		$this->assertSearchForbidden($type, 'Hladana', 'Admin:Home', $signal);
+	}
+
+	/**
+	 * @return iterable<string, array{string, int}>
+	 */
+	public static function provideSearchesDeniedToDealerJunior(): iterable
+	{
+		yield 'desktop search of partners' => ['search-search', SearchRepository::TYPE_PARTNER];
+		yield 'desktop search of agencies' => ['search-search', SearchRepository::TYPE_AGENCY];
+		yield 'mobile search of partners' => ['search-searchMobile', SearchRepository::TYPE_PARTNER];
+		yield 'mobile search of agencies' => ['search-searchMobile', SearchRepository::TYPE_AGENCY];
+	}
+
+	public function testMobileSearchOfAllTypesSkipsModulesTheRoleMayNotOpen(): void
+	{
+		$this->loginAs(UserRole::DEALER_JUNIOR);
+		TestDatabase::createFamily([FamilyTableMap::COL_SURNAME => 'Hladana']);
+		TestDatabase::createPartner([PartnerTableMap::COL_NAME => 'Hladanapartner']);
+		TestDatabase::createAgency([AgencyTableMap::COL_NAME => 'Hladanaagentura']);
+
+		$payload = $this->dispatchSearch(null, 'Hladana', 'Admin:Home', 'search-searchMobile');
+
+		self::assertIsArray($payload['counts']);
+		self::assertSame([
+			SearchRepository::TYPE_BABYSITTER,
+			SearchRepository::TYPE_FAMILY,
+			SearchRepository::TYPE_FAMILY_CONTACT,
+		], array_keys($payload['counts']));
+		self::assertSame(1, $payload['counts'][SearchRepository::TYPE_FAMILY]);
+		self::assertStringNotContainsString('Hladanapartner', $payload['html']);
+		self::assertStringNotContainsString('Hladanaagentura', $payload['html']);
+	}
+
+	public function testDealerMaySearchPartnersAndAgencies(): void
+	{
+		$this->loginAs(UserRole::DEALER);
+		TestDatabase::createPartner([PartnerTableMap::COL_NAME => 'Hladanapartner']);
+		TestDatabase::createAgency([AgencyTableMap::COL_NAME => 'Hladanaagentura']);
+
+		$payload = $this->dispatchSearch(null, 'Hladana', 'Admin:Home', 'search-searchMobile');
+
+		self::assertSame(1, $payload['counts'][SearchRepository::TYPE_PARTNER]);
+		self::assertSame(1, $payload['counts'][SearchRepository::TYPE_AGENCY]);
+		self::assertStringContainsString('Hladanapartner', $payload['html']);
+		self::assertStringContainsString('Hladanaagentura', $payload['html']);
 	}
 
 	/**

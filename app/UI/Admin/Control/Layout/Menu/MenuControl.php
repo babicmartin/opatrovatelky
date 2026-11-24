@@ -3,6 +3,7 @@
 namespace App\UI\Admin\Control\Layout\Menu;
 
 use App\Model\Repository\PageRepository;
+use App\Model\Table\PageTableMap;
 use Nette\Application\UI\Control;
 use Nette\Security\User;
 
@@ -19,35 +20,30 @@ class MenuControl extends Control
 		$template = $this->getTemplate();
 		$template->setFile(__DIR__ . '/templates/MenuControl.latte');
 
-		$template->menuItems = $this->pageRepository->findMenuItems();
-		$template->menuDestinations = $this->getMenuDestinations();
-		$template->user = $this->user;
+		$template->menuItems = $this->getVisibleItems();
 		$template->render();
 	}
 
 	/**
-	 * @return array<string, string>
+	 * Rows of `sany_pages` give the name and the order; the role's permission on the module decides visibility.
+	 *
+	 * @return list<array{name: string, destination: string}>
 	 */
-	private function getMenuDestinations(): array
+	private function getVisibleItems(): array
 	{
-		return [
-			'homepage' => ':Admin:Home:default',
-			'opatrovatelky' => ':Admin:Babysitter:default',
-			'families' => ':Admin:Family:default',
-			'partneri' => ':Admin:Partner:default',
-			'agencies' => ':Admin:Agency:default',
-			'turnus' => ':Admin:Turnus:default',
-			'projekty' => ':Admin:Project:default',
-			'pracovnici' => ':Admin:Worker:default',
-			'proposal' => ':Admin:Proposal:default',
-			'proposal-records' => ':Admin:Proposal:default',
-			'stats' => ':Admin:Stats:default',
-			'settings' => ':Admin:Settings:default',
-			'country' => ':Admin:Country:default',
-			'user-management' => ':Admin:UserManagement:default',
-			'translation' => ':Admin:Translation:default',
-			'missing-registry' => ':Admin:MissingRegistry:default',
-			'todo' => ':Admin:Todo:default',
-		];
+		$items = [];
+		foreach ($this->pageRepository->findMenuItems() as $row) {
+			$page = MenuPage::tryFrom((string) $row->{PageTableMap::COL_URL});
+			if ($page === null || !$this->user->isAllowed($page->resource()->value)) {
+				continue;
+			}
+
+			$items[] = [
+				'name' => (string) $row->{PageTableMap::COL_NAME},
+				'destination' => $page->destination(),
+			];
+		}
+
+		return $items;
 	}
 }

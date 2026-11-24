@@ -281,20 +281,8 @@ final class AdminSupportingFormFactoryTest extends DatabaseTestCase
 
 	public function testAclProtectedFactoriesDenyUnauthorizedUsers(): void
 	{
-		$this->loginAs(UserRole::DEALER);
-
-		$this->assertForbidden(function (): void {
-			$this->getContainer()
-				->getByType(AgencyUpdateFormFactory::class)
-				->create($this->companyFormData(60, 'Denied agency'), [1 => 'Slovensko'], [1 => 'Aktívny'], static function (): void {
-				});
-		});
-		$this->assertForbidden(function (): void {
-			$this->getContainer()
-				->getByType(PartnerUpdateFormFactory::class)
-				->create($this->companyFormData(61, 'Denied partner'), [1 => 'Slovensko'], [1 => 'Aktívny'], static function (): void {
-				});
-		});
+		// Every signed-in role may edit todos; only a guest is denied.
+		$this->getContainer()->getByType(User::class)->logout(true);
 		$this->assertForbidden(function (): void {
 			$this->getContainer()
 				->getByType(TodoUpdateFormFactory::class)
@@ -314,6 +302,26 @@ final class AdminSupportingFormFactoryTest extends DatabaseTestCase
 				], [0 => '---'], [0 => '---'], [0 => '---'], [0 => '---'], static function (): void {
 				});
 		});
+
+		// Agencies and partners start at DEALER.
+		$this->loginAs(UserRole::DEALER_JUNIOR);
+
+		$this->assertForbidden(function (): void {
+			$this->getContainer()
+				->getByType(AgencyUpdateFormFactory::class)
+				->create($this->companyFormData(60, 'Denied agency'), [1 => 'Slovensko'], [1 => 'Aktívny'], static function (): void {
+				});
+		});
+		$this->assertForbidden(function (): void {
+			$this->getContainer()
+				->getByType(PartnerUpdateFormFactory::class)
+				->create($this->companyFormData(61, 'Denied partner'), [1 => 'Slovensko'], [1 => 'Aktívny'], static function (): void {
+				});
+		});
+
+		// Countries and user management start at CEO.
+		$this->loginAs(UserRole::DEALER);
+
 		$this->assertForbidden(function (): void {
 			$this->getContainer()
 				->getByType(CountryUpdateFormFactory::class)

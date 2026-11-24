@@ -10,34 +10,37 @@ use Tests\Support\PHPUnit\DatabaseTestCase;
 
 final class PageRepositoryTest extends DatabaseTestCase
 {
-	public function testFindMenuItemsFiltersByActiveParentPositionMenuAndPermission(): void
+	protected function setUp(): void
 	{
-		$repository = $this->getContainer()->getByType(PageRepository::class);
-		$lowPermId = $this->createPage('Opatrovatelky', 10, ['permission' => 2]);
-		$highPermId = $this->createPage('Nastavenia', 20, ['permission' => 5]);
-		$this->createPage('Inactive', 30, ['active' => 0]);
-		$this->createPage('Hidden', 40, ['in_menu' => 0]);
-		$this->createPage('Child', 50, ['parent' => $lowPermId]);
-		$this->createPage('No position', 0);
+		parent::setUp();
 
-		$allMenuIds = $this->menuIds($repository->findMenuItems());
-		$restrictedIds = $this->menuIds($repository->findMenuItems(2));
-
-		self::assertSame([$lowPermId, $highPermId], $allMenuIds);
-		self::assertSame([$lowPermId], $restrictedIds);
-
-		$entities = $repository->findMenuItems(null, true);
-		self::assertSame([$lowPermId, $highPermId], array_map(static fn (PageEntity $page): int => $page->getId(), $entities));
+		// The seed holds the production menu; these tests need a table they fully control.
+		TestDatabase::pdo()->exec('TRUNCATE TABLE `' . PageTableMap::TABLE_NAME . '`');
 	}
 
-	public function testGetAllWrapsEveryRowToEntity(): void
+	public function testFindMenuItemsFiltersByActiveParentPositionAndMenuFlag(): void
 	{
 		$repository = $this->getContainer()->getByType(PageRepository::class);
-		$createdId = $this->createPage('Extra', 99);
+		$secondId = $this->createPage('Nastavenia', 20);
+		$firstId = $this->createPage('Opatrovatelky', 10);
+		$this->createPage('Inactive', 30, ['active' => 0]);
+		$this->createPage('Hidden', 40, ['in_menu' => 0]);
+		$this->createPage('Child', 50, ['parent' => $firstId]);
+		$this->createPage('No position', 0);
 
-		$entities = $repository->getAll();
+		self::assertSame([$firstId, $secondId], $this->menuIds($repository->findMenuItems()));
 
-		self::assertContains($createdId, array_map(static fn (PageEntity $page): int => $page->getId(), $entities));
+		$entities = $repository->findMenuItems(wrapToEntity: true);
+		self::assertSame([$firstId, $secondId], array_map(static fn (PageEntity $page): int => $page->getId(), $entities));
+	}
+
+	public function testFindMenuItemsIgnoresThePermissionColumn(): void
+	{
+		$repository = $this->getContainer()->getByType(PageRepository::class);
+		$lowId = $this->createPage('Low', 10, ['permission' => 2]);
+		$highId = $this->createPage('High', 20, ['permission' => 10]);
+
+		self::assertSame([$lowId, $highId], $this->menuIds($repository->findMenuItems()));
 	}
 
 	private int $nextPageId = 100;

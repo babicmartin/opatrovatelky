@@ -2,77 +2,109 @@
 
 namespace Tests\Unit\Model\Security;
 
-use App\Model\Entity\PageEntity;
 use App\Model\Enum\Acl\Resource;
 use App\Model\Enum\UserRole\UserRole;
-use App\Model\Repository\PageRepository;
 use App\Model\Security\Authorizator\AuthorizatorFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Support\PHPUnit\TestCase;
 
+/**
+ * Pins who may use what. The expectation is written here on purpose and not read from the factory:
+ * any change of permissions in the code must fail this test and be confirmed by editing it.
+ */
 final class AuthorizatorFactoryTest extends TestCase
 {
-	public function testLegacyMenuUrlsGrantCanonicalPresenterResources(): void
-	{
-		$acl = (new AuthorizatorFactory(new StaticPageRepository([
-			$this->page('opatrovatelky', 2),
-			$this->page('families', 2),
-		])))->create();
-
-		self::assertTrue($acl->isAllowed(UserRole::DEALER->value, Resource::BABYSITTER->value, 'default'));
-		self::assertTrue($acl->isAllowed(UserRole::DEALER->value, Resource::FAMILY->value, 'default'));
-		self::assertTrue($acl->isAllowed(UserRole::DEALER_JUNIOR->value, Resource::BABYSITTER->value, 'default'));
-		self::assertTrue($acl->isAllowed(UserRole::DEALER_JUNIOR->value, Resource::FAMILY->value, 'default'));
-	}
-
-	public function testPartnerFamilyOverviewIsOnlyForAdminAndCeo(): void
-	{
-		$acl = (new AuthorizatorFactory(new StaticPageRepository([
-			$this->page('partneri', 2),
-		])))->create();
-
-		self::assertTrue($acl->isAllowed(UserRole::ADMIN->value, Resource::PARTNER_FAMILY->value, 'default'));
-		self::assertTrue($acl->isAllowed(UserRole::CEO->value, Resource::PARTNER_FAMILY->value, 'default'));
-		self::assertFalse($acl->isAllowed(UserRole::DEALER->value, Resource::PARTNER_FAMILY->value, 'default'));
-		self::assertFalse($acl->isAllowed(UserRole::DEALER_JUNIOR->value, Resource::PARTNER_FAMILY->value, 'default'));
-		// dealers still see the partner itself
-		self::assertTrue($acl->isAllowed(UserRole::DEALER->value, Resource::PARTNER->value, 'default'));
-	}
-
-	private function page(string $url, int $permission): PageEntity
-	{
-		return new PageEntity(
-			1,
-			null,
-			$url,
-			0,
-			$permission,
-			1,
-			1,
-			0,
-			0,
-			0,
-			0,
-			0,
-			null,
-		);
-	}
-}
-
-final class StaticPageRepository extends PageRepository
-{
-	/**
-	 * @param list<PageEntity> $pages
-	 */
-	public function __construct(
-		private readonly array $pages,
-	) {
-	}
+	/** Roles from the lowest to the highest; a role inherits everything of the roles before it. */
+	private const array RoleOrder = [
+		UserRole::DEALER_JUNIOR,
+		UserRole::DEALER,
+		UserRole::CEO,
+		UserRole::ADMIN,
+	];
 
 	/**
-	 * @return list<PageEntity>
+	 * Resource value => lowest role that may use it.
 	 */
-	public function getAll(): array
+	private const array LowestRole = [
+		'homepage' => UserRole::DEALER_JUNIOR,
+		'babysitter' => UserRole::DEALER_JUNIOR,
+		'family' => UserRole::DEALER_JUNIOR,
+		'worker' => UserRole::DEALER_JUNIOR,
+		'project' => UserRole::DEALER_JUNIOR,
+		'turnus' => UserRole::DEALER_JUNIOR,
+		'stats' => UserRole::DEALER_JUNIOR,
+		'todo' => UserRole::DEALER_JUNIOR,
+		'proposal' => UserRole::DEALER_JUNIOR,
+		'missing-registry' => UserRole::DEALER_JUNIOR,
+		'partner' => UserRole::DEALER,
+		'agency' => UserRole::DEALER,
+		'settings' => UserRole::CEO,
+		'country' => UserRole::CEO,
+		'userManagement' => UserRole::CEO,
+		'translation' => UserRole::CEO,
+		'familyManagement' => UserRole::CEO,
+		'workerManagement' => UserRole::CEO,
+		'todoViewAll' => UserRole::CEO,
+		'change-log' => UserRole::CEO,
+		'login-log' => UserRole::CEO,
+		'partnerFamily' => UserRole::CEO,
+	];
+
+	/**
+	 * @return iterable<string, array{UserRole, Resource, bool}>
+	 */
+	public static function roleResourceMatrix(): iterable
 	{
-		return $this->pages;
+		foreach (self::RoleOrder as $rolePosition => $role) {
+			foreach (Resource::cases() as $resource) {
+				$lowestRole = self::LowestRole[$resource->value];
+				$allowed = $rolePosition >= array_search($lowestRole, self::RoleOrder, true);
+
+				yield $role->value . ' / ' . $resource->value => [$role, $resource, $allowed];
+			}
+		}
+	}
+
+	#[DataProvider('roleResourceMatrix')]
+	public function testRoleMayUseExactlyItsResources(UserRole $role, Resource $resource, bool $allowed): void
+	{
+		$acl = (new AuthorizatorFactory())->create();
+
+		self::assertSame($allowed, $acl->isAllowed($role->value, $resource->value, 'default'));
+	}
+
+	public function testExpectationCoversEveryResourceAndRole(): void
+	{
+		$resources = array_map(static fn (Resource $resource): string => $resource->value, Resource::cases());
+		sort($resources);
+		$expected = array_keys(self::LowestRole);
+		sort($expected);
+
+		self::assertSame($resources, $expected, 'A resource was added or removed: write its lowest role into this test.');
+		self::assertEqualsCanonicalizing(UserRole::cases(), self::RoleOrder);
+	}
+
+	public function testGuestMayUseNothing(): void
+	{
+		$acl = (new AuthorizatorFactory())->create();
+
+		foreach (Resource::cases() as $resource) {
+			self::assertFalse($acl->isAllowed('guest', $resource->value, 'default'), $resource->value);
+		}
+	}
+
+	public function testResourcesAreExactlyTheEnumAndNotMenuUrls(): void
+	{
+		$acl = (new AuthorizatorFactory())->create();
+
+		$resources = $acl->getResources();
+		sort($resources);
+		$expected = array_map(static fn (Resource $resource): string => $resource->value, Resource::cases());
+		sort($expected);
+
+		self::assertSame($expected, $resources);
+		foreach (['opatrovatelky', 'families', 'partneri', 'user-management', 'dokumenty'] as $menuUrl) {
+			self::assertFalse($acl->hasResource($menuUrl), $menuUrl);
+		}
 	}
 }

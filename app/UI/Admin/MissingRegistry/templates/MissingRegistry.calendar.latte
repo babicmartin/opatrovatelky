@@ -1,0 +1,17 @@
+{block pageTitle}Tímový kalendár neprítomnosti{/block}
+
+{block head}
+	<link href="{$basePath}/assets/css/missingCalendar.css?v={$cssVersion}" rel="stylesheet">
+{/block}
+
+{block content}
+	<div class="mb-4">
+		<a href="{plink :Admin:MissingRegistry:default}" class="btn btn-success btn-sm">Evidencia neprítomnosti – zoznam</a>
+	</div>
+	{control missingCalendar}
+{/block}
+
+{block scripts}
+	{include parent}
+	<script src="{$basePath}/js/missingCalendar.js?v={$jsVersion}"></script>
+{/block}

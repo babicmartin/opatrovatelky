@@ -25,6 +25,16 @@ final class ChangeAuditLogger
 	}
 
 	/**
+	 * A record changed as a whole (not field by field, as autosave logs it).
+	 *
+	 * @param array<string, mixed> $metadata
+	 */
+	public function logUpdated(string $context, string $entityTable, int $entityId, string $oldLabel, string $newLabel, array $metadata = []): void
+	{
+		$this->logAction($context, $entityTable, $entityId, 'record', 'Záznam', 'text', (string) $entityId, $oldLabel, (string) $entityId, $newLabel, 'updated', $metadata);
+	}
+
+	/**
 	 * @param array<string, mixed> $metadata
 	 */
 	public function logDeleted(string $context, string $entityTable, int $entityId, string $label = 'Záznam', array $metadata = []): void

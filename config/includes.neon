@@ -25,6 +25,7 @@ includes:
     - control/turnusDocuments.neon
     - control/statsOverview.neon
     - control/missingRegistryList.neon
+    - control/missingCalendar.neon
     - control/proposalList.neon
     - control/alphabetFilter.neon
     - control/familyList.neon

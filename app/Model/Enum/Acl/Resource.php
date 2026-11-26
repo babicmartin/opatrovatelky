@@ -25,5 +25,6 @@ enum Resource: string
 	case TRANSLATION = 'translation';
 	case PROPOSAL = 'proposal';
 	case MISSING = 'missing-registry';
+	case MISSING_MANAGE_ALL = 'missingRegistryManageAll';
 	case PARTNER_FAMILY = 'partnerFamily';
 }

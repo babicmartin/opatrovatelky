@@ -1,0 +1,216 @@
+{varType App\Model\DTO\MissingRegistry\Calendar\MissingCalendar $calendar}
+{varType App\Model\Enum\MissingRegistry\MissingType[] $types}
+{varType array<int, string> $months}
+{varType array{year: int, month: int} $previous}
+{varType array{year: int, month: int} $next}
+{varType array{year: int, month: int} $today}
+{varType int $currentUserId}
+{varType string[] $workingDayTypes}
+{varType string[] $calendarDayTypes}
+
+<div class="mc" data-missing-calendar data-preview-url="{link preview!, from: '__FROM__', to: '__TO__'}">
+	{snippet content}
+		<div class="mc-head">
+		<div class="mc-head-nav">
+		<div class="mc-nav">
+			<div class="mc-nav-month">
+				<a class="btn btn-sm mc-nav-arrow js-mc-nav" href="{plink this, year: $previous['year'], month: $previous['month']}" aria-label="Predchádzajúci mesiac">&lsaquo;</a>
+				<strong class="mc-nav-title">{$calendar->monthName} {$calendar->year}</strong>
+				<a class="btn btn-sm mc-nav-arrow js-mc-nav" href="{plink this, year: $next['year'], month: $next['month']}" aria-label="Nasledujúci mesiac">&rsaquo;</a>
+				<a class="btn btn-sm mc-nav-today js-mc-nav" href="{plink this, year: $today['year'], month: $today['month']}">Dnes</a>
+			</div>
+			<div class="mc-nav-year">
+				<a class="btn btn-sm mc-nav-yearbtn js-mc-nav" href="{plink this, year: $calendar->year - 1, month: $calendar->month}" aria-label="Predchádzajúci rok">&laquo; {$calendar->year - 1}</a>
+				<a class="btn btn-sm mc-nav-yearbtn js-mc-nav" href="{plink this, year: $calendar->year + 1, month: $calendar->month}" aria-label="Nasledujúci rok">{$calendar->year + 1} &raquo;</a>
+			</div>
+		</div>
+		<div class="mc-months">
+			<a n:foreach="$months as $number => $name"
+				href="{plink this, year: $calendar->year, month: $number}"
+				n:class="'mc-month', 'js-mc-nav', $number === $calendar->month ? 'is-current'"
+				n:attr="aria-current: $number === $calendar->month ? 'page'">{$name}</a>
+		</div>
+
+		</div>
+
+		<div class="pf-kpis">
+			<div class="pf-kpi">
+				<span class="pf-kpi-value">{$calendar->workingDays}</span>
+				<span class="pf-kpi-label">Pracovné dni</span>
+			</div>
+			<div class="pf-kpi">
+				<span class="pf-kpi-value">{count($calendar->holidays)}</span>
+				<span class="pf-kpi-label">Sviatky v pracovný deň</span>
+			</div>
+			<div class="pf-kpi">
+				<span class="pf-kpi-value">{$calendar->weekendDays}</span>
+				<span class="pf-kpi-label">Víkendové dni</span>
+			</div>
+			<div class="pf-kpi mc-kpi-absent">
+				<span class="pf-kpi-value">{count($calendar->absentToday)}</span>
+				<span class="pf-kpi-label">Dnes neprítomní</span>
+				<span n:if="$calendar->absentToday !== []" class="mc-kpi-names">{implode(', ', $calendar->absentToday)}</span>
+			</div>
+		</div>
+
+		</div>
+
+		<div class="mc-legend" role="group" aria-label="Zobrazené typy">
+			<span class="mc-legend-title">Typy:</span>
+			<button n:foreach="$types as $type" type="button" class="mc-chip js-mc-filter" data-type="{$type->value}" aria-pressed="true" n:attr="style: '--mc-color:' . $type->color()">{$type->label()}</button>
+			<span class="mc-chip mc-chip--static" n:attr="style: '--mc-color:' . App\Model\DTO\MissingRegistry\Calendar\MissingCalendarEntry::UNCLASSIFIED_COLOR">Nezaradené</span>
+			<span class="mc-legend-note">Kliknutím typ skryjete. Vyblednutý deň sa do počtu dní nezapočítava.</span>
+		</div>
+
+		<div class="mc-sheet-wrap">
+			<table class="mc-sheet" n:attr="style: '--mc-users:' . count($calendar->users)">
+				<thead>
+					<tr>
+						<th class="mc-date-col" scope="col">Dátum</th>
+						<th n:foreach="$calendar->users as $person" class="mc-user-col" scope="col">
+							<img src="{$basePath}/{$person->imagePath}" alt="" class="mc-avatar" n:attr="style: 'border-color:' . $person->color">
+							<span class="mc-user-name">{$person->name}</span>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr n:foreach="$calendar->days as $day" n:class="$day->isWeekend ? 'is-weekend', $day->holidayName !== null ? 'is-holiday', $day->isToday ? 'is-today'">
+						<th class="mc-date-col" scope="row" n:attr="aria-current: $day->isToday ? 'date'">
+							<span class="mc-date">{$day->date->format('j. n.')}</span>
+							<span class="mc-dayname">{$day->dayName|firstUpper}</span>
+							<span n:if="$day->holidayName !== null" class="mc-holiday">{$day->holidayName}</span>
+						</th>
+						<td n:foreach="$calendar->users as $person"
+							class="mc-cell"
+							data-user-id="{$person->id}"
+							data-user-name="{$person->name}"
+							data-date="{$day->date->format('Y-m-d')}"
+							n:attr="data-can-add: $person->canManage ? '1'">
+							{var $entries = $day->getEntries($person->id)}
+							<div n:if="$entries !== []" class="mc-entries">
+							{foreach $entries as $entry}
+								{var $record = $entry->record}
+								<div n:tag="$entry->isEditable ? 'button' : 'div'"
+									n:class="'mc-entry', $entry->isFirstDay ? 'is-first', $entry->isLastDay ? 'is-last', !$entry->isCounted ? 'is-uncounted', $entry->isEditable ? 'js-mc-edit'"
+									n:attr="type: $entry->isEditable ? 'button', style: '--mc-bg:' . $entry->getBackground(), data-id: $entry->isEditable ? $record->id"
+									data-types="{implode(',', $record->getTypeValues())}"
+									data-user-id="{$record->userId}"
+									data-user-name="{$person->name}"
+									data-from="{$record->dateFrom?->format('Y-m-d')}"
+									data-to="{$record->getLastDay()?->format('Y-m-d')}"
+									data-notice="{$record->notice}"
+									title="{$record->getTypeLabel()} · {$record->dateFrom?->format('j. n. Y')} – {$record->getLastDay()?->format('j. n. Y')}{if $record->notice !== ''} · {$record->notice}{/if}{if !$entry->isCounted} · tento deň sa nezapočítava{/if}">
+									<span class="mc-entry-label">{$record->getTypeLabel()}</span>
+									<span n:if="$entry->showNotice && $record->notice !== ''" class="mc-entry-note">{$record->notice|truncate:40}</span>
+								</div>
+							{/foreach}
+							</div>
+							<button n:if="$person->canManage" type="button" class="mc-add js-mc-add" aria-label="Pridať neprítomnosť: {$person->name}, {$day->date->format('j. n. Y')}">+</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="tableone mc-summary">
+			<div class="tableone-header">
+				<h3 class="tableone-title">Počet dní · {$calendar->year}</h3>
+			</div>
+			<div class="table-responsive">
+				<table class="table card-table table-vcenter">
+					<thead>
+						<tr class="thead">
+							<th>Kto</th>
+							<th n:foreach="$types as $type" class="tcenter">
+								<span class="mc-chip mc-chip--static" n:attr="style: '--mc-color:' . $type->color()">{$type->label()}</span>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr n:foreach="$calendar->users as $person">
+							<td>{$person->name}</td>
+							<td n:foreach="$types as $type" class="tcenter">
+								{var $yearTotal = $calendar->getYearTotal($person->id, $type->value)}
+								{var $monthTotal = $calendar->getMonthTotal($person->id, $type->value)}
+								<strong n:class="$yearTotal === 0 ? 'pf-muted'">{$yearTotal}</strong>
+								<small n:if="$monthTotal > 0" class="mc-month-total">{$calendar->monthName|lower}: {$monthTotal}</small>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<p class="mc-summary-note">
+				V pracovných dňoch (bez víkendov a dní pracovného pokoja) sa počíta: {implode(', ', $workingDayTypes)}.
+				V kalendárnych dňoch: {implode(', ', $calendarDayTypes)}.
+				Deň, ktorý pokrývajú dva záznamy rovnakého typu, sa počíta raz.
+			</p>
+		</div>
+	{/snippet}
+
+	<div class="modal fade" id="mc-entry-modal" tabindex="-1" aria-labelledby="mc-entry-title" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				{form entryForm, class: 'js-mc-entry-form'}
+					<div class="modal-header">
+						<h5 class="modal-title" id="mc-entry-title" data-title-create="Pridať neprítomnosť" data-title-edit="Upraviť neprítomnosť">Pridať neprítomnosť</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavrieť"></button>
+					</div>
+					<div class="modal-body">
+						<div class="alert alert-danger d-none js-mc-errors" role="alert"></div>
+
+						<div class="mb-3">
+							{ifset $form['userId']}
+								{label userId, class: 'form-label' /}
+								{input userId}
+							{else}
+								<div class="form-label">Kto</div>
+								<div class="form-control-plaintext js-mc-user-name"></div>
+							{/ifset}
+						</div>
+
+						<div class="row">
+							<div class="col-6 mb-3">
+								{label dateFrom, class: 'form-label' /}
+								{input dateFrom}
+							</div>
+							<div class="col-6 mb-3">
+								{label dateTo, class: 'form-label' /}
+								{input dateTo}
+								<div class="form-text">Prázdne = jeden deň.</div>
+							</div>
+						</div>
+
+						<div class="mc-preview js-mc-preview" aria-live="polite"></div>
+
+						<div class="mb-3">
+							<div class="form-label">Typ</div>
+							<div class="mc-type-options">
+								{foreach $types as $type}
+									{var $typeValue = $type->value}
+									<label class="mc-type-option" n:attr="style: '--mc-color:' . $type->color()">
+										<input n:name="types:$typeValue">
+										<span>{$type->label()}</span>
+									</label>
+								{/foreach}
+							</div>
+						</div>
+
+						<div class="mb-0">
+							{label notice, class: 'form-label' /}
+							{input notice}
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-danger me-auto d-none js-mc-delete" data-label="Odstrániť" data-confirm-label="Naozaj odstrániť?">Odstrániť</button>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavrieť</button>
+						{input save}
+					</div>
+				{/form}
+			</div>
+		</div>
+	</div>
+
+	{form deleteForm, class: 'd-none js-mc-delete-form'}{input delete}{/form}
+
+	<div class="mc-toast js-mc-toast" role="status" aria-live="polite"></div>
+</div>

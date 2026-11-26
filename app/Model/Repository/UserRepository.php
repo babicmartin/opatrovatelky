@@ -14,6 +14,7 @@ use App\Model\Utils\Date\DateService;
 use Nette\Database\Explorer;
 use Nette\Database\Row;
 use Nette\Database\Table\ActiveRow;
+use Nette\Database\Table\Selection;
 
 class UserRepository extends BaseRepository
 {
@@ -56,15 +57,56 @@ class UserRepository extends BaseRepository
 	public function findSelectOptions(): array
 	{
 		$options = [0 => '---'];
-		$rows = $this->findAll()
-			->where(UserTableMap::COL_PERMISSION . ' < ?', 10)
-			->order(UserTableMap::COL_SECOND_NAME . ' ASC');
-
-		foreach ($rows as $row) {
-			$options[(int) $row->id] = trim((string) $row->{UserTableMap::COL_NAME} . ' ' . (string) $row->{UserTableMap::COL_SECOND_NAME});
+		foreach ($this->findAssignable() as $row) {
+			$options[(int) $row->id] = $this->formatFullName($row);
 		}
 
 		return $options;
+	}
+
+	/**
+	 * People shown as columns of the absence calendar: active assignable users,
+	 * plus the users named in $extraUserIds (somebody with a record who was deactivated since).
+	 *
+	 * @param list<int> $extraUserIds
+	 * @return list<array{id: int, name: string, acronym: string, color: string, image: string}>
+	 */
+	public function findCalendarUsers(array $extraUserIds = []): array
+	{
+		$users = [];
+		foreach ($this->findAssignable() as $row) {
+			$id = (int) $row->id;
+			if ((int) $row->{UserTableMap::COL_ACTIVE} !== 1 && !in_array($id, $extraUserIds, true)) {
+				continue;
+			}
+
+			$users[] = [
+				'id' => $id,
+				'name' => $this->formatFullName($row),
+				'acronym' => (string) ($row->{UserTableMap::COL_ACRONYM} ?? ''),
+				'color' => (string) ($row->{UserTableMap::COL_COLOR} ?? ''),
+				'image' => (string) ($row->{UserTableMap::COL_IMAGE} ?? ''),
+			];
+		}
+
+		return $users;
+	}
+
+	/**
+	 * Users a record may be assigned to: everyone below the administrator, ordered by surname.
+	 *
+	 * @return Selection<ActiveRow>
+	 */
+	private function findAssignable(): Selection
+	{
+		return $this->findAll()
+			->where(UserTableMap::COL_PERMISSION . ' < ?', UserRole::ADMIN->getPermissionId())
+			->order(UserTableMap::COL_SECOND_NAME . ' ASC');
+	}
+
+	private function formatFullName(ActiveRow $row): string
+	{
+		return trim((string) $row->{UserTableMap::COL_NAME} . ' ' . (string) $row->{UserTableMap::COL_SECOND_NAME});
 	}
 
 	public function updateProfile(int $userId, UserProfileUpdateForm $form): int

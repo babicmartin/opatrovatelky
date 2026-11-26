@@ -2,8 +2,13 @@
 
 namespace App\Model\Repository;
 
+use App\Model\DTO\MissingRegistry\MissingRegistryInput;
+use App\Model\DTO\MissingRegistry\MissingRegistryRecord;
+use App\Model\Enum\MissingRegistry\MissingType;
 use App\Model\Table\MissingRegistryTableMap;
+use DateTimeImmutable;
 use Nette\Database\Table\ActiveRow;
+use Nette\Database\Table\Selection;
 
 class MissingRegistryRepository extends BaseRepository
 {
@@ -15,12 +20,11 @@ class MissingRegistryRepository extends BaseRepository
 	/**
 	 * @param int<1, max> $page
 	 * @param int<1, max> $itemsPerPage
-	 * @return list<array<string, mixed>>
+	 * @return list<MissingRegistryRecord>
 	 */
 	public function findVisibleRows(int $page, int $itemsPerPage, ?int $excludeId, ?int &$pageCount = null): array
 	{
-		$selection = $this->findAll()
-			->where(MissingRegistryTableMap::COL_DELETED, 0)
+		$selection = $this->findNotDeleted()
 			->order(MissingRegistryTableMap::COL_DATE_FROM . ' DESC');
 
 		if ($excludeId !== null) {
@@ -29,30 +33,103 @@ class MissingRegistryRepository extends BaseRepository
 
 		$selection->page($page, $itemsPerPage, $pageCount);
 
-		$rows = $selection->fetchAll();
-
-		return array_map([$this, 'mapRow'], array_values($rows));
+		return $this->mapRows($selection);
 	}
 
 	/**
-	 * @return array<string, mixed>|null
+	 * The newest row that has no date yet, the one the list offers as "Nový záznam".
+	 * With $userId only a row of that user is returned.
 	 */
-	public function findLastEmptyRow(): ?array
+	public function findLastEmptyRow(?int $userId = null): ?MissingRegistryRecord
 	{
-		$row = $this->findAll()
+		$selection = $this->findNotDeleted()
 			->where('(' . MissingRegistryTableMap::COL_DATE_FROM . ' IS NULL OR ' . MissingRegistryTableMap::COL_DATE_FROM . " = '')")
-			->where(MissingRegistryTableMap::COL_DELETED, 0)
-			->order(MissingRegistryTableMap::COL_DATE_FROM . ' DESC')
-			->limit(1)
+			->order(MissingRegistryTableMap::COL_ID . ' DESC')
+			->limit(1);
+
+		if ($userId !== null) {
+			$selection->where(MissingRegistryTableMap::COL_USER_ID, $userId);
+		}
+
+		$row = $selection->fetch();
+
+		return $row === null ? null : $this->mapRow($row);
+	}
+
+	public function findActive(int $id): ?MissingRegistryRecord
+	{
+		$row = $this->findNotDeleted()
+			->where(MissingRegistryTableMap::COL_ID, $id)
 			->fetch();
 
 		return $row === null ? null : $this->mapRow($row);
 	}
 
-	public function createEmpty(): int
+	/**
+	 * Records that have at least one day inside the given period, oldest first.
+	 *
+	 * @return list<MissingRegistryRecord>
+	 */
+	public function findInRange(DateTimeImmutable $from, DateTimeImmutable $to): array
 	{
-		$row = $this->insert([
-			MissingRegistryTableMap::COL_USER_ID => 0,
+		$dateFrom = MissingRegistryTableMap::COL_DATE_FROM;
+		$dateTo = MissingRegistryTableMap::COL_DATE_TO;
+
+		$selection = $this->findNotDeleted()
+			->where("$dateFrom IS NOT NULL")
+			->where("$dateFrom <= ?", $to->format('Y-m-d'))
+			->where("GREATEST(COALESCE($dateTo, $dateFrom), $dateFrom) >= ?", $from->format('Y-m-d'))
+			->order("$dateFrom ASC, " . MissingRegistryTableMap::COL_ID . ' ASC');
+
+		return $this->mapRows($selection);
+	}
+
+	public function createEmpty(int $userId = 0): int
+	{
+		return $this->insertRow([MissingRegistryTableMap::COL_USER_ID => $userId]);
+	}
+
+	public function create(int $userId, MissingRegistryInput $input): int
+	{
+		return $this->insertRow($this->toRow($userId, $input));
+	}
+
+	/**
+	 * Returns false when the record does not exist or is deleted.
+	 */
+	public function updateRecord(int $id, int $userId, MissingRegistryInput $input): bool
+	{
+		$selection = $this->findNotDeleted()->where(MissingRegistryTableMap::COL_ID, $id);
+		if ($selection->count('*') === 0) {
+			return false;
+		}
+
+		$selection->update($this->toRow($userId, $input));
+
+		return true;
+	}
+
+	public function softDelete(int $id): bool
+	{
+		return $this->findNotDeleted()
+			->where(MissingRegistryTableMap::COL_ID, $id)
+			->update([MissingRegistryTableMap::COL_DELETED => 1]) === 1;
+	}
+
+	/**
+	 * @return Selection<ActiveRow>
+	 */
+	private function findNotDeleted(): Selection
+	{
+		return $this->findAll()->where(MissingRegistryTableMap::COL_DELETED, 0);
+	}
+
+	/**
+	 * @param array<string, mixed> $data
+	 */
+	private function insertRow(array $data): int
+	{
+		$row = $this->insert($data + [
 			MissingRegistryTableMap::COL_ACTIVE => 1,
 			MissingRegistryTableMap::COL_DELETED => 0,
 		]);
@@ -65,55 +142,45 @@ class MissingRegistryRepository extends BaseRepository
 	}
 
 	/**
-	 * @param array{userId?:int,dateFrom?:?\DateTimeImmutable,dateTo?:?\DateTimeImmutable,typePn?:mixed,typeOcr?:mixed,typeLekar?:mixed,typeSviatok?:mixed,typeZastup?:mixed,typeSluzba?:mixed,typeDovolenka?:mixed,notice?:string} $data
+	 * @return array<string, mixed>
 	 */
-	public function updateRegistryRow(int $id, array $data): void
+	private function toRow(int $userId, MissingRegistryInput $input): array
 	{
-		$dateFrom = $data['dateFrom'] ?? null;
-		$dateTo = $data['dateTo'] ?? null;
-		$this->update($id, [
-			MissingRegistryTableMap::COL_USER_ID => (int) ($data['userId'] ?? 0),
-			MissingRegistryTableMap::COL_DATE_FROM => $dateFrom instanceof \DateTimeImmutable ? $dateFrom->format('Y-m-d') : null,
-			MissingRegistryTableMap::COL_DATE_TO => $dateTo instanceof \DateTimeImmutable ? $dateTo->format('Y-m-d') : null,
-			MissingRegistryTableMap::COL_TYPE_PN => !empty($data['typePn']) ? 1 : 0,
-			MissingRegistryTableMap::COL_TYPE_OCR => !empty($data['typeOcr']) ? 1 : 0,
-			MissingRegistryTableMap::COL_TYPE_LEKAR => !empty($data['typeLekar']) ? 1 : 0,
-			MissingRegistryTableMap::COL_TYPE_SVIATOK => !empty($data['typeSviatok']) ? 1 : 0,
-			MissingRegistryTableMap::COL_TYPE_ZASTUP => !empty($data['typeZastup']) ? 1 : 0,
-			MissingRegistryTableMap::COL_TYPE_SLUZBA => !empty($data['typeSluzba']) ? 1 : 0,
-			MissingRegistryTableMap::COL_TYPE_DOVOLENKA => !empty($data['typeDovolenka']) ? 1 : 0,
-			MissingRegistryTableMap::COL_NOTICE => (string) ($data['notice'] ?? ''),
-		]);
-	}
+		$row = [
+			MissingRegistryTableMap::COL_USER_ID => $userId,
+			MissingRegistryTableMap::COL_DATE_FROM => $input->dateFrom?->format('Y-m-d'),
+			MissingRegistryTableMap::COL_DATE_TO => $input->dateTo?->format('Y-m-d'),
+			MissingRegistryTableMap::COL_NOTICE => $input->notice,
+		];
 
-	public function softDelete(int $id): bool
-	{
-		return $this->findAll()
-			->where(MissingRegistryTableMap::COL_ID, $id)
-			->where(MissingRegistryTableMap::COL_DELETED, 0)
-			->update([MissingRegistryTableMap::COL_DELETED => 1]) === 1;
+		foreach (MissingType::cases() as $type) {
+			$row[$type->column()] = in_array($type, $input->types, true) ? 1 : 0;
+		}
+
+		return $row;
 	}
 
 	/**
-	 * @return array<string, mixed>
+	 * @param Selection<ActiveRow> $selection
+	 * @return list<MissingRegistryRecord>
 	 */
-	private function mapRow(ActiveRow $row): array
+	private function mapRows(Selection $selection): array
 	{
-		return [
-			'id' => (int) $row->id,
-			'formKey' => 'r' . (int) $row->id,
-			'userId' => (int) ($row->{MissingRegistryTableMap::COL_USER_ID} ?? 0),
-			'dateFrom' => $this->dateService->tryCreateFromDb((string) ($row->{MissingRegistryTableMap::COL_DATE_FROM} ?? '')),
-			'dateTo' => $this->dateService->tryCreateFromDb((string) ($row->{MissingRegistryTableMap::COL_DATE_TO} ?? '')),
-			'typePn' => (bool) $row->{MissingRegistryTableMap::COL_TYPE_PN},
-			'typeOcr' => (bool) $row->{MissingRegistryTableMap::COL_TYPE_OCR},
-			'typeLekar' => (bool) $row->{MissingRegistryTableMap::COL_TYPE_LEKAR},
-			'typeSviatok' => (bool) $row->{MissingRegistryTableMap::COL_TYPE_SVIATOK},
-			'typeZastup' => (bool) $row->{MissingRegistryTableMap::COL_TYPE_ZASTUP},
-			'typeSluzba' => (bool) $row->{MissingRegistryTableMap::COL_TYPE_SLUZBA},
-			'typeDovolenka' => (bool) $row->{MissingRegistryTableMap::COL_TYPE_DOVOLENKA},
-			'notice' => (string) ($row->{MissingRegistryTableMap::COL_NOTICE} ?? ''),
-		];
+		return array_map($this->mapRow(...), array_values($selection->fetchAll()));
 	}
 
+	private function mapRow(ActiveRow $row): MissingRegistryRecord
+	{
+		return new MissingRegistryRecord(
+			(int) $row->{MissingRegistryTableMap::COL_ID},
+			(int) ($row->{MissingRegistryTableMap::COL_USER_ID} ?? 0),
+			$this->dateService->tryCreateFromDb((string) ($row->{MissingRegistryTableMap::COL_DATE_FROM} ?? '')),
+			$this->dateService->tryCreateFromDb((string) ($row->{MissingRegistryTableMap::COL_DATE_TO} ?? '')),
+			array_values(array_filter(
+				MissingType::cases(),
+				static fn (MissingType $type): bool => (bool) $row->{$type->column()},
+			)),
+			(string) ($row->{MissingRegistryTableMap::COL_NOTICE} ?? ''),
+		);
+	}
 }

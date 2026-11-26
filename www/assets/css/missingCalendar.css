@@ -1,0 +1,159 @@
+/* Tímový kalendár neprítomnosti (MissingCalendarControl) */
+.mc {
+	--mc-border: #e6e8eb;
+	--mc-muted: #8a8f98;
+	--mc-brand: #8A2062;
+	--mc-color: #6c757d;
+}
+
+/* Hierarchia: dominuje názov mesiaca a mriežka; mesiace, čísla mesiaca a legenda sú len doplnok. */
+
+/* Legenda a filter typov: drobný detail tesne nad mriežkou */
+/* Horný okraj splýva s dolným okrajom hlavičky (margin collapsing), preto je väčší z nich tu. */
+.mc-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 52px 0 12px; }
+.mc-legend-title { color: var(--mc-muted); font-size: 12px; }
+.mc-legend-note { margin-left: 6px; color: var(--mc-muted); font-size: 12px; }
+.mc-chip {
+	display: inline-flex; align-items: center; padding: 0 8px;
+	border: 1px solid var(--mc-color); border-radius: 999px;
+	background: var(--mc-color); color: #fff;
+	font-size: 11px; font-weight: 600; line-height: 1.6; white-space: nowrap; cursor: pointer;
+}
+.mc-chip--static { cursor: default; }
+.mc-chip[aria-pressed="false"] { background: #fff; color: var(--mc-color); text-decoration: line-through; }
+.mc-chip:focus-visible, .mc-month:focus-visible, .mc-entry:focus-visible, .mc-add:focus-visible {
+	outline: 2px solid var(--mc-brand); outline-offset: 2px;
+}
+
+/* Hlavička: vľavo navigácia mesiacov, vpravo čísla mesiaca, všetko v jednej línii */
+.mc-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 32px; margin-bottom: 28px; }
+
+/* Navigácia */
+.mc-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-bottom: 12px; }
+.mc-nav-month, .mc-nav-year { display: flex; align-items: center; gap: 6px; }
+.mc-nav-title { min-width: 190px; color: #222; font-size: 24px; font-weight: 700; text-align: center; }
+.mc-nav .btn { border: 0; font-weight: 600; }
+.mc-nav-arrow { padding: 0 11px; background: #f3e3ee; color: var(--mc-brand); font-size: 20px; line-height: 1.35; }
+.mc-nav-arrow:hover, .mc-nav-arrow:focus-visible { background: var(--mc-brand); color: #fff; }
+/* "Dnes" je odkaz na aktuálny mesiac, nie označenie vybraného stavu: rovnaká jemná výplň ako šípky. */
+.mc-nav-today { background: #f3e3ee; color: var(--mc-brand); }
+.mc-nav-today:hover, .mc-nav-today:focus-visible { background: var(--mc-brand); color: #fff; }
+.mc-nav-yearbtn { background: #f1f3f5; color: #5c6370; font-size: 12px; }
+.mc-nav-yearbtn:hover, .mc-nav-yearbtn:focus-visible { background: #f3e3ee; color: var(--mc-brand); }
+.mc-months { display: flex; flex-wrap: wrap; gap: 2px; }
+.mc-month { padding: 2px 10px; border-radius: 999px; color: var(--mc-muted); font-size: 12px; text-decoration: none; }
+.mc-month:hover { background: #f3e3ee; color: var(--mc-brand); text-decoration: none; }
+.mc-month.is-current, .mc-month.is-current:hover { background: var(--mc-brand); color: #fff; font-weight: 600; }
+
+/* Čísla mesiaca: kompaktné, tichšie než mriežka */
+.mc .pf-kpis { flex-wrap: nowrap; gap: 10px; margin-bottom: 0; }
+.mc .pf-kpi { flex: 0 0 auto; min-width: 132px; padding: 10px 16px; }
+.mc .pf-kpi-value { font-size: 20px; }
+.mc .pf-kpi-label { margin-top: 2px; font-size: 11px; }
+.mc .pf-kpi.mc-kpi-absent { max-width: 340px; }
+.mc-kpi-names { margin-top: 4px; color: #333; font-size: 12px; }
+
+/* Na širokej obrazovke sa stránka posúva celá a hlavička mriežky ostáva prilepená hore;
+   na úzkej sa mriežka posúva do strán vo vlastnom ráme. */
+.mc-sheet-wrap {
+	margin-bottom: 44px; border: 1px solid var(--mc-border); border-radius: 10px; background: #fff;
+	transition: opacity .15s;
+}
+@media (max-width: 991.98px) {
+	.mc-sheet-wrap { max-height: 85vh; overflow: auto; }
+}
+.mc.is-loading .mc-sheet-wrap { opacity: .55; }
+/* Rovnako široké stĺpce ľudí; --mc-users nastavuje šablóna. */
+.mc-sheet { width: 100%; min-width: calc(150px + var(--mc-users, 3) * 160px); border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+.mc-sheet thead th:first-child { border-top-left-radius: 10px; }
+.mc-sheet thead th:last-child { border-top-right-radius: 10px; }
+.mc-sheet tbody tr:last-child th { border-bottom-left-radius: 10px; }
+.mc-sheet tbody tr:last-child td:last-child { border-bottom-right-radius: 10px; }
+.mc-sheet thead th {
+	position: sticky; top: 0; z-index: 3; padding: 10px 12px;
+	border-bottom: 1px solid var(--mc-border); background: #fafbfc;
+	font-size: 13px; font-weight: 600; text-align: left; white-space: nowrap;
+}
+.mc-sheet .mc-date-col {
+	position: sticky; left: 0; z-index: 2; width: 150px; min-width: 150px; padding: 5px 12px;
+	border-right: 1px solid var(--mc-border); background: #fff; font-weight: 400; text-align: left;
+}
+.mc-sheet thead .mc-date-col { z-index: 4; background: #fafbfc; font-weight: 600; }
+.mc-sheet tbody th, .mc-sheet tbody td { border-top: 1px solid var(--mc-border); }
+.mc-sheet tbody tr:first-child th, .mc-sheet tbody tr:first-child td { border-top: 0; }
+.mc-user-col { min-width: 160px; }
+.mc-avatar { width: 30px; height: 30px; margin-right: 8px; border: 2px solid var(--mc-brand); border-radius: 50%; object-fit: cover; }
+.mc-date { display: inline-block; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.mc-dayname { color: var(--mc-muted); font-size: 12px; }
+.mc-holiday { display: block; width: fit-content; margin-top: 2px; padding: 0 7px; border-radius: 4px; background: #f8dc8a; color: #7a4c00; font-size: 11px; font-weight: 600; }
+
+.mc-cell { position: relative; min-width: 160px; height: 36px; padding: 0 34px 0 8px; border-left: 1px solid var(--mc-border); vertical-align: top; }
+.mc-cell:first-of-type { border-left: 0; }
+.mc-cell[data-can-add] { cursor: cell; }
+.mc-sheet tr.is-weekend td, .mc-sheet tr.is-weekend th { background: #e9edf3; }
+.mc-sheet tr.is-holiday td, .mc-sheet tr.is-holiday th { background: #fdf1c9; }
+.mc-sheet tr.is-today td, .mc-sheet tr.is-today th { box-shadow: inset 0 2px 0 var(--mc-brand), inset 0 -2px 0 var(--mc-brand); }
+.mc-sheet tr.is-today .mc-date { color: var(--mc-brand); }
+.mc-sheet td.is-selecting { background: #f3e3ee; box-shadow: inset 0 0 0 2px var(--mc-brand); }
+
+/* Záznam: viacdňový rozsah sa spája do jedného pruhu. Obal vypĺňa celú výšku bunky,
+   aby pruh pokračoval bez medzery aj cez vyšší riadok (deň so sviatkom). */
+.mc-entries { display: flex; flex-direction: column; height: 100%; min-height: 36px; }
+.mc-entry {
+	position: relative; display: block; flex: 1 1 auto; width: 100%; margin: -1px 0 0; padding: 4px 9px;
+	overflow: hidden; border: 0; border-radius: 0; background: var(--mc-bg, #6c757d); color: #fff;
+	font-size: 12px; font-weight: 600; line-height: 1.35; text-align: left;
+}
+.mc-entry.is-first { margin-top: 3px; border-top-left-radius: 7px; border-top-right-radius: 7px; }
+.mc-entry.is-last { margin-bottom: 3px; border-bottom-right-radius: 7px; border-bottom-left-radius: 7px; }
+button.mc-entry { cursor: pointer; }
+button.mc-entry:hover { filter: brightness(1.1); }
+/* Deň, ktorý sa nezapočítava (víkend alebo sviatok vnútri dovolenky): farba typu je polopriehľadná
+   s jemným šrafovaním, text ostáva čitateľný. Farbu nastavuje šablóna cez --mc-bg. */
+.mc-entry.is-uncounted { background: none; color: #1f2937; }
+.mc-entry.is-uncounted::before, .mc-entry.is-uncounted::after { position: absolute; inset: 0; content: ""; pointer-events: none; }
+.mc-entry.is-uncounted::before { background: var(--mc-bg, #6c757d); opacity: .35; }
+.mc-entry.is-uncounted::after { background: repeating-linear-gradient(135deg, rgba(255, 255, 255, .3) 0 3px, transparent 3px 10px); }
+.mc-entry.is-filtered { display: none; }
+.mc-entry-label, .mc-entry-note { position: relative; z-index: 1; display: block; }
+.mc-entry-note { overflow: hidden; font-weight: 400; opacity: .92; text-overflow: ellipsis; white-space: nowrap; }
+
+.mc-add {
+	position: absolute; top: 6px; right: 6px; width: 23px; height: 23px; padding: 0;
+	border: 1px solid var(--mc-border); border-radius: 50%; background: #fff; color: var(--mc-brand);
+	font-size: 16px; font-weight: 700; line-height: 1; opacity: 0; transition: opacity .12s;
+}
+.mc-cell:hover .mc-add, .mc-add:focus-visible { opacity: 1; }
+@media (hover: none) {
+	.mc-add { opacity: .7; }
+}
+
+/* Súhrn dní */
+.mc-month-total { display: block; color: var(--mc-muted); }
+.mc-summary-note { margin: 0; padding: 12px 16px; color: var(--mc-muted); font-size: 13px; }
+
+/* Dialóg */
+.mc-type-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.mc-type-option {
+	display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 4px 12px;
+	border: 1px solid var(--mc-color); border-radius: 999px; color: var(--mc-color);
+	font-size: 13px; font-weight: 600; cursor: pointer; user-select: none;
+}
+.mc-type-option input { margin: 0; accent-color: var(--mc-color); }
+.mc-type-option:has(input:checked) { background: var(--mc-color); color: #fff; }
+.mc-type-option:has(input:focus-visible) { outline: 2px solid var(--mc-brand); outline-offset: 2px; }
+.mc-preview { min-height: 21px; margin-bottom: 14px; color: #333; font-size: 13px; }
+.mc-preview strong { color: var(--mc-brand); }
+
+/* Oznam po uložení */
+.mc-toast {
+	position: fixed; right: 24px; bottom: 24px; z-index: 1090; max-width: 360px; padding: 10px 16px;
+	border-radius: 8px; background: #1f2937; color: #fff; font-size: 14px;
+	opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .2s, transform .2s;
+}
+.mc-toast.is-visible { opacity: 1; transform: none; }
+.mc-toast.is-error { background: #b3261e; }
+
+@media (prefers-reduced-motion: reduce) {
+	.mc-sheet-wrap, .mc-add, .mc-toast { transition: none; }
+}

@@ -2,6 +2,9 @@
 
 namespace Tests\Integration;
 
+use App\Model\DTO\MissingRegistry\MissingRegistryInput;
+use App\Model\DTO\MissingRegistry\MissingRegistryRecord;
+use App\Model\Enum\MissingRegistry\MissingType;
 use App\Model\Enum\UserRole\UserRole;
 use App\Model\Form\DTO\Admin\Agency\AgencyUpdate\AgencyUpdateForm;
 use App\Model\Form\DTO\Admin\Partner\PartnerUpdate\PartnerUpdateForm;
@@ -111,21 +114,15 @@ final class AdminSupportingFormFactoryTest extends DatabaseTestCase
 		$missingPayload = null;
 		$missingForm = $this->getContainer()
 			->getByType(MissingRegistryFormFactory::class)
-			->create([
-				'id' => 30,
-				'userId' => 3,
-				'dateFrom' => new \DateTimeImmutable('2026-08-01'),
-				'dateTo' => new \DateTimeImmutable('2026-08-03'),
-				'typePn' => true,
-				'typeOcr' => false,
-				'typeLekar' => true,
-				'typeSviatok' => false,
-				'typeZastup' => true,
-				'typeSluzba' => false,
-				'typeDovolenka' => false,
-				'notice' => 'Missing default',
-			], [3 => 'User'], function (int $id, array $values) use (&$missingPayload): void {
-				$missingPayload = ['id' => $id, 'values' => $values];
+			->create(new MissingRegistryRecord(
+				30,
+				3,
+				new \DateTimeImmutable('2026-08-01'),
+				new \DateTimeImmutable('2026-08-03'),
+				[MissingType::PN, MissingType::LEKAR, MissingType::ZASTUP],
+				'Missing default',
+			), [3 => 'User', 4 => 'Other'], function (MissingRegistryInput $input) use (&$missingPayload): void {
+				$missingPayload = $input;
 			});
 		$countryPayload = null;
 		$countryForm = $this->getContainer()
@@ -165,9 +162,10 @@ final class AdminSupportingFormFactoryTest extends DatabaseTestCase
 			'dateProposalSended' => '22.07.2026',
 			'notice' => 'Proposal submitted',
 		]);
+		// The hidden `id` names another record: the form hands over values only, never an id to write to.
 		$this->submit($missingForm, [
-			'id' => 30,
-			'userId' => 3,
+			'id' => 31,
+			'userId' => 4,
 			'dateFrom' => '05.08.2026',
 			'dateTo' => '06.08.2026',
 			'typePn' => false,
@@ -191,10 +189,15 @@ final class AdminSupportingFormFactoryTest extends DatabaseTestCase
 		self::assertInstanceOf(ProposalUpdateForm::class, $proposalDto);
 		self::assertSame('Proposal submitted', $proposalDto->notice);
 		self::assertSame('2026-07-21', $proposalDto->dateStartingWork?->format('Y-m-d'));
-		self::assertIsArray($missingPayload);
-		self::assertSame(30, $missingPayload['id']);
-		self::assertSame(true, $missingPayload['values']['typeOcr']);
-		self::assertSame('Missing submitted', $missingPayload['values']['notice']);
+		self::assertInstanceOf(MissingRegistryInput::class, $missingPayload);
+		self::assertSame(4, $missingPayload->userId);
+		self::assertSame('2026-08-05', $missingPayload->dateFrom?->format('Y-m-d'));
+		self::assertSame('2026-08-06', $missingPayload->dateTo?->format('Y-m-d'));
+		self::assertSame(
+			[MissingType::OCR, MissingType::SVIATOK, MissingType::SLUZBA, MissingType::DOVOLENKA],
+			$missingPayload->types,
+		);
+		self::assertSame('Missing submitted', $missingPayload->notice);
 		self::assertIsArray($countryPayload);
 		self::assertSame(40, $countryPayload['id']);
 		self::assertSame('Country submitted', $countryPayload['values']['name']);

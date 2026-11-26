@@ -1,16 +1,31 @@
-{varType array|null $newRow}
-{varType array $rows}
+{varType App\Model\DTO\MissingRegistry\MissingRegistryRecord|null $newRow}
+{varType App\Model\DTO\MissingRegistry\MissingRegistryRecord[] $rows}
 {varType App\Model\Utils\Paginator\Paginator $paginator}
+{varType App\Model\Enum\MissingRegistry\MissingType[] $types}
+{varType array<int, string> $userNames}
+{varType array<int, bool> $editableIds}
 
-{define registryRow, array $row}
+{define registryRow, App\Model\DTO\MissingRegistry\MissingRegistryRecord $row}
+	{if isset($editableIds[$row->id])}
+		{include editableRow, $row}
+	{else}
+		{include readOnlyRow, $row}
+	{/if}
+{/define}
+
+{define editableRow, App\Model\DTO\MissingRegistry\MissingRegistryRecord $row}
 	<div class="row align-items-center">
 		<div class="col-xl-11 col-md-12">
-			{form "registryForm-$row[id]"}
+			{form "registryForm-$row->id"}
 				<div class="row">
 					<div class="col-xl-2 col-md-12">
 						<div class="mb10">
 							<div class="inputLabel">Kto</div>
-							{input userId}
+							{ifset $form['userId']}
+								{input userId}
+							{else}
+								<div class="form-control-plaintext">{$userNames[$row->userId] ?? '---'}</div>
+							{/ifset}
 						</div>
 					</div>
 					<div class="col-xl-2 col-md-12">
@@ -27,13 +42,11 @@
 					</div>
 					<div class="col-xl-3 col-md-12">
 						<div class="mb10 mt-3 row">
-							<div class="col-4">{input typePn} PN</div>
-							<div class="col-4">{input typeOcr} OČR</div>
-							<div class="col-4">{input typeLekar} Lekár</div>
-							<div class="col-4">{input typeSviatok} Sviatok</div>
-							<div class="col-4">{input typeZastup} Zástup</div>
-							<div class="col-4">{input typeSluzba} Služba</div>
-							<div class="col-8">{input typeDovolenka} Dovolenka</div>
+							{foreach $types as $type}
+								{var $typeField = $type->field()}
+								{* the last, longest label keeps the rest of the row *}
+								<div n:class="$iterator->last ? 'col-8' : 'col-4'">{input $typeField} {$type->label()}</div>
+							{/foreach}
 						</div>
 					</div>
 					<div class="col-xl-3 col-md-12">
@@ -47,7 +60,45 @@
 			{/form}
 		</div>
 		<div class="col-xl-1 col-md-12">
-			{form "deleteRegistryForm-$row[id]"}{input delete}{/form}
+			{form "deleteRegistryForm-$row->id"}{input delete}{/form}
+		</div>
+	</div>
+{/define}
+
+{define readOnlyRow, App\Model\DTO\MissingRegistry\MissingRegistryRecord $row}
+	<div class="row align-items-center missing-registry-readonly">
+		<div class="col-xl-11 col-md-12">
+			<div class="row">
+				<div class="col-xl-2 col-md-12">
+					<div class="mb10">
+						<div class="inputLabel">Kto</div>
+						<div class="form-control-plaintext">{$userNames[$row->userId] ?? '---'}</div>
+					</div>
+				</div>
+				<div class="col-xl-2 col-md-12">
+					<div class="mb10">
+						<div style="font-weight:bold; font-size:16px;">Od</div>
+						<div class="form-control-plaintext">{$row->dateFrom?->format('d.m.Y')}</div>
+					</div>
+				</div>
+				<div class="col-xl-2 col-md-12">
+					<div class="mb10">
+						<div style="font-weight:bold; font-size:16px;">Do</div>
+						<div class="form-control-plaintext">{$row->dateTo?->format('d.m.Y')}</div>
+					</div>
+				</div>
+				<div class="col-xl-3 col-md-12">
+					<div class="mb10 mt-3">
+						<span n:foreach="$row->types as $type" class="badge me-1" n:attr="style: 'background-color:' . $type->color()">{$type->label()}</span>
+					</div>
+				</div>
+				<div class="col-xl-3 col-md-12">
+					<div class="mb10">
+						<div style="font-weight:bold; font-size:16px;">Poznámka</div>
+						<div class="form-control-plaintext">{$row->notice|breakLines}</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 {/define}

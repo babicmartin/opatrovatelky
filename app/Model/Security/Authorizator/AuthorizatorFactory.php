@@ -43,6 +43,7 @@ final class AuthorizatorFactory
 			Resource::FAMILY_MANAGEMENT,
 			Resource::WORKER_MANAGEMENT,
 			Resource::TODO_VIEW_ALL,
+			Resource::MISSING_MANAGE_ALL,
 			Resource::CHANGE_LOG,
 			Resource::LOGIN_LOG,
 			Resource::PARTNER_FAMILY,

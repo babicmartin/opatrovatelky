@@ -19,6 +19,10 @@ services:
 	- App\Model\Repository\ChangeLogRepository
 	- App\Model\Service\Audit\ChangeAuditLogger
 	- App\Model\Service\Autosave\AutosaveFieldUpdateService
+	- App\Model\Service\MissingRegistry\MissingRegistryAccessPolicy
+	- App\Model\Service\MissingRegistry\MissingRegistryWriteService
+	- App\Model\Service\MissingRegistry\MissingRegistryDayCounter
+	- App\Model\Service\MissingRegistry\MissingCalendarBuilder
 	- App\Model\Service\Pdf\BabysitterPdfService
 	- App\Model\Service\Hhs\HhsPresentationWriter
 	- App\Model\Service\Hhs\HhsPresentationService(templatePath: %rootDir%/%storageDir.hhsPresentationTemplate%, exportDirectory: %rootDir%/%storageDir.babysitterHhsPpt%)

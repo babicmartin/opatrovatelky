@@ -2,12 +2,15 @@
 
 namespace App\UI\Admin\Control\MissingRegistry\MissingRegistryList;
 
+use App\Model\DTO\MissingRegistry\MissingRegistryInput;
+use App\Model\DTO\MissingRegistry\MissingRegistryRecord;
+use App\Model\Enum\MissingRegistry\MissingType;
 use App\Model\Factory\PaginatorFactory;
 use App\Model\Repository\MissingRegistryRepository;
 use App\Model\Repository\UserRepository;
-use App\Model\Service\Audit\ChangeAuditLogger;
-use App\Model\Table\MissingRegistryTableMap;
-use App\Model\Utils\Date\DateService;
+use App\Model\Service\MissingRegistry\MissingRegistryAccessPolicy;
+use App\Model\Service\MissingRegistry\MissingRegistryException;
+use App\Model\Service\MissingRegistry\MissingRegistryWriteService;
 use App\Model\Utils\Paginator\Paginator;
 use App\UI\Admin\AdminPresenter;
 use App\UI\Admin\Form\ConfirmedCreateFormFactory;
@@ -17,6 +20,10 @@ use Nette\Application\UI\Control;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\Multiplier;
 
+/**
+ * Paged list of the absence registry. Everybody sees every row; a row is a form only for
+ * the user who may change it (MissingRegistryAccessPolicy), the others see it as text.
+ */
 class MissingRegistryListControl extends Control
 {
 	private const int ITEMS_PER_PAGE = 20;
@@ -25,21 +32,23 @@ class MissingRegistryListControl extends Control
 
 	private int $pageCount = 1;
 
-	/** @var list<array<string, mixed>>|null */
+	/** @var list<MissingRegistryRecord>|null */
 	private ?array $rows = null;
 
-	/** @var array<string, mixed>|null */
-	private ?array $newRow = null;
+	private MissingRegistryRecord|false|null $newRow = false;
+
+	/** @var array<int, string>|null */
+	private ?array $userOptions = null;
 
 	public function __construct(
 		private readonly MissingRegistryRepository $missingRegistryRepository,
 		private readonly UserRepository $userRepository,
 		private readonly PaginatorFactory $paginatorFactory,
 		private readonly MissingRegistryFormFactory $missingRegistryFormFactory,
-		private readonly DateService $dateService,
 		private readonly ConfirmedCreateFormFactory $confirmedCreateFormFactory,
 		private readonly ConfirmedDeleteFormFactory $confirmedDeleteFormFactory,
-		private readonly ChangeAuditLogger $changeAuditLogger,
+		private readonly MissingRegistryWriteService $writeService,
+		private readonly MissingRegistryAccessPolicy $policy,
 	) {
 	}
 
@@ -52,16 +61,22 @@ class MissingRegistryListControl extends Control
 
 	public function render(): void
 	{
+		$this->assertCanView();
+
 		$template = $this->getTemplate();
 		$template->setFile(__DIR__ . '/templates/MissingRegistryListControl.latte');
 		$template->newRow = $this->getNewRow();
-		$template->rows = $this->getRowsWithoutNewRow();
+		$template->rows = $this->getRows();
 		$template->paginator = $this->createPaginator();
+		$template->types = MissingType::cases();
+		$template->userNames = $this->getUserOptions();
+		$template->editableIds = $this->getEditableIds();
 		$template->render();
 	}
 
 	public function handleCreate(): void
 	{
+		$this->assertCanView();
 		$this->redirect('this');
 	}
 
@@ -69,14 +84,12 @@ class MissingRegistryListControl extends Control
 	protected function createComponentDeleteRegistryForm(): Multiplier
 	{
 		return new Multiplier(function (string $id): Form {
-			if (!ctype_digit($id)) {
-				$this->error('Evidencia neexistuje.');
-			}
+			$record = $this->getEditableRecord($id);
 
 			return $this->confirmedDeleteFormFactory->create(
 				'Naozaj chcete odstrániť evidenciu neprítomnosti?',
-				function () use ($id): void {
-					$this->deleteRegistryFormSucceeded((int) $id);
+				function () use ($record): void {
+					$this->deleteRegistryFormSucceeded($record->id);
 				},
 			);
 		});
@@ -88,21 +101,22 @@ class MissingRegistryListControl extends Control
 	protected function createComponentRegistryForm(): Multiplier
 	{
 		return new Multiplier(function (string $id): Form {
-			$row = $this->findRowForForm((int) $id);
-			if ($row === null) {
-				$this->error('Evidencia neexistuje.');
-			}
+			$record = $this->getEditableRecord($id);
 
 			return $this->missingRegistryFormFactory->create(
-				$row,
-				$this->userRepository->findSelectOptions(),
-				$this->registryFormSucceeded(...),
+				$record,
+				$this->policy->canManageAll() ? $this->getUserOptions() : null,
+				function (MissingRegistryInput $input) use ($record): void {
+					$this->registryFormSucceeded($record->id, $input);
+				},
 			);
 		});
 	}
 
 	protected function createComponentCreateMissingRegistryForm(): Form
 	{
+		$this->assertCanView();
+
 		return $this->confirmedCreateFormFactory->create(
 			'Pridať novú evidenciu',
 			'Naozaj chcete vytvoriť novú evidenciu neprítomnosti?',
@@ -113,57 +127,72 @@ class MissingRegistryListControl extends Control
 
 	private function createMissingRegistryFormSucceeded(Form $form): void
 	{
-		$id = $this->missingRegistryRepository->createEmpty();
-		$this->changeAuditLogger->logCreated('missingRegistry.row', MissingRegistryTableMap::TABLE_NAME, $id, 'Neprítomnosť');
+		$this->run(fn () => $this->writeService->createEmpty());
 		$this->redirect('this');
 	}
 
 	private function deleteRegistryFormSucceeded(int $id): void
 	{
-		if ($this->findRowForForm($id) === null || !$this->missingRegistryRepository->softDelete($id)) {
-			$this->error('Evidencia neexistuje.');
-		}
-
-		$this->changeAuditLogger->logDeleted('missingRegistry.row', MissingRegistryTableMap::TABLE_NAME, $id, 'Neprítomnosť');
+		$this->run(fn () => $this->writeService->delete($id));
 		$this->redirect('this');
 	}
 
 	/**
-	 * @param array<string, mixed> $values
+	 * $id is the record the form was built for, verified on the server. The hidden `id` field is not read.
 	 */
-	private function registryFormSucceeded(int $id, array $values): void
+	private function registryFormSucceeded(int $id, MissingRegistryInput $input): void
 	{
 		$presenter = $this->getPresenter();
 		if ($presenter instanceof AdminPresenter) {
-			$presenter->tryHandleAutosavePartialRequest();
+			$presenter->tryHandleAutosavePartialRequest($id);
 		}
 
-		$values['dateFrom'] = $this->dateService->tryCreateFromUserInput((string) ($values['dateFrom'] ?? ''));
-		$values['dateTo'] = $this->dateService->tryCreateFromUserInput((string) ($values['dateTo'] ?? ''));
-		$this->missingRegistryRepository->updateRegistryRow($id, $values);
+		$this->run(fn () => $this->writeService->update($id, $input, requireComplete: false));
 
-		if ($this->getPresenter()->isAjax()) {
-			$this->getPresenter()->sendJson(['success' => true]);
+		if ($presenter->isAjax()) {
+			$presenter->sendJson(['success' => true]);
 		}
 
 		$this->redirect('this');
 	}
 
 	/**
-	 * @return list<array<string, mixed>>
+	 * Record named by a Multiplier key, only when the current user may change it.
 	 */
-	private function getRowsWithoutNewRow(): array
+	private function getEditableRecord(string $id): MissingRegistryRecord
 	{
-		$newRowId = $this->getNewRow()['id'] ?? null;
+		if (!ctype_digit($id)) {
+			$this->error('Evidencia neexistuje.');
+		}
 
-		return array_values(array_filter(
-			$this->getRows(),
-			static fn (array $row): bool => $row['id'] !== $newRowId,
-		));
+		return $this->run(fn (): MissingRegistryRecord => $this->writeService->getEditable((int) $id));
 	}
 
 	/**
-	 * @return list<array<string, mixed>>
+	 * Runs a registry operation and turns its refusal into the matching HTTP error.
+	 *
+	 * @template T
+	 * @param callable(): T $operation
+	 * @return T
+	 */
+	private function run(callable $operation): mixed
+	{
+		try {
+			return $operation();
+		} catch (MissingRegistryException $e) {
+			$this->error($e->getMessage(), $e->getCode());
+		}
+	}
+
+	private function assertCanView(): void
+	{
+		if (!$this->policy->canView()) {
+			$this->error('Prístup zamietnutý', 403);
+		}
+	}
+
+	/**
+	 * @return list<MissingRegistryRecord>
 	 */
 	private function getRows(): array
 	{
@@ -176,7 +205,7 @@ class MissingRegistryListControl extends Control
 			$this->rows = $this->missingRegistryRepository->findVisibleRows(
 				$page,
 				$itemsPerPage,
-				$this->getNewRow()['id'] ?? null,
+				$this->getNewRow()?->id,
 				$pageCount,
 			);
 			$this->pageCount = max(1, $pageCount);
@@ -186,15 +215,40 @@ class MissingRegistryListControl extends Control
 	}
 
 	/**
-	 * @return array<string, mixed>|null
+	 * The unfinished row offered as "Nový záznam": any for somebody who manages all records, otherwise the own one.
 	 */
-	private function getNewRow(): ?array
+	private function getNewRow(): ?MissingRegistryRecord
 	{
-		if ($this->newRow === null) {
-			$this->newRow = $this->missingRegistryRepository->findLastEmptyRow();
+		if ($this->newRow === false) {
+			$this->newRow = $this->missingRegistryRepository->findLastEmptyRow(
+				$this->policy->canManageAll() ? null : $this->policy->getCurrentUserId(),
+			);
 		}
 
 		return $this->newRow;
+	}
+
+	/**
+	 * @return array<int, true> ids of the shown records the current user may change
+	 */
+	private function getEditableIds(): array
+	{
+		$ids = [];
+		foreach ([$this->getNewRow(), ...$this->getRows()] as $record) {
+			if ($record !== null && $this->policy->canEdit($record)) {
+				$ids[$record->id] = true;
+			}
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private function getUserOptions(): array
+	{
+		return $this->userOptions ??= $this->userRepository->findSelectOptions();
 	}
 
 	private function createPaginator(): Paginator
@@ -207,24 +261,5 @@ class MissingRegistryListControl extends Control
 			self::ITEMS_PER_PAGE,
 			'this',
 		);
-	}
-
-	/**
-	 * @return array<string, mixed>|null
-	 */
-	private function findRowForForm(int $id): ?array
-	{
-		$newRow = $this->getNewRow();
-		if ($newRow !== null && $newRow['id'] === $id) {
-			return $newRow;
-		}
-
-		foreach ($this->getRowsWithoutNewRow() as $row) {
-			if ($row['id'] === $id) {
-				return $row;
-			}
-		}
-
-		return null;
 	}
 }

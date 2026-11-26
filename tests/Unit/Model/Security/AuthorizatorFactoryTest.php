@@ -45,6 +45,7 @@ final class AuthorizatorFactoryTest extends TestCase
 		'familyManagement' => UserRole::CEO,
 		'workerManagement' => UserRole::CEO,
 		'todoViewAll' => UserRole::CEO,
+		'missingRegistryManageAll' => UserRole::CEO,
 		'change-log' => UserRole::CEO,
 		'login-log' => UserRole::CEO,
 		'partnerFamily' => UserRole::CEO,

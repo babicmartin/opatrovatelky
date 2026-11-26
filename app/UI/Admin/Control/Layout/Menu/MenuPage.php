@@ -64,7 +64,7 @@ enum MenuPage: string
 			self::PROPOSAL => ':Admin:Proposal:default',
 			self::STATS => ':Admin:Stats:default',
 			self::TODO => ':Admin:Todo:default',
-			self::MISSING => ':Admin:MissingRegistry:default',
+			self::MISSING => ':Admin:MissingRegistry:calendar',
 			self::SETTINGS => ':Admin:Settings:default',
 			self::COUNTRY => ':Admin:Country:default',
 			self::USER_MANAGEMENT => ':Admin:UserManagement:default',

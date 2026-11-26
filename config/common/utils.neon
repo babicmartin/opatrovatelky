@@ -2,6 +2,7 @@ services:
 	- App\Model\Utils\ArrayService\ArrayService
 	- App\Model\Utils\Checkbox\CheckboxService
 	- App\Model\Utils\Date\DateService
+	- App\Model\Utils\Date\HolidayService
 	- App\Model\Utils\Date\MonthService
 	- App\Model\Utils\Date\QuarterService
 	- App\Model\Utils\Date\YearService

@@ -1,7 +1,7 @@
 parameters:
     latteVariable:
-        cssVersion: 3
-        jsVersion: 2
+        cssVersion: 10
+        jsVersion: 3
 
 services:
     customLatteFilters:

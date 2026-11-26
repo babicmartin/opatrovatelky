@@ -2,6 +2,7 @@
 
 namespace App\Model\Service\Autosave;
 
+use App\Model\Enum\MissingRegistry\MissingType;
 use App\Model\Repository\ChangeLogRepository;
 use App\Model\Table\ActiveTableMap;
 use App\Model\Table\AgencyTableMap;
@@ -590,15 +591,9 @@ final class AutosaveFieldUpdateService
 				'userId' => $this->select(MissingRegistryTableMap::COL_USER_ID, 'Kto', UserTableMap::TABLE_NAME, UserTableMap::COL_ID, [UserTableMap::COL_NAME, UserTableMap::COL_SECOND_NAME]),
 				'dateFrom' => $this->date(MissingRegistryTableMap::COL_DATE_FROM, 'Od'),
 				'dateTo' => $this->date(MissingRegistryTableMap::COL_DATE_TO, 'Do'),
-				'typePn' => $this->bool(MissingRegistryTableMap::COL_TYPE_PN, 'PN'),
-				'typeOcr' => $this->bool(MissingRegistryTableMap::COL_TYPE_OCR, 'OČR'),
-				'typeLekar' => $this->bool(MissingRegistryTableMap::COL_TYPE_LEKAR, 'Lekár'),
-				'typeSviatok' => $this->bool(MissingRegistryTableMap::COL_TYPE_SVIATOK, 'Sviatok'),
-				'typeZastup' => $this->bool(MissingRegistryTableMap::COL_TYPE_ZASTUP, 'Zástup'),
-				'typeSluzba' => $this->bool(MissingRegistryTableMap::COL_TYPE_SLUZBA, 'Služba'),
-				'typeDovolenka' => $this->bool(MissingRegistryTableMap::COL_TYPE_DOVOLENKA, 'Dovolenka'),
+				...$this->missingTypeFields(),
 				'notice' => $this->text(MissingRegistryTableMap::COL_NOTICE, 'Poznámka'),
-			]),
+			], ['where' => [MissingRegistryTableMap::COL_DELETED => 0]]),
 			'country.update' => $this->context(CountryTableMap::TABLE_NAME, [
 				'name' => $this->text(CountryTableMap::COL_NAME, 'Názov'),
 				'german' => $this->text(CountryTableMap::COL_GERMAN, 'Nemecky'),
@@ -623,6 +618,21 @@ final class AutosaveFieldUpdateService
 			'documents.partner' => $this->documentContext(),
 			'documents.turnus' => $this->documentContext(false),
 		];
+	}
+
+	/**
+	 * One 0/1 field per type of an absence registry record.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function missingTypeFields(): array
+	{
+		$fields = [];
+		foreach (MissingType::cases() as $type) {
+			$fields[$type->field()] = $this->bool($type->column(), $type->label());
+		}
+
+		return $fields;
 	}
 
 	/**

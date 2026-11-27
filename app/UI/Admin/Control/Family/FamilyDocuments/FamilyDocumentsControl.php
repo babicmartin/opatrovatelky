@@ -2,248 +2,36 @@
 
 namespace App\UI\Admin\Control\Family\FamilyDocuments;
 
-use App\Model\DataProvider\Directory\DirectoryProvider;
-use App\Model\DataProvider\Directory\StorageDirProvider;
 use App\Model\Enum\Acl\Resource;
-use App\Model\Form\Factory\BaseFormFactory;
-use App\Model\Repository\FileRepository;
-use App\Model\Service\Audit\ChangeAuditLogger;
-use App\Model\Utils\Date\DateService;
-use App\UI\Admin\AdminPresenter;
-use Nette\Application\UI\Control;
-use Nette\Application\UI\Form;
-use Nette\Application\UI\Multiplier;
-use Nette\Application\Responses\FileResponse;
-use Nette\Http\FileUpload;
-use Nette\Security\User;
-use Nette\Utils\ArrayHash;
-use Nette\Utils\FileSystem;
-use Nette\Utils\Random;
-use Nette\Utils\Strings;
+use App\UI\Admin\Control\Document\DocumentsControl;
 
-class FamilyDocumentsControl extends Control
+class FamilyDocumentsControl extends DocumentsControl
 {
-	private const int MAX_FILE_SIZE = 20_971_520;
-	private const array ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docs', 'docx'];
-	private const array ALLOWED_CONTENT_TYPES = [
-		'application/pdf',
-		'application/msword',
-		'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-		'application/octet-stream',
-	];
-
-	private int $familyId = 0;
-
-	private string $dir = '';
-
-	private string $title = '';
-
-	public function __construct(
-		private readonly FileRepository $fileRepository,
-		private readonly BaseFormFactory $baseFormFactory,
-		private readonly DirectoryProvider $directoryProvider,
-		private readonly StorageDirProvider $storageDirProvider,
-		private readonly User $user,
-		private readonly DateService $dateService,
-		private readonly ChangeAuditLogger $changeAuditLogger,
-	) {
-	}
-
+	/**
+	 * A family has two document lists; the presenter names the folder and the heading of each.
+	 */
 	public function setContext(int $familyId, string $dir, string $title): static
 	{
-		$this->familyId = $familyId;
-		$this->dir = $dir;
-		$this->title = $title;
-
-		return $this;
+		return $this->setOwner($dir, $familyId, $title);
 	}
 
-	public function render(): void
+	protected function getRequiredResource(): Resource
 	{
-		if (!$this->user->isAllowed(Resource::FAMILY->value)) {
-			$this->getPresenter()->error('Prístup zamietnutý', 403);
-		}
-
-		$template = $this->getTemplate();
-		$template->setFile(__DIR__ . '/templates/FamilyDocumentsControl.latte');
-		$template->title = $this->title;
-		$template->documents = $this->fileRepository->findDocuments($this->dir, $this->familyId);
-		$template->statusOptions = $this->fileRepository->findStatusOptions();
-		$template->typeImageBasePath = $this->storageDirProvider->getDocumentTypeImages();
-		$template->canManageFamily = $this->user->isAllowed(Resource::FAMILY->value);
-		$template->allowedExtensions = self::ALLOWED_EXTENSIONS;
-		$template->maxFileSize = self::MAX_FILE_SIZE;
-		$template->render();
+		return Resource::FAMILY;
 	}
 
-	public function handleDownload(int $id): void
+	protected function getAuditContext(): string
 	{
-		if (!$this->user->isAllowed(Resource::FAMILY->value)) {
-			$this->getPresenter()->error('Prístup zamietnutý', 403);
-		}
-
-		$document = $this->fileRepository->findDocument($this->dir, $this->familyId, $id);
-		if ($document === null) {
-			$this->getPresenter()->error('Dokument neexistuje.', 404);
-		}
-
-		$path = $this->getPrivateDocumentDir() . '/' . $document['name'];
-		if (!is_file($path)) {
-			$this->getPresenter()->error('Súbor neexistuje.', 404);
-		}
-
-		$this->getPresenter()->sendResponse(new FileResponse($path, (string) $document['name']));
+		return 'documents.family';
 	}
 
-	public function handleDelete(int $id): void
+	protected function getFormClass(): string
 	{
-		if (!$this->user->isAllowed(Resource::FAMILY->value)) {
-			$this->getPresenter()->error('Prístup zamietnutý', 403);
-		}
-
-		$document = $this->fileRepository->findDocument($this->dir, $this->familyId, $id);
-		if ($document === null) {
-			$this->getPresenter()->error('Dokument neexistuje.', 404);
-		}
-
-		$this->fileRepository->softDelete($id);
-		$this->changeAuditLogger->logDocumentDeleted('documents.family', $id, (string) $document['name'], $this->dir, $this->familyId);
-		$this->redirect('this');
+		return 'family-document-form';
 	}
 
-	/**
-	 * @return Multiplier<Form>
-	 */
-	protected function createComponentDocumentForm(): Multiplier
+	protected function getTemplateFile(): string
 	{
-		if (!$this->user->isAllowed(Resource::FAMILY->value)) {
-			$this->getPresenter()->error('Prístup zamietnutý', 403);
-		}
-
-		return new Multiplier(function (string $id): Form {
-			$document = $this->fileRepository->findDocument($this->dir, $this->familyId, (int) $id);
-			if ($document === null) {
-				$this->getPresenter()->error('Dokument neexistuje.', 404);
-			}
-
-			$form = $this->baseFormFactory->create();
-			$form->getElementPrototype()->setAttribute('class', 'family-document-form js-autosave-form');
-			$form->addHidden('id', (string) $document['id']);
-			$form->addText('notice', $document['upload'])
-				->setDefaultValue((string) $document['notice'])
-				->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');
-			$form->addText('validFrom', 'Platnosť od')
-				->setDefaultValue($document['validFrom'] instanceof \DateTimeImmutable ? $document['validFrom']->format('d.m.Y') : '')
-				->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
-				->setHtmlAttribute('autocomplete', 'off');
-			$form->addText('validTo', 'Platnosť do')
-				->setDefaultValue($document['validTo'] instanceof \DateTimeImmutable ? $document['validTo']->format('d.m.Y') : '')
-				->setHtmlAttribute('class', 'form-control updateDate datepicker js-autosave-control')
-				->setHtmlAttribute('autocomplete', 'off');
-			$form->addSelect('status', 'Status', $this->fileRepository->findStatusOptions())
-				->setDefaultValue((int) $document['status'])
-				->setHtmlAttribute('class', 'form-select updateSelect js-autosave-control');
-			$form->addSubmit('save', 'Uložiť')->setHtmlAttribute('class', 'd-none');
-
-			// Save the document verified above, never the one named by the hidden field of the request.
-			$documentId = (int) $document['id'];
-			$form->onSuccess[] = function (Form $form, ArrayHash $values) use ($documentId): void {
-				if (!$this->user->isAllowed(Resource::FAMILY->value)) {
-					$this->getPresenter()->error('Prístup zamietnutý', 403);
-				}
-
-				$presenter = $this->getPresenter();
-				if ($presenter instanceof AdminPresenter) {
-					$presenter->tryHandleAutosavePartialRequest($documentId);
-				}
-
-				$this->fileRepository->updateDocument($documentId, [
-					'notice' => (string) $values->notice,
-					'validFrom' => $this->dateService->tryCreateFromUserInput((string) $values->validFrom),
-					'validTo' => $this->dateService->tryCreateFromUserInput((string) $values->validTo),
-					'status' => (int) $values->status,
-				]);
-
-				if ($this->getPresenter()->isAjax()) {
-					$this->getPresenter()->sendJson(['success' => true]);
-				}
-
-				$this->redirect('this');
-			};
-
-			return $form;
-		});
-	}
-
-	protected function createComponentUploadForm(): Form
-	{
-		if (!$this->user->isAllowed(Resource::FAMILY->value)) {
-			$this->getPresenter()->error('Prístup zamietnutý', 403);
-		}
-
-		$form = $this->baseFormFactory->create();
-		$form->addUpload('fileAll')
-			->setHtmlAttribute('id', 'fileAll')
-			->setHtmlAttribute('data-max-size', (string) self::MAX_FILE_SIZE)
-			->setHtmlAttribute('data-allowed-extensions', implode(',', self::ALLOWED_EXTENSIONS));
-		$form->addSubmit('upload', '')
-			->setHtmlAttribute('class', 'd-none js-upload-submit');
-
-		$form->onSuccess[] = function (Form $form, ArrayHash $values): void {
-			if (!$this->user->isAllowed(Resource::FAMILY->value)) {
-				$this->getPresenter()->error('Prístup zamietnutý', 403);
-			}
-
-			/** @var FileUpload $upload */
-			$upload = $values->fileAll;
-			if (!$upload->isOk() || !$upload->hasFile()) {
-				$this->redirect('this');
-			}
-
-			$extension = strtolower(pathinfo($upload->getSanitizedName(), PATHINFO_EXTENSION));
-			if (!in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
-				$form->addError('Povolené sú iba tieto koncovky: ' . implode(', ', self::ALLOWED_EXTENSIONS));
-				return;
-			}
-
-			if ($upload->getSize() > self::MAX_FILE_SIZE) {
-				$form->addError('Maximálna veľkosť súboru je 20 MB.');
-				return;
-			}
-
-			$contentType = (string) $upload->getContentType();
-			if ($contentType !== '' && !in_array($contentType, self::ALLOWED_CONTENT_TYPES, true)) {
-				$form->addError('Nepovolený typ súboru.');
-				return;
-			}
-
-			$type = $extension;
-			if ($type === 'doc' || $type === 'docx') {
-				$type = 'docs';
-			}
-			$name = Strings::webalize(pathinfo($upload->getSanitizedName(), PATHINFO_FILENAME));
-			if ($name === '') {
-				$name = 'document';
-			}
-			$fileName = $name . '-' . Random::generate(8) . '.' . $extension;
-			$targetDir = $this->getPrivateDocumentDir();
-
-			FileSystem::createDir($targetDir);
-			$upload->move($targetDir . '/' . $fileName);
-			$documentId = $this->fileRepository->insertDocument($this->dir, $this->familyId, $fileName, $type, (int) $this->user->getId());
-			$this->changeAuditLogger->logDocumentUploaded('documents.family', $documentId, $fileName, $this->dir, $this->familyId, [
-				'file_type' => $type,
-				'extension' => $extension,
-				'size_bytes' => $upload->getSize(),
-			]);
-			$this->redirect('this');
-		};
-
-		return $form;
-	}
-
-	private function getPrivateDocumentDir(): string
-	{
-		return $this->directoryProvider->getRootDir() . '/' . $this->storageDirProvider->getPrivateDocuments() . '/' . $this->dir . '/' . $this->familyId;
+		return __DIR__ . '/templates/FamilyDocumentsControl.latte';
 	}
 }

@@ -46,6 +46,7 @@ use App\Model\Table\TranslateTableMap;
 use App\Model\Table\TurnusTableMap;
 use App\Model\Table\UserTableMap;
 use App\Model\Utils\Date\DateService;
+use App\Model\Utils\Validator\ColorValidator;
 use DateTimeInterface;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
@@ -606,7 +607,7 @@ final class AutosaveFieldUpdateService
 				'secondName' => $this->text(UserTableMap::COL_SECOND_NAME, 'Priezvisko'),
 				'acronym' => $this->text(UserTableMap::COL_ACRONYM, 'Skratka'),
 				'email' => $this->text(UserTableMap::COL_EMAIL, 'Email'),
-				'color' => $this->text(UserTableMap::COL_COLOR, 'Farba'),
+				'color' => $this->text(UserTableMap::COL_COLOR, 'Farba') + ['pattern' => ColorValidator::PATTERN],
 			]),
 			'user.access' => $this->context(UserTableMap::TABLE_NAME, [
 				'permission' => $this->select(UserTableMap::COL_PERMISSION, 'Práva', PermissionTableMap::TABLE_NAME, PermissionTableMap::COL_PERMISSION, PermissionTableMap::COL_NAME),

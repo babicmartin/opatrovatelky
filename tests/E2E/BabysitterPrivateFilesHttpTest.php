@@ -101,8 +101,8 @@ final class BabysitterPrivateFilesHttpTest extends DatabaseTestCase
 	public static function privateFileActions(): array
 	{
 		return [
+			// Deleting a document is a form; its foreign-record case is in DocumentSecurityHttpTest.
 			'document download' => ['documents', 'babysitterDocuments-download'],
-			'document delete' => ['documents', 'babysitterDocuments-delete'],
 			'video download' => ['video', 'babysitterVideos-download'],
 			'video playback' => ['video', 'babysitterVideos-play'],
 			'video delete' => ['video', 'babysitterVideos-delete'],
@@ -146,9 +146,9 @@ final class BabysitterPrivateFilesHttpTest extends DatabaseTestCase
 		$otherBefore = $this->readFileState($this->second);
 		$logs = $this->getDatabase()->table(ChangeLogTableMap::TABLE_NAME);
 		$auditCount = $logs->count('*');
-		$link = $this->getLink($this->openTab($card, 'documents'), 'babysitterDocuments-delete');
-		self::assertSame(302, $this->web->get($link)->getStatusCode());
-		$document = $this->getDatabase()->table(FileTableMap::TABLE_NAME)->get($card->documentId);
+		$deleted = $this->web->submitForm($card->getPagePath() . '?tab=documents', 'frm-babysitterDocuments-deleteForm-' . $card->documentId);
+		self::assertSame(303, $deleted->getStatusCode());
+		$document =$this->getDatabase()->table(FileTableMap::TABLE_NAME)->get($card->documentId);
 		self::assertNotNull($document);
 		self::assertSame(0, (int) $document[FileTableMap::COL_ACTIVE]);
 		self::assertSame($card->documentContents, file_get_contents($card->documentPath));

@@ -14,6 +14,7 @@ use App\Model\Repository\UserRepository;
 use App\Model\Utils\Date\DateService;
 use App\Model\Utils\Date\HolidayService;
 use App\Model\Utils\Date\MonthService;
+use App\Model\Utils\Validator\ColorValidator;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Psr\Clock\ClockInterface;
@@ -100,7 +101,7 @@ final readonly class MissingCalendarBuilder
 			$row['id'],
 			$row['name'],
 			$row['acronym'],
-			preg_match('/^(#[0-9a-f]{3,8}|[a-z]{3,20})$/i', $row['color']) === 1 ? $row['color'] : self::DEFAULT_USER_COLOR,
+			preg_match(ColorValidator::PATTERN,$row['color']) === 1 ? $row['color'] : self::DEFAULT_USER_COLOR,
 			$row['image'] !== ''
 				? $this->storageDirProvider->getUserImages() . '/' . $row['image']
 				: $this->storageDirProvider->getUserImagesEmpty(),

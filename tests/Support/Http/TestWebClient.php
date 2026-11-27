@@ -109,6 +109,21 @@ final class TestWebClient
 	}
 
 
+	/**
+	 * Posts an upload built by the caller, for a request sent to a page that does not offer the form.
+	 * @param array<string, string> $fields
+	 */
+	public function postUpload(string $path, array $fields, string $fileField, string $filename, StreamInterface $contents): ResponseInterface
+	{
+		$parts = [];
+		foreach ($fields as $name => $value) {
+			$parts[] = ['name' => $name, 'contents' => $value];
+		}
+		$parts[] = ['name' => $fileField, 'filename' => $filename, 'contents' => $contents];
+		return $this->client->post($path, ['multipart' => $parts, 'expect' => false]);
+	}
+
+
 	/** @return array{string, array<string, string>, Element} */
 	private function readForm(string $path, string $formId): array
 	{

@@ -97,16 +97,22 @@ class FileRepository extends BaseRepository
 	}
 
 	/**
-	 * @param array{notice:string,validFrom:?\DateTimeImmutable,validTo:?\DateTimeImmutable,status:int} $values
+	 * The status is written only when the caller offers one; a module without a status leaves the column alone.
+	 *
+	 * @param array{notice:string,validFrom:?\DateTimeImmutable,validTo:?\DateTimeImmutable,status?:int} $values
 	 */
 	public function updateDocument(int $id, array $values): void
 	{
-		$this->update($id, [
+		$columns = [
 			FileTableMap::COL_NOTICE => $values['notice'],
 			FileTableMap::COL_VALID_FROM => $values['validFrom']?->format('Y-m-d'),
 			FileTableMap::COL_VALID_TO => $values['validTo']?->format('Y-m-d'),
-			FileTableMap::COL_STATUS => $values['status'],
-		]);
+		];
+		if (isset($values['status'])) {
+			$columns[FileTableMap::COL_STATUS] = $values['status'];
+		}
+
+		$this->update($id, $columns);
 	}
 
 	public function softDelete(int $id): void

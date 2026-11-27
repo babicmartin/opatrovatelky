@@ -89,6 +89,49 @@ Control/Partner/PartnerList/
   PartnerListControl.latte     — template
 ```
 
+## Security (priority — same weight as PHPStan level 8)
+
+Every change to a file, service, method, presenter, control or form is checked for abuse by a **logged-in user**. Handle it in the same change, never as a later task. A task is not done while a hole is open, the same as with PHPStan errors.
+
+**Principle:** everything that comes from the browser is untrusted — GET/POST parameters, signal parameters, hidden fields, persistent parameters, file names, headers. The user can edit any of it in the console or type the URL by hand. Hiding a button in Latte is not protection; the server decides.
+
+**Rules:**
+- **Permission on every entry point:** `action*`, `handle*` (signals), `createComponent*`, form `onSuccess`, AJAX/autosave endpoints.
+  - Presenter: `getResource()` / `getPrivilege()`, checked in `AdminPresenter::startup()`.
+  - Control: its own `$this->user->isAllowed(Resource::X->value)` in every `handle*`, `createComponent*` and `onSuccess` — a control can be attached to another presenter. Pattern: `app/UI/Admin/Control/Babysitter/BabysitterDocuments/BabysitterDocumentsControl.php`.
+- **Record ownership (IDOR):** never load a record by a bare ID from the URL/POST. Load it through its parent/owner (`FileRepository::findDocument($dir, $ownerId, $id)`) and answer 404 when it does not match. Write to the record verified on the server, never to the ID named by a hidden field.
+- **Writes go through a whitelist:** name the columns, autosave contexts and fields explicitly (`AdminPresenter::getAllowedAutosaveContexts()`, `AutosaveFieldUpdateService`). No `update($request->getPost())`, no column/table/order name taken from the request.
+- **Role, permission, `user_id`, owner** are never read from the request — only from `$this->user` and `AuthorizatorFactory::ROLE_RESOURCES`. Changing another user's role or access needs its own permission check.
+- **State changes:** keep Nette's built-in same-site protection of signals (never add `#[CrossOrigin]`), create forms through `BaseFormFactory` (`addProtection()`), custom AJAX endpoints require POST + `isFrom([FetchSite::SameSite, FetchSite::SameOrigin])`.
+- **Files:** build paths from `StorageDirProvider` + the name stored in the DB, never from the request (path traversal). Uploads: check extension, size and content type, generate the file name. Private files are served only by an authorized handler.
+- **Output:** no `|noescape` on user data; SQL only through Explorer with parameters.
+- **Sensitive changes** are logged through `ChangeAuditLogger`.
+- **Tests:** a new handler/endpoint gets a test for a foreign ID, a missing permission and a guest. Patterns: `tests/Smoke/GuestAccessSmokeTest.php`, `tests/Smoke/OffcanvasAccessSmokeTest.php`, `tests/Api/UserAccessAutosaveContractTest.php`.
+
+**Check before handing over** — for every new or changed entry point answer:
+1. Who can call it, and is that checked on the server?
+2. What happens when the ID is changed to someone else's record?
+3. What happens when an extra field or another context is sent?
+4. What happens when it is called directly by URL, without the UI?
+
+An existing hole found outside the scope of the task is reported to the user with the file and line; it is not silently rewritten at scale.
+
+**Audit of existing code:** `/security-fix <folder|file|Class::method|URL|module|topic|next|status>` (skill in `.claude/skills/security-fix/`). It inventories the entry points, attacks each one, fixes with a proving test and keeps the ledger in `workflow/_active/security-audit/`.
+
+## Architecture: SOLID, DRY, Refactoring
+
+- **Search before writing:** before adding a service or method, look for an existing one (`app/Model/Service`, `app/Model/Utils`, `app/Model/Repository`) and reuse or extend it. Never create a second service for the same job.
+- **DRY:** the same logic in a second place is extracted into a shared service, trait or base class in the same change. Known candidate: the `*DocumentsControl` classes (Babysitter, Family, Partner, Agency, Turnus) carry near-identical code.
+- **SOLID:**
+  - **S** — one class, one responsibility. Presenters and controls only orchestrate; logic belongs to a service, queries to a repository.
+  - **O** — new variants come as new classes or enum cases with `match`/strategy, not as a growing `if/else` in an existing method.
+  - **L** — a subclass does not change the contract of its parent.
+  - **I** — small purpose-built interfaces, not one large one.
+  - **D** — dependencies through the constructor/DI; no `new` of services and no static calls inside logic.
+- **Overcomplicated services** (long methods, many dependencies, branching by type) are refactored: split them and use a fitting pattern (Strategy, Factory, DTO/Value Object, Template Method).
+- **Scope:** code the task touches is refactored right away. A larger refactoring outside the task is reported with a proposal and done only on request.
+- A refactoring must not change behaviour or weaken permission checks; run PHPStan level 8 and the tests after it.
+
 ## Model Utilities
 
 Utilities in `app/Model/Utils` provide an object-oriented interface for common tasks, often wrapping `Nette\Utils` or PHP internal functions. Use these services via DI for better testability.
@@ -133,6 +176,7 @@ public function __get($name) { ... }  // Latte can't read private props
 - Use `php-fixer@nette` for formatting.
 - Type hint all parameters and return types.
 - Use PHP 8.5 features (constructor promotion, match expressions, nullsafe operator).
+- The Security and SOLID/DRY rules above are mandatory and checked on every change together with PHPStan level 8.
 
 ## PHPStan & Type Checking
 

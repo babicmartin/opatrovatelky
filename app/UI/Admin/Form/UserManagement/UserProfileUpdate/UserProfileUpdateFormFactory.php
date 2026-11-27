@@ -7,8 +7,10 @@ use App\Model\Form\DTO\Admin\UserManagement\UserProfileUpdate\UserPasswordUpdate
 use App\Model\Form\DTO\Admin\UserManagement\UserProfileUpdate\UserAccessUpdateForm;
 use App\Model\Form\DTO\Admin\UserManagement\UserProfileUpdate\UserProfileUpdateForm;
 use App\Model\Form\Factory\BaseFormFactory;
+use App\Model\Utils\Validator\ColorValidator;
 use Nette\Application\ForbiddenRequestException;
 use Nette\Application\UI\Form;
+use Nette\Forms\Controls\TextInput;
 use Nette\Security\User;
 use Nette\Utils\ArrayHash;
 use Nette\Utils\Strings;
@@ -18,6 +20,7 @@ final class UserProfileUpdateFormFactory
 	public function __construct(
 		private readonly BaseFormFactory $baseFormFactory,
 		private readonly User $user,
+		private readonly ColorValidator $colorValidator,
 	) {
 	}
 
@@ -43,9 +46,14 @@ final class UserProfileUpdateFormFactory
 		$form->addEmail('email', 'Email')
 			->setDefaultValue((string) $user['email'])
 			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');
+		// The colour is printed into the pages of colleagues, so only a colour is stored.
 		$form->addText('color', 'Farba pozadia skratky')
 			->setDefaultValue((string) $user['color'])
-			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control');
+			->setHtmlAttribute('class', 'form-control updateInput js-autosave-control')
+			->addRule(
+				fn (TextInput $input): bool => $this->colorValidator->isColor((string) $input->getValue()),
+				'Farba musí byť v tvare #rrggbb alebo anglický názov farby, napríklad blue.',
+			);
 		$form->addSubmit('save', 'Uložiť')
 			->setHtmlAttribute('class', 'd-none');
 

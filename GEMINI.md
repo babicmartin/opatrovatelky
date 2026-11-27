@@ -27,6 +27,22 @@
 - Migration map: [.claude/memory/reference_old_web_map.md](.claude/memory/reference_old_web_map.md)
 - UI Controls: [docs/conventions/ui-controls.md](docs/conventions/ui-controls.md)
 
+## Security (priority)
+Full rules: `CLAUDE.md` → "Security". Same weight as PHPStan level 8, handled in the same change.
+- Everything from the browser is untrusted (GET/POST, signal parameters, hidden fields, file names); a logged-in user can edit it in the console or type the URL by hand.
+- Check permission on every entry point: `action*`, `handle*`, `createComponent*`, form `onSuccess`, AJAX/autosave. Controls check `isAllowed()` themselves.
+- Never load a record by a bare ID from the request; load it through its owner and answer 404 on mismatch.
+- Writes go through an explicit whitelist of fields; role, permission and `user_id` are never read from the request.
+- File paths come from `StorageDirProvider` + the name stored in the DB, never from the request.
+
+## Architecture (SOLID, DRY)
+Full rules: `CLAUDE.md` → "Architecture: SOLID, DRY, Refactoring".
+- Follow SOLID and DRY.
+- Before adding a service or method, find the existing one and reuse or extend it.
+- Duplicated logic is extracted into a shared service, trait or base class in the same change.
+- Overcomplicated services are split and rebuilt on a fitting design pattern.
+- A refactoring must not change behaviour or weaken permission checks.
+
 ## Coding Standards
 - Follow Nette coding standards.
 - Use `php-fixer@nette` for formatting.

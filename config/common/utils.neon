@@ -23,6 +23,7 @@ services:
 	- App\Model\Utils\TypeChecker\TypeChecker
 	- App\Model\Utils\TypeConverter\TypeConverter
 	- App\Model\Utils\Url\UrlVersionGenerator
+	- App\Model\Utils\Validator\ColorValidator
 	- App\Model\Utils\Validator\EmailValidator
 	- App\Model\Utils\Validator\ImageValidator
 	- App\Model\Utils\Validator\UrlValidator

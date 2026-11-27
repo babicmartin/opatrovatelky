@@ -35,3 +35,6 @@ Thumbs.db
 /www/assets/iconfonts/
 /www/assets/plugins/
 /www/assets/switcher/
+
+# Reports and SQL migrations (run on the database by hand)
+/report/
